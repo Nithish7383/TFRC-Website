@@ -39,14 +39,14 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+    <main className="min-h-screen bg-black flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="card space-y-6">
           <div className="flex flex-col items-center gap-3">
             <img src="/firstruleclublogo.jpg" alt="TFRC" className="w-16 h-16 rounded-full object-cover" />
-            <h1 className="text-2xl font-bold text-white">Member Login</h1>
+            <h1 className="heading-display text-white text-2xl">Member Login</h1>
             <p className="text-gray-400 text-sm text-center">
-              Enter your WhatsApp number to access your profile.
+              Enter your WhatsApp number to access your dashboard.
             </p>
           </div>
 
@@ -90,7 +90,7 @@ export default function LoginPage() {
 
           <p className="text-center text-gray-600 text-xs">
             Not a member?{' '}
-            <Link href="/join" className="text-[#C9A227] hover:underline">
+            <Link href="/join" className="text-gold hover:underline">
               Join free →
             </Link>
           </p>

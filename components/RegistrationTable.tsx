@@ -15,7 +15,7 @@ interface Props {
 const EXPERIENCE_COLORS: Record<string, string> = {
   'First timer': 'bg-blue-900/30 text-blue-400 border-blue-800/40',
   'Casual (1–2 runs/month)': 'bg-purple-900/30 text-purple-400 border-purple-800/40',
-  'Regular (weekly)': 'bg-[#C9A227]/20 text-[#C9A227] border-[#C9A227]/30',
+  'Regular (weekly)': 'bg-gold/20 text-gold border-gold/30',
   'Competitive': 'bg-red-900/30 text-red-400 border-red-800/40',
 }
 
@@ -228,7 +228,7 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
 
       {/* Auto-select panel */}
       {autoSelectOpen && (
-        <div className="card border-[#C9A227]/30 bg-[#C9A227]/5 space-y-3">
+        <div className="card border-gold/30 bg-gold/5 space-y-3">
           <p className="text-white font-medium text-sm">Auto-select up to {maxParticipants} runners</p>
           <div className="flex flex-wrap gap-2">
             {([
@@ -241,8 +241,8 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
                 onClick={() => setAutoSelectMode(key)}
                 className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
                   autoSelectMode === key
-                    ? 'bg-[#C9A227] text-black border-[#C9A227]'
-                    : 'border-gray-700 text-gray-400 hover:border-gray-500'
+                    ? 'bg-gold text-black border-gold'
+                    : 'border-white/15 text-gray-400 hover:border-white/30'
                 }`}
               >
                 {label}
@@ -269,7 +269,7 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
 
       {/* Bulk action bar */}
       {checked.size > 0 && (
-        <div className="flex flex-wrap items-center gap-3 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3">
+        <div className="flex flex-wrap items-center gap-3 bg-white/[0.03] border border-white/15 rounded-xl px-4 py-3">
           <span className="text-gray-400 text-sm">{checked.size} selected</span>
           <span className="text-gray-700 hidden sm:block">|</span>
           <span className="text-gray-400 text-sm">Mark as:</span>
@@ -281,7 +281,7 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
               className={`text-xs px-3 py-1.5 rounded-lg border capitalize transition-colors ${
                 s === 'selected' ? 'border-green-800/50 text-green-400 hover:bg-green-900/20' :
                 s === 'rejected' ? 'border-red-800/50 text-red-400 hover:bg-red-900/20' :
-                'border-gray-700 text-gray-400 hover:bg-gray-800'
+                'border-white/15 text-gray-400 hover:bg-white/10'
               }`}
             >
               {bulkUpdating ? '...' : s}
@@ -291,16 +291,16 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-gray-800">
+      <div className="overflow-x-auto rounded-xl border border-white/10">
         <table className="w-full min-w-[800px] text-sm">
           <thead>
-            <tr className="bg-gray-900 border-b border-gray-800">
+            <tr className="bg-white/[0.03] border-b border-white/10">
               <th className="px-3 py-3">
                 <input
                   type="checkbox"
                   checked={allChecked}
                   onChange={toggleAll}
-                  className="accent-[#C9A227]"
+                  className="accent-gold"
                 />
               </th>
               {['Name', 'Age', 'Gender', 'Place', 'Phone', 'Experience', 'Status', 'Attended', 'Notes', 'Actions'].map((h) => (
@@ -310,12 +310,12 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-800/60">
+          <tbody className="divide-y divide-white/10">
             {filtered.map((reg) => (
               <>
                 <tr
                   key={reg.id}
-                  className={`transition-colors hover:bg-gray-800/30 ${
+                  className={`transition-colors hover:bg-white/5 ${
                     reg.status === 'selected' ? 'bg-green-900/10' :
                     reg.status === 'rejected' ? 'bg-red-900/10' : ''
                   }`}
@@ -325,13 +325,13 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
                       type="checkbox"
                       checked={checked.has(reg.id)}
                       onChange={() => toggleOne(reg.id)}
-                      className="accent-[#C9A227]"
+                      className="accent-gold"
                     />
                   </td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => setExpandedId(expandedId === reg.id ? null : reg.id)}
-                      className="text-white font-medium hover:text-[#C9A227] transition-colors text-left whitespace-nowrap"
+                      className="text-white font-medium hover:text-gold transition-colors text-left whitespace-nowrap"
                     >
                       {reg.name}
                       <span className="text-gray-600 ml-1 text-xs">{expandedId === reg.id ? '▲' : '▼'}</span>
@@ -345,14 +345,14 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
                       href={`https://wa.me/91${reg.phone}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#C9A227] hover:underline"
+                      className="text-gold hover:underline"
                     >
                       {reg.phone}
                     </a>
                   </td>
                   <td className="px-4 py-3">
                     {reg.running_experience ? (
-                      <span className={`text-xs px-2 py-0.5 rounded-full border ${EXPERIENCE_COLORS[reg.running_experience] || 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full border ${EXPERIENCE_COLORS[reg.running_experience] || 'bg-white/10 text-gray-400 border-white/15'}`}>
                         {reg.running_experience}
                       </span>
                     ) : <span className="text-gray-600 text-xs">—</span>}
@@ -420,7 +420,7 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
                   </td>
                 </tr>
                 {expandedId === reg.id && (
-                  <tr key={`${reg.id}-exp`} className="bg-gray-900/60 border-b border-gray-800">
+                  <tr key={`${reg.id}-exp`} className="bg-white/[0.04] border-b border-white/10">
                     <td colSpan={11} className="px-6 py-4">
                       <div className="grid md:grid-cols-2 gap-4 text-sm">
                         <div>

@@ -59,7 +59,7 @@ export default function AdminEventList({ events }: Props) {
                 <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
                   event.is_active
                     ? 'bg-green-900/30 text-green-400 border-green-800/40'
-                    : 'bg-gray-800 text-gray-500 border-gray-700'
+                    : 'bg-white/5 text-gray-500 border-white/10'
                 }`}>
                   {event.is_active ? 'Active' : 'Inactive'}
                 </span>
@@ -112,8 +112,8 @@ export default function AdminEventList({ events }: Props) {
                 disabled={toggling === event.id}
                 className={`text-sm py-2 px-3 rounded-lg border transition-colors ${
                   event.is_active
-                    ? 'border-gray-700 text-gray-400 hover:text-red-400 hover:border-red-800/50'
-                    : 'border-gray-700 text-gray-400 hover:text-green-400 hover:border-green-800/50'
+                    ? 'border-white/15 text-gray-400 hover:text-red-400 hover:border-red-800/50'
+                    : 'border-white/15 text-gray-400 hover:text-green-400 hover:border-green-800/50'
                 }`}
               >
                 {toggling === event.id ? '...' : event.is_active ? 'Deactivate' : 'Activate'}
@@ -125,8 +125,8 @@ export default function AdminEventList({ events }: Props) {
                 }}
                 className={`text-sm py-2 px-3 rounded-lg border transition-colors ${
                   editingEventId === event.id
-                    ? 'border-[#C9A227]/50 text-[#C9A227] bg-[#C9A227]/10'
-                    : 'border-gray-700 text-gray-400 hover:text-[#C9A227] hover:border-[#C9A227]/40'
+                    ? 'border-gold/50 text-gold bg-gold/10'
+                    : 'border-white/15 text-gray-400 hover:text-gold hover:border-gold/40'
                 }`}
               >
                 Edit
@@ -142,7 +142,7 @@ export default function AdminEventList({ events }: Props) {
                   </button>
                   <button
                     onClick={() => setConfirmDeleteId(null)}
-                    className="text-sm py-2 px-2 rounded-lg border border-gray-700 text-gray-400 hover:text-gray-200 transition-colors"
+                    className="text-sm py-2 px-2 rounded-lg border border-white/15 text-gray-400 hover:text-gray-200 transition-colors"
                   >
                     ×
                   </button>

@@ -356,8 +356,8 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
                 isMaleFull
                   ? 'border-red-800/50 text-red-400 bg-red-900/10 cursor-not-allowed'
                   : form.gender === 'Male'
-                  ? 'border-[#C9A227] text-[#C9A227] bg-[#C9A227]/10'
-                  : 'border-gray-700 text-gray-400 hover:border-gray-500'
+                  ? 'border-gold text-gold bg-gold/10'
+                  : 'border-white/15 text-gray-400 hover:border-white/30'
               }`}
             >
               {isMaleFull ? 'Male — FULL' : selectedEvent ? `Male (${maleCount}/${maxMale})` : 'Male'}
@@ -370,8 +370,8 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
                 isFemaleFull
                   ? 'border-red-800/50 text-red-400 bg-red-900/10 cursor-not-allowed'
                   : form.gender === 'Female'
-                  ? 'border-[#C9A227] text-[#C9A227] bg-[#C9A227]/10'
-                  : 'border-gray-700 text-gray-400 hover:border-gray-500'
+                  ? 'border-gold text-gold bg-gold/10'
+                  : 'border-white/15 text-gray-400 hover:border-white/30'
               }`}
             >
               {isFemaleFull ? 'Female — FULL' : selectedEvent ? `Female (${femaleCount}/${maxFemale})` : 'Female'}
@@ -381,14 +381,14 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
             <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-blue-400 text-xs w-14">Male</span>
-                <div className="flex-1 bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                <div className="flex-1 bg-white/10 rounded-full h-1.5 overflow-hidden">
                   <div className={`h-full rounded-full transition-all ${isMaleFull ? 'bg-red-500' : 'bg-blue-500'}`} style={{ width: `${Math.min((maleCount / Math.max(maxMale, 1)) * 100, 100)}%` }} />
                 </div>
                 <span className={`text-xs w-12 text-right ${isMaleFull ? 'text-red-400' : 'text-gray-500'}`}>{maleCount}/{maxMale}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-pink-400 text-xs w-14">Female</span>
-                <div className="flex-1 bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                <div className="flex-1 bg-white/10 rounded-full h-1.5 overflow-hidden">
                   <div className={`h-full rounded-full transition-all ${isFemaleFull ? 'bg-red-500' : 'bg-pink-500'}`} style={{ width: `${Math.min((femaleCount / Math.max(maxFemale, 1)) * 100, 100)}%` }} />
                 </div>
                 <span className={`text-xs w-12 text-right ${isFemaleFull ? 'text-red-400' : 'text-gray-500'}`}>{femaleCount}/{maxFemale}</span>
@@ -425,8 +425,8 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
                 onClick={() => { setForm((p) => ({ ...p, running_experience: value })); setError('') }}
                 className={`py-3 px-4 rounded-xl border-2 text-sm font-medium transition-all text-left ${
                   form.running_experience === value
-                    ? 'border-[#C9A227] text-[#C9A227] bg-[#C9A227]/10'
-                    : 'border-gray-700 text-gray-400 hover:border-gray-500'
+                    ? 'border-gold text-gold bg-gold/10'
+                    : 'border-white/15 text-gray-400 hover:border-white/30'
                 }`}
               >
                 {label}
@@ -446,15 +446,15 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
                 key={reason}
                 className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                   form.reasons.includes(reason)
-                    ? 'border-[#C9A227]/60 bg-[#C9A227]/10'
-                    : 'border-gray-700 hover:border-gray-600'
+                    ? 'border-gold/60 bg-gold/10'
+                    : 'border-white/10 hover:border-white/25'
                 }`}
               >
                 <input
                   type="checkbox"
                   checked={form.reasons.includes(reason)}
                   onChange={() => toggleReason(reason)}
-                  className="accent-[#C9A227]"
+                  className="accent-gold"
                 />
                 <span className="text-sm text-gray-300">{reason}</span>
               </label>
@@ -463,17 +463,17 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
         </div>
 
         {/* Emergency Contact — accordion */}
-        <div className="border border-gray-800 rounded-xl overflow-hidden">
+        <div className="border border-white/10 rounded-xl overflow-hidden">
           <button
             type="button"
             onClick={() => setSafetyOpen((o) => !o)}
-            className="w-full flex items-center justify-between px-5 py-4 text-left bg-gray-800/50 hover:bg-gray-800/80 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-4 text-left bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
           >
             <span className="text-gray-300 text-sm font-medium">Safety info (optional but recommended)</span>
             <span className="text-gray-500 text-lg">{safetyOpen ? '▲' : '▼'}</span>
           </button>
           {safetyOpen && (
-            <div className="px-5 pb-5 pt-4 space-y-4 bg-gray-900/30">
+            <div className="px-5 pb-5 pt-4 space-y-4 bg-white/[0.015]">
               <div>
                 <label className="block text-gray-300 text-sm font-medium mb-2">Emergency contact name</label>
                 <input type="text" name="emergency_contact_name" value={form.emergency_contact_name} onChange={handleChange} placeholder="e.g. Ramesh Kumar" className="input-field" />

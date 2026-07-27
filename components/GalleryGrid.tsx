@@ -9,7 +9,7 @@ export default function GalleryGrid({ photos }: Props) {
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       {photos.map((photo) => (
         <div key={photo.id} className="space-y-1">
-          <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-900 border border-gray-800">
+          <div className="relative aspect-square overflow-hidden rounded-xl bg-white/[0.02] border border-white/10">
             <img
               src={photo.image_url}
               alt={photo.caption || 'Run photo'}
@@ -26,7 +26,7 @@ export default function GalleryGrid({ photos }: Props) {
                 href={photo.instagram_post_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-500 hover:text-[#C9A227] transition-colors ml-2 flex-shrink-0"
+                className="text-gray-500 hover:text-gold transition-colors ml-2 flex-shrink-0"
                 title="View on Instagram"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">

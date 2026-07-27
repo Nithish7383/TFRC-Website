@@ -34,13 +34,11 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+    <main className="min-h-screen bg-black flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gray-800 border-2 border-[#C9A227] rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">🔐</span>
-          </div>
-          <h1 className="text-2xl font-bold text-white mb-1">Admin Login</h1>
+          <img src="/firstruleclublogo.jpg" alt="TFRC" className="w-16 h-16 rounded-full object-cover mx-auto mb-4 ring-2 ring-gold/25" />
+          <h1 className="heading-display text-white text-2xl mb-1">Admin Login</h1>
           <p className="text-gray-500 text-sm">The First Rule Club — Dashboard</p>
         </div>
 

@@ -125,7 +125,7 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
   return (
     <div className="space-y-5">
       {/* Message preview + copy */}
-      <div className="bg-gray-800/60 border border-gray-700 rounded-lg p-4 space-y-3">
+      <div className="bg-white/5 border border-white/15 rounded-lg p-4 space-y-3">
         <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">
           Message template
         </p>
@@ -135,7 +135,7 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
             copied
               ? 'bg-green-800/60 text-green-300 border border-green-700/50'
-              : 'bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600'
+              : 'bg-white/10 hover:bg-white/15 text-gray-200 border border-white/15'
           }`}
         >
           {copied ? (
@@ -153,7 +153,7 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
       </div>
 
       {/* Auto-cycle panel */}
-      <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-4">
+      <div className="bg-white/[0.03] border border-white/15 rounded-xl p-5 space-y-4">
         {/* Done state */}
         {cycleState === 'done' && (
           <div className="flex flex-col items-center gap-3 py-2">
@@ -166,7 +166,7 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
             </p>
             <button
               onClick={handleReset}
-              className="mt-1 px-5 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-semibold border border-gray-600 transition-colors"
+              className="mt-1 px-5 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-gray-200 text-sm font-semibold border border-white/15 transition-colors"
             >
               Start over
             </button>
@@ -179,7 +179,7 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
             onClick={handleStart}
             disabled={selectedUsers.length === 0}
             className="w-full py-3 rounded-xl text-black font-bold text-sm tracking-wide transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ backgroundColor: '#C9A227' }}
+            style={{ backgroundColor: '#C8A435' }}
           >
             Start Auto-cycle ({selectedUsers.length} runners)
           </button>
@@ -189,7 +189,7 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
         {(cycleState === 'running' || cycleState === 'paused') && (
           <div className="space-y-4">
             {/* Current runner info */}
-            <div className="bg-gray-800/70 rounded-lg p-4 space-y-1">
+            <div className="bg-white/5 rounded-lg p-4 space-y-1">
               <p className="text-gray-400 text-xs uppercase tracking-wide font-medium">
                 {cycleState === 'paused' ? 'Paused on' : 'Sending to'}
               </p>
@@ -202,8 +202,8 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
               <div
                 className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold shrink-0"
                 style={{
-                  border: `3px solid ${cycleState === 'paused' ? '#4B5563' : '#C9A227'}`,
-                  color: cycleState === 'paused' ? '#6B7280' : '#C9A227',
+                  border: `3px solid ${cycleState === 'paused' ? '#4B5563' : '#C8A435'}`,
+                  color: cycleState === 'paused' ? '#6B7280' : '#C8A435',
                 }}
               >
                 {countdown}
@@ -220,7 +220,7 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
               {cycleState === 'running' ? (
                 <button
                   onClick={handlePause}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-semibold border border-gray-600 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-gray-200 text-sm font-semibold border border-white/15 transition-colors"
                 >
                   <PauseIcon className="w-4 h-4" />
                   Pause
@@ -229,7 +229,7 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
                 <button
                   onClick={handleResume}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg text-black text-sm font-bold transition-colors"
-                  style={{ backgroundColor: '#C9A227' }}
+                  style={{ backgroundColor: '#C8A435' }}
                 >
                   <PlayIcon className="w-4 h-4" />
                   Resume
@@ -237,7 +237,7 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
               )}
               <button
                 onClick={handleReset}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 text-sm font-semibold border border-gray-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-gray-400 text-sm font-semibold border border-white/15 transition-colors"
               >
                 Cancel
               </button>
@@ -255,12 +255,12 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
                 {selectedUsers.length} sent
               </span>
             </div>
-            <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${progressPct}%`,
-                  backgroundColor: cycleState === 'done' ? '#22c55e' : '#C9A227',
+                  backgroundColor: cycleState === 'done' ? '#22c55e' : '#C8A435',
                 }}
               />
             </div>
@@ -269,17 +269,17 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
       </div>
 
       {/* Collapsible contacts list */}
-      <div className="border border-gray-700 rounded-xl overflow-hidden">
+      <div className="border border-white/15 rounded-xl overflow-hidden">
         <button
           onClick={() => setShowContacts(!showContacts)}
-          className="w-full flex items-center justify-between px-4 py-3 bg-gray-900 hover:bg-gray-800 transition-colors text-sm font-medium text-gray-300"
+          className="w-full flex items-center justify-between px-4 py-3 bg-white/[0.03] hover:bg-white/[0.06] transition-colors text-sm font-medium text-gray-300"
         >
           <span>Contacts ({selectedUsers.length})</span>
           <ChevronIcon className={`w-4 h-4 transition-transform ${showContacts ? 'rotate-180' : ''}`} />
         </button>
 
         {showContacts && (
-          <div className="divide-y divide-gray-800">
+          <div className="divide-y divide-white/10">
             {selectedUsers.map((user, idx) => {
               const isSent = sentSet.has(user.phone)
               const isCurrent =
@@ -289,7 +289,7 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
                 <div
                   key={user.phone}
                   className={`flex items-center justify-between px-4 py-3 transition-colors ${
-                    isCurrent ? 'bg-gray-800' : 'bg-gray-950'
+                    isCurrent ? 'bg-white/5' : 'bg-black'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">

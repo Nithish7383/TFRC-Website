@@ -75,9 +75,9 @@ export default function MergeMembersModal({ member, allMembers, onClose }: Props
   }
 
   const MemberCol = ({ m, isKeep }: { m: Member; isKeep: boolean }) => (
-    <div className={`flex-1 border rounded-xl p-4 space-y-3 ${isKeep ? 'border-[#C9A227]/40 bg-[#C9A227]/5' : 'border-gray-700 bg-gray-800/30'}`}>
+    <div className={`flex-1 border rounded-xl p-4 space-y-3 ${isKeep ? 'border-gold/40 bg-gold/5' : 'border-white/15 bg-white/5'}`}>
       <div className="space-y-1">
-        <p className="text-[#C9A227] font-bold text-sm tracking-wider">{m.member_id}</p>
+        <p className="text-gold font-bold text-sm tracking-wider">{m.member_id}</p>
         <p className="text-white font-medium">{m.name}</p>
         <p className="text-gray-400 text-xs">{m.phone}</p>
         <p className="text-gray-400 text-xs">{m.place}</p>

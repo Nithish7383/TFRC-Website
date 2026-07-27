@@ -108,10 +108,11 @@ export default function MemberLevel2Form() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
-        <a href="/" className="text-gray-500 text-sm hover:text-gray-300 inline-block mb-6">
+        <a href="/" className="text-gray-500 text-sm hover:text-gray-300 block mb-6">
           ← Home
         </a>
-        <h1 className="text-3xl font-bold text-white mb-2">Level 2 Profile</h1>
+        <p className="eyebrow mb-2">Go deeper</p>
+        <h1 className="heading-display text-white text-4xl mb-2">Level 2 Profile</h1>
         <p className="text-gray-400">Complete your runner profile after your first few events.</p>
       </div>
 
@@ -161,9 +162,9 @@ export default function MemberLevel2Form() {
           <div className="flex items-center justify-between mb-2">
             <div>
               <p className="text-white font-semibold">{member.name}</p>
-              <p className="text-[#C9A227] text-sm">{member.member_id}</p>
+              <p className="text-gold text-sm font-mono">{member.member_id}</p>
             </div>
-            <span className="text-xs bg-[#C9A227]/20 text-[#C9A227] border border-[#C9A227]/30 px-2 py-1 rounded-full">
+            <span className="text-xs bg-gold/20 text-gold border border-gold/30 px-2 py-1 rounded-full">
               Level 2
             </span>
           </div>
@@ -207,15 +208,15 @@ export default function MemberLevel2Form() {
                   key={interest}
                   className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                     form.interests.includes(interest)
-                      ? 'border-[#C9A227]/60 bg-[#C9A227]/10'
-                      : 'border-gray-700 hover:border-gray-600'
+                      ? 'border-gold/60 bg-gold/10'
+                      : 'border-white/10 hover:border-white/25'
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={form.interests.includes(interest)}
                     onChange={() => toggleInterest(interest)}
-                    className="accent-[#C9A227]"
+                    className="accent-gold"
                   />
                   <span className="text-sm text-gray-300">{interest}</span>
                 </label>

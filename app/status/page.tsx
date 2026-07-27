@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { RegistrationStatus } from '@/lib/types'
+import StatusBadge from '@/components/ui/StatusBadge'
 
 interface RegResult {
   id: string
@@ -41,13 +42,14 @@ export default function StatusPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-950 py-12 px-4">
+    <main className="min-h-screen bg-black py-12 px-4">
       <div className="max-w-xl mx-auto">
         <div className="text-center mb-10">
-          <Link href="/" className="text-gray-500 text-sm hover:text-gray-300 mb-6 inline-block">
+          <Link href="/" className="text-gray-500 text-sm hover:text-gray-300 block mb-6">
             ← Back to home
           </Link>
-          <h1 className="text-3xl font-bold text-white mb-2">Check Registration Status</h1>
+          <p className="eyebrow mb-2 justify-center w-full">Track your run</p>
+          <h1 className="heading-display text-white text-4xl mb-2">Check Registration Status</h1>
           <p className="text-gray-400">Enter your WhatsApp number to see your registration status.</p>
         </div>
 
@@ -93,28 +95,22 @@ function StatusCard({ reg }: { reg: RegResult }) {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
   })
 
-  const statusConfig: Record<RegistrationStatus, { label: string; badgeColor: string; message: string; messageColor: string }> = {
+  const messageConfig: Record<RegistrationStatus, { message: string; messageColor: string }> = {
     pending: {
-      label: 'Pending',
-      badgeColor: 'bg-yellow-900/30 text-yellow-400 border-yellow-800/40',
       message: 'Your registration is under review. We will notify you soon.',
       messageColor: 'text-yellow-400',
     },
     selected: {
-      label: 'Selected ✓',
-      badgeColor: 'bg-green-900/30 text-green-400 border-green-800/40',
       message: 'Congratulations! You have been selected for this event.',
       messageColor: 'text-green-400',
     },
     rejected: {
-      label: 'Not Selected',
-      badgeColor: 'bg-red-900/30 text-red-400 border-red-800/40',
       message: "You weren't selected this time — spots are limited.",
       messageColor: 'text-red-400',
     },
   }
 
-  const cfg = statusConfig[reg.status]
+  const cfg = messageConfig[reg.status]
 
   return (
     <div className="card space-y-3">
@@ -123,15 +119,13 @@ function StatusCard({ reg }: { reg: RegResult }) {
           <p className="text-white font-semibold">{reg.events.title}</p>
           <p className="text-gray-500 text-sm">{formattedDate}</p>
         </div>
-        <span className={`text-xs font-medium px-3 py-1 rounded-full border whitespace-nowrap ${cfg.badgeColor}`}>
-          {cfg.label}
-        </span>
+        <StatusBadge status={reg.status} />
       </div>
 
       <p className={`text-sm ${cfg.messageColor}`}>{cfg.message}</p>
 
       {reg.status === 'pending' && (
-        <div className="bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 space-y-1">
+        <div className="bg-white/[0.03] border border-white/10 rounded-lg px-4 py-3 space-y-1">
           {eventDate > now && (
             <p className="text-white text-sm font-medium">Event: {formattedDate}</p>
           )}
@@ -161,7 +155,7 @@ function StatusCard({ reg }: { reg: RegResult }) {
             Join WhatsApp Group →
           </a>
         ) : (
-          <div className="bg-gray-800/60 border border-gray-700 rounded-lg px-4 py-3">
+          <div className="bg-white/[0.03] border border-white/10 rounded-lg px-4 py-3">
             {daysUntil > 0 ? (
               <p className="text-sm text-gray-400">
                 Event in <span className="text-white font-semibold">{daysUntil} day{daysUntil !== 1 ? 's' : ''}</span> — your WhatsApp group link will be shared closer to the date.

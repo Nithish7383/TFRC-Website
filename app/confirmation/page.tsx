@@ -24,7 +24,7 @@ export default function ConfirmationPage({
   )
 
   return (
-    <main className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+    <main className="min-h-screen bg-black flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
         <div className="card space-y-5">
           {/* Success icon */}
@@ -35,19 +35,22 @@ export default function ConfirmationPage({
           </div>
 
           <div>
-            <h1 className="text-2xl font-bold text-white mb-2">
+            <h1 className="heading-display text-white text-3xl mb-2">
               You&apos;re registered, {name}!
             </h1>
             <p className="text-gray-400">
               Your registration for{' '}
-              <span className="text-[#C9A227] font-medium">{event}</span>{' '}
+              <span className="text-gold font-medium">{event}</span>{' '}
               {date && <>on <span className="text-white">{date}</span></>} has been received.
+            </p>
+            <p className="heading-display text-base mt-3">
+              <span className="text-white">Luck is optional.</span> <span className="text-gold">Effort isn&apos;t.</span>
             </p>
           </div>
 
-          <div className="bg-gray-800/60 rounded-lg p-4 text-left border border-gray-700/50">
+          <div className="bg-white/[0.03] rounded-lg p-4 text-left border border-white/10">
             <p className="text-gray-300 text-sm leading-relaxed">
-              <span className="text-[#C9A227] font-medium">What&apos;s next?</span>
+              <span className="text-gold font-medium">What&apos;s next?</span>
               <br />
               Our admin team will review all registrations and select participants.
               If selected, you&apos;ll receive a WhatsApp message with the group link

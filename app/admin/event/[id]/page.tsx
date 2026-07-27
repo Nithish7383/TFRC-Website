@@ -49,14 +49,14 @@ export default async function EventDetailPage({
   const selectedUsers = allRegs.filter((r: Registration) => r.status === 'selected')
 
   return (
-    <main className="min-h-screen bg-gray-950">
-      <header className="border-b border-gray-800 bg-gray-900/50 px-4 py-4">
+    <main className="min-h-screen bg-black">
+      <header className="border-b border-white/10 bg-white/[0.02] px-4 py-4">
         <div className="max-w-6xl mx-auto flex items-center gap-3">
           <Link href="/admin" className="text-gray-500 hover:text-gray-300 text-sm">
             ← Dashboard
           </Link>
           <div className="flex-1 min-w-0">
-            <h1 className="text-white font-bold text-lg truncate">{event.title}</h1>
+            <h1 className="heading-display text-white text-xl truncate">{event.title}</h1>
             <p className="text-gray-500 text-sm">
               {new Date(event.date).toLocaleDateString('en-IN', {
                 weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
@@ -66,7 +66,7 @@ export default async function EventDetailPage({
           <span className={`text-xs font-medium px-2.5 py-1 rounded-full border flex-shrink-0 ${
             event.is_active
               ? 'bg-green-900/30 text-green-400 border-green-800/40'
-              : 'bg-gray-800 text-gray-500 border-gray-700'
+              : 'bg-white/5 text-gray-500 border-white/10'
           }`}>
             {event.is_active ? 'Active' : 'Inactive'}
           </span>
@@ -107,7 +107,7 @@ export default async function EventDetailPage({
                   href={event.meeting_point_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#C9A227] hover:underline text-sm"
+                  className="text-gold hover:underline text-sm"
                 >
                   Open in Maps →
                 </a>
@@ -139,7 +139,7 @@ export default async function EventDetailPage({
               <span className="text-blue-400 text-sm font-medium">♂ Male slots</span>
               <span className="text-gray-400 text-sm">{maleCount} / {event.max_male}</span>
             </div>
-            <div className="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
+            <div className="w-full bg-white/10 rounded-full h-2.5 overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${maleCount >= event.max_male ? 'bg-red-500' : 'bg-blue-500'}`}
                 style={{ width: `${Math.min((maleCount / event.max_male) * 100, 100)}%` }}
@@ -152,7 +152,7 @@ export default async function EventDetailPage({
               <span className="text-pink-400 text-sm font-medium">♀ Female slots</span>
               <span className="text-gray-400 text-sm">{femaleCount} / {event.max_female}</span>
             </div>
-            <div className="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
+            <div className="w-full bg-white/10 rounded-full h-2.5 overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${femaleCount >= event.max_female ? 'bg-red-500' : 'bg-pink-500'}`}
                 style={{ width: `${Math.min((femaleCount / event.max_female) * 100, 100)}%` }}
@@ -183,7 +183,7 @@ export default async function EventDetailPage({
 
         {/* Filters */}
         <div>
-          <h2 className="text-lg font-bold text-white mb-4">
+          <h2 className="heading-display text-white text-lg mb-4">
             Registrations
             {(searchParams.gender || searchParams.minAge || searchParams.maxAge) && (
               <Link href={`/admin/event/${params.id}`} className="ml-3 text-sm text-gray-500 hover:text-gray-300 font-normal">
@@ -212,7 +212,7 @@ export default async function EventDetailPage({
         </div>
 
         {/* Photos */}
-        <div className="border-t border-gray-800 pt-8">
+        <div className="border-t border-white/10 pt-8">
           <EventPhotoManager eventId={params.id} />
         </div>
       </div>

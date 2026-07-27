@@ -69,7 +69,7 @@ export default function EditEventForm({ event, onClose }: Props) {
   }
 
   return (
-    <div className="card border-[#C9A227]/30 bg-[#C9A227]/5 mt-2">
+    <div className="card border-gold/30 bg-gold/5 mt-2">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white font-semibold">Edit Event</h3>
         <button

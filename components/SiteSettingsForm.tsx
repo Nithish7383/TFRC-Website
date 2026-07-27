@@ -140,7 +140,7 @@ export default function SiteSettingsForm({ settings }: Props) {
             type="checkbox"
             checked={featActive}
             onChange={(e) => setFeatActive(e.target.checked)}
-            className="accent-[#C9A227] w-4 h-4"
+            className="accent-gold w-4 h-4"
           />
           <span className="text-gray-300 text-sm">Show featured event banner on homepage</span>
         </label>
@@ -175,7 +175,7 @@ export default function SiteSettingsForm({ settings }: Props) {
           { num: 2, text: q2text, name: q2name, setText: setQ2text, setName: setQ2name },
           { num: 3, text: q3text, name: q3name, setText: setQ3text, setName: setQ3name },
         ].map(({ num, text, name, setText, setName }) => (
-          <div key={num} className="space-y-2 border border-gray-800 rounded-lg p-4">
+          <div key={num} className="space-y-2 border border-white/10 rounded-lg p-4">
             <p className="text-gray-400 text-xs font-medium">Quote {num}</p>
             <textarea
               value={text}

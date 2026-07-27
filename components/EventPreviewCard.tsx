@@ -17,9 +17,9 @@ export default function EventPreviewCard({ event }: Props) {
   const deadlineUrgent = hoursUntilDeadline !== null && hoursUntilDeadline > 0 && hoursUntilDeadline <= 24
 
   return (
-    <div className="border border-[#C9A227]/30 bg-[#C9A227]/5 rounded-xl p-5 space-y-3">
+    <div className="border border-gold/30 bg-gold/5 rounded-xl p-5 space-y-3">
       <div>
-        <h3 className="text-white font-bold text-lg">{event.title}</h3>
+        <h3 className="heading-display text-white text-xl">{event.title}</h3>
         <p className="text-gray-400 text-sm">{formatEventDate(event.date)}</p>
       </div>
 
@@ -29,7 +29,7 @@ export default function EventPreviewCard({ event }: Props) {
             href={event.meeting_point_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-[#C9A227] hover:underline"
+            className="flex items-center gap-1 text-gold hover:underline"
           >
             📍 View meeting point
           </a>

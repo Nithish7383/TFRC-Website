@@ -43,13 +43,14 @@ export default async function RegisterPage({
   )
 
   return (
-    <main className="min-h-screen bg-gray-950 py-12 px-4">
+    <main className="min-h-screen bg-black py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-10">
-          <a href="/" className="text-gray-500 text-sm hover:text-gray-300 mb-6 inline-block">
+          <a href="/" className="text-gray-500 text-sm hover:text-gray-300 block mb-6">
             ← Back to home
           </a>
-          <h1 className="text-3xl font-bold text-white mb-2">Register for an Event</h1>
+          <p className="eyebrow mb-2 justify-center w-full">Entry open</p>
+          <h1 className="heading-display text-white text-4xl mb-2">Register for an Event</h1>
           <p className="text-gray-400">Fill in your details to secure your spot.</p>
         </div>
         <RegisterForm

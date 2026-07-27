@@ -68,7 +68,7 @@ export default function HomepageGalleryManager() {
   return (
     <div className="space-y-6">
       {/* Add form */}
-      <form onSubmit={handleAdd} className="space-y-4 border border-gray-700 rounded-xl p-5">
+      <form onSubmit={handleAdd} className="space-y-4 border border-white/15 rounded-xl p-5">
         <h4 className="text-white font-medium">Add Photo</h4>
         <div>
           <label className="block text-gray-400 text-xs mb-1">Image URL <span className="text-red-400">*</span></label>
@@ -115,11 +115,11 @@ export default function HomepageGalleryManager() {
       ) : (
         <div className="space-y-3">
           {photos.map((photo) => (
-            <div key={photo.id} className="flex items-center gap-4 border border-gray-700 rounded-lg p-3">
+            <div key={photo.id} className="flex items-center gap-4 border border-white/15 rounded-lg p-3">
               <img
                 src={photo.image_url}
                 alt={photo.caption ?? 'Gallery'}
-                className="w-16 h-16 object-cover rounded-lg flex-shrink-0 bg-gray-800"
+                className="w-16 h-16 object-cover rounded-lg flex-shrink-0 bg-white/10"
               />
               <div className="flex-1 min-w-0">
                 <p className="text-gray-300 text-sm truncate">{photo.caption || '—'}</p>
@@ -130,7 +130,7 @@ export default function HomepageGalleryManager() {
                 className={`text-xs px-3 py-1.5 rounded-lg border transition-colors whitespace-nowrap ${
                   deleteConfirm === photo.id
                     ? 'bg-red-900/50 border-red-700 text-red-300'
-                    : 'border-gray-700 text-gray-400 hover:border-red-700 hover:text-red-400'
+                    : 'border-white/15 text-gray-400 hover:border-red-700 hover:text-red-400'
                 }`}
               >
                 {deleteConfirm === photo.id ? 'Confirm delete?' : 'Delete'}

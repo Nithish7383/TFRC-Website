@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
-import { GOALS_OPTIONS, EXPERIENCE_OPTIONS, normalizePhone } from '@/lib/constants'
+import { GOALS_OPTIONS, normalizePhone } from '@/lib/constants'
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-', 'Unknown']
 
@@ -103,21 +103,22 @@ export default function MemberRegisterForm() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-950 py-12 px-4">
+    <main className="min-h-screen bg-black py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
-          <Link href="/" className="text-gray-500 text-sm hover:text-gray-300 inline-block mb-6">
+          <Link href="/" className="text-gray-500 text-sm hover:text-gray-300 block mb-6">
             ← Home
           </Link>
-          <h1 className="text-3xl font-bold text-white mb-2">Join The First Rule Club</h1>
+          <p className="eyebrow mb-2">Join the movement</p>
+          <h1 className="heading-display text-white text-4xl mb-2">Join The First Rule Club</h1>
           <p className="text-gray-400">Create your member profile to register for events.</p>
-          <p className="text-gray-600 text-sm mt-2">Step 1 of 1 — Member Registration</p>
+          <p className="text-gray-600 text-sm mt-2 font-mono">Step 1 of 1 — Member Registration</p>
         </div>
 
         <form onSubmit={handleSubmit} className="card space-y-6">
           {/* Section 1 — Personal */}
           <div className="space-y-4">
-            <h2 className="text-white font-semibold text-lg border-b border-gray-800 pb-2">Personal Details</h2>
+            <h2 className="text-white font-semibold text-lg border-b border-white/10 pb-2">Personal Details</h2>
 
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-2">
@@ -178,8 +179,8 @@ export default function MemberRegisterForm() {
                     onClick={() => { setForm((p) => ({ ...p, gender: g })); setError('') }}
                     className={`flex-1 py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all ${
                       form.gender === g
-                        ? 'border-[#C9A227] text-[#C9A227] bg-[#C9A227]/10'
-                        : 'border-gray-700 text-gray-400 hover:border-gray-500'
+                        ? 'border-gold text-gold bg-gold/10'
+                        : 'border-white/15 text-gray-400 hover:border-white/30'
                     }`}
                   >
                     {g}
@@ -221,7 +222,7 @@ export default function MemberRegisterForm() {
 
           {/* Section 2 — Running */}
           <div className="space-y-4">
-            <h2 className="text-white font-semibold text-lg border-b border-gray-800 pb-2">Running Profile</h2>
+            <h2 className="text-white font-semibold text-lg border-b border-white/10 pb-2">Running Profile</h2>
 
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-3">
@@ -240,8 +241,8 @@ export default function MemberRegisterForm() {
                     onClick={() => { setForm((p) => ({ ...p, running_experience: value })); setError('') }}
                     className={`py-3 px-4 rounded-xl border-2 text-sm font-medium transition-all text-left ${
                       form.running_experience === value
-                        ? 'border-[#C9A227] text-[#C9A227] bg-[#C9A227]/10'
-                        : 'border-gray-700 text-gray-400 hover:border-gray-500'
+                        ? 'border-gold text-gold bg-gold/10'
+                        : 'border-white/15 text-gray-400 hover:border-white/30'
                     }`}
                   >
                     {label}
@@ -260,15 +261,15 @@ export default function MemberRegisterForm() {
                     key={goal}
                     className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                       form.goals.includes(goal)
-                        ? 'border-[#C9A227]/60 bg-[#C9A227]/10'
-                        : 'border-gray-700 hover:border-gray-600'
+                        ? 'border-gold/60 bg-gold/10'
+                        : 'border-white/10 hover:border-white/25'
                     }`}
                   >
                     <input
                       type="checkbox"
                       checked={form.goals.includes(goal)}
                       onChange={() => toggleGoal(goal)}
-                      className="accent-[#C9A227]"
+                      className="accent-gold"
                     />
                     <span className="text-sm text-gray-300">{goal}</span>
                   </label>
@@ -278,18 +279,18 @@ export default function MemberRegisterForm() {
           </div>
 
           {/* Section 3 — Safety (accordion) */}
-          <div className="border border-gray-800 rounded-xl overflow-hidden">
+          <div className="border border-white/10 rounded-xl overflow-hidden">
             <button
               type="button"
               onClick={() => setSafetyOpen((o) => !o)}
-              className="w-full flex items-center justify-between px-5 py-4 text-left bg-gray-900 hover:bg-gray-800/60 transition-colors"
+              className="w-full flex items-center justify-between px-5 py-4 text-left bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
             >
               <span className="text-gray-300 text-sm font-medium">Safety info — optional but recommended</span>
               <span className="text-gray-500 text-lg">{safetyOpen ? '▲' : '▼'}</span>
             </button>
 
             {safetyOpen && (
-              <div className="px-5 pb-5 pt-4 space-y-4 bg-gray-900/50">
+              <div className="px-5 pb-5 pt-4 space-y-4 bg-white/[0.015]">
                 <div>
                   <label className="block text-gray-300 text-sm font-medium mb-2">Emergency Contact Name</label>
                   <input
@@ -342,10 +343,10 @@ export default function MemberRegisterForm() {
           </div>
 
           {existingMemberId && (
-            <div className="bg-[#C9A227]/10 border border-[#C9A227]/40 rounded-xl p-5 space-y-3">
-              <p className="text-[#C9A227] font-semibold">
+            <div className="bg-gold/10 border border-gold/40 rounded-xl p-5 space-y-3">
+              <p className="text-gold font-semibold">
                 You&apos;re already a TFRC member! Your ID is{' '}
-                <span className="tracking-widest">{existingMemberId}</span>.
+                <span className="tracking-widest font-mono">{existingMemberId}</span>.
               </p>
               <Link href="/login" className="btn-primary inline-block">
                 Go to Member Login →

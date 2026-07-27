@@ -9,13 +9,29 @@ module.exports = {
     extend: {
       colors: {
         gold: {
-          400: '#C9A227',
-          500: '#B8911F',
-          600: '#9A7A18',
+          DEFAULT: '#C8A435',
+          light: '#D9BB5E',
+          dark: '#A9862A',
         },
       },
       fontFamily: {
-        sans: ['Space Grotesk', 'sans-serif'],
+        sans: ['var(--font-sans)', 'Space Grotesk', 'sans-serif'],
+        display: ['var(--font-display)', 'Oswald', 'sans-serif'],
+        mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
+      },
+      keyframes: {
+        'fade-up': {
+          '0%': { opacity: '0', transform: 'translateY(16px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'pulse-slow': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.4' },
+        },
+      },
+      animation: {
+        'fade-up': 'fade-up 0.6s ease-out forwards',
+        'pulse-slow': 'pulse-slow 2s ease-in-out infinite',
       },
     },
   },

@@ -71,7 +71,7 @@ export default function EventPhotoManager({ eventId }: Props) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h3 className="text-white font-semibold text-lg">Photos</h3>
-          <span className="text-xs bg-gray-800 text-gray-400 border border-gray-700 px-2 py-0.5 rounded-full">
+          <span className="text-xs bg-white/10 text-gray-400 border border-white/15 px-2 py-0.5 rounded-full">
             {photos.length}
           </span>
         </div>
@@ -84,7 +84,7 @@ export default function EventPhotoManager({ eventId }: Props) {
       </div>
 
       {addOpen && (
-        <form onSubmit={handleSave} className="card border-[#C9A227]/20 bg-[#C9A227]/5 space-y-3">
+        <form onSubmit={handleSave} className="card border-gold/20 bg-gold/5 space-y-3">
           <div>
             <label className="block text-gray-300 text-sm font-medium mb-1">Image URL <span className="text-red-400">*</span></label>
             <input
@@ -138,11 +138,11 @@ export default function EventPhotoManager({ eventId }: Props) {
       ) : (
         <div className="space-y-2">
           {photos.map((photo) => (
-            <div key={photo.id} className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-xl px-4 py-3">
+            <div key={photo.id} className="flex items-center gap-3 bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3">
               <img
                 src={photo.image_url}
                 alt={photo.caption || 'Photo'}
-                className="w-14 h-14 object-cover rounded-lg flex-shrink-0 bg-gray-800"
+                className="w-14 h-14 object-cover rounded-lg flex-shrink-0 bg-white/10"
               />
               <div className="flex-1 min-w-0">
                 <p className="text-gray-300 text-sm truncate">{photo.caption || <span className="text-gray-600 italic">No caption</span>}</p>
@@ -151,7 +151,7 @@ export default function EventPhotoManager({ eventId }: Props) {
                     href={photo.instagram_post_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#C9A227] text-xs hover:underline"
+                    className="text-gold text-xs hover:underline"
                   >
                     Instagram post ↗
                   </a>

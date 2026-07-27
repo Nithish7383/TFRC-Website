@@ -41,7 +41,7 @@ export default function CloneEventButton({ event }: Props) {
       className={`text-sm py-2 px-3 rounded-lg border transition-colors ${
         done
           ? 'border-green-800/40 text-green-400'
-          : 'border-gray-700 text-gray-400 hover:text-[#C9A227] hover:border-[#C9A227]/40'
+          : 'border-white/15 text-gray-400 hover:text-gold hover:border-gold/40'
       }`}
     >
       {done ? '✓ Cloned' : loading ? '...' : 'Clone'}

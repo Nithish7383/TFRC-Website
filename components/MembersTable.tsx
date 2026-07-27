@@ -12,7 +12,7 @@ interface Props {
 const EXPERIENCE_COLORS: Record<string, string> = {
   'First timer': 'bg-blue-900/30 text-blue-400 border-blue-800/40',
   'Casual': 'bg-purple-900/30 text-purple-400 border-purple-800/40',
-  'Regular': 'bg-[#C9A227]/20 text-[#C9A227] border-[#C9A227]/30',
+  'Regular': 'bg-gold/20 text-gold border-gold/30',
   'Competitive': 'bg-red-900/30 text-red-400 border-red-800/40',
 }
 
@@ -133,24 +133,24 @@ export default function MembersTable({ members }: Props) {
 
       <p className="text-gray-500 text-sm">{filtered.length} member{filtered.length !== 1 ? 's' : ''}</p>
 
-      <div className="overflow-x-auto rounded-xl border border-gray-800">
+      <div className="overflow-x-auto rounded-xl border border-white/10">
         <table className="w-full min-w-[900px] text-sm">
           <thead>
-            <tr className="bg-gray-900 border-b border-gray-800">
+            <tr className="bg-white/[0.03] border-b border-white/10">
               {['Member ID', 'Name', 'Phone', 'Age / Gender / Place', 'Experience', 'Runs', 'Level', 'Joined', 'Actions'].map((h) => (
                 <th key={h} className="text-left text-gray-400 font-medium px-4 py-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-800/60">
+          <tbody className="divide-y divide-white/10">
             {filtered.map((member) => {
               const isDuplicate = duplicateIds.has(member.id)
               return (
                 <>
-                  <tr key={member.id} className={`hover:bg-gray-800/30 transition-colors ${isDuplicate ? 'bg-yellow-900/10' : ''}`}>
+                  <tr key={member.id} className={`hover:bg-white/5 transition-colors ${isDuplicate ? 'bg-yellow-900/10' : ''}`}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-[#C9A227] font-bold text-xs tracking-wider bg-[#C9A227]/10 border border-[#C9A227]/30 px-2 py-1 rounded-lg">
+                        <span className="text-gold font-bold text-xs tracking-wider bg-gold/10 border border-gold/30 px-2 py-1 rounded-lg">
                           {member.member_id}
                         </span>
                         {isDuplicate && (
@@ -163,7 +163,7 @@ export default function MembersTable({ members }: Props) {
                     <td className="px-4 py-3">
                       <button
                         onClick={() => setExpandedId(expandedId === member.id ? null : member.id)}
-                        className="text-white font-medium hover:text-[#C9A227] transition-colors text-left"
+                        className="text-white font-medium hover:text-gold transition-colors text-left"
                       >
                         {member.name}
                         <span className="text-gray-600 ml-1 text-xs">{expandedId === member.id ? '▲' : '▼'}</span>
@@ -174,7 +174,7 @@ export default function MembersTable({ members }: Props) {
                         href={`https://wa.me/91${member.phone}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#C9A227] hover:underline"
+                        className="text-gold hover:underline"
                       >
                         {member.phone}
                       </a>
@@ -183,7 +183,7 @@ export default function MembersTable({ members }: Props) {
                       {member.age}y · {member.gender} · {member.place}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full border ${EXPERIENCE_COLORS[member.running_experience] || 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full border ${EXPERIENCE_COLORS[member.running_experience] || 'bg-white/10 text-gray-400 border-white/15'}`}>
                         {member.running_experience}
                       </span>
                     </td>
@@ -191,8 +191,8 @@ export default function MembersTable({ members }: Props) {
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full border ${
                         member.level === 2
-                          ? 'bg-[#C9A227]/20 text-[#C9A227] border-[#C9A227]/30'
-                          : 'bg-gray-800 text-gray-400 border-gray-700'
+                          ? 'bg-gold/20 text-gold border-gold/30'
+                          : 'bg-white/10 text-gray-400 border-white/15'
                       }`}>
                         Level {member.level}
                       </span>
@@ -206,7 +206,7 @@ export default function MembersTable({ members }: Props) {
                           <button
                             onClick={() => upgradeToLevel2(member.id)}
                             disabled={upgrading === member.id}
-                            className="text-xs px-3 py-1.5 rounded-lg border border-[#C9A227]/40 text-[#C9A227] hover:bg-[#C9A227]/10 transition-colors whitespace-nowrap"
+                            className="text-xs px-3 py-1.5 rounded-lg border border-gold/40 text-gold hover:bg-gold/10 transition-colors whitespace-nowrap"
                           >
                             {upgrading === member.id ? '...' : 'Upgrade to L2'}
                           </button>
@@ -223,7 +223,7 @@ export default function MembersTable({ members }: Props) {
                     </td>
                   </tr>
                   {expandedId === member.id && (
-                    <tr key={`${member.id}-exp`} className="bg-gray-900/60 border-b border-gray-800">
+                    <tr key={`${member.id}-exp`} className="bg-white/[0.04] border-b border-white/10">
                       <td colSpan={9} className="px-6 py-4">
                         <div className="grid md:grid-cols-3 gap-4 text-sm">
                           <div>
@@ -231,7 +231,7 @@ export default function MembersTable({ members }: Props) {
                             {member.goals && member.goals.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
                                 {member.goals.map((g) => (
-                                  <span key={g} className="text-xs bg-gray-800 text-gray-300 border border-gray-700 px-2 py-0.5 rounded-full">{g}</span>
+                                  <span key={g} className="text-xs bg-white/10 text-gray-300 border border-white/15 px-2 py-0.5 rounded-full">{g}</span>
                                 ))}
                               </div>
                             ) : <p className="text-gray-600">None</p>}

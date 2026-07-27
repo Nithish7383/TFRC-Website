@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase-server'
 import { Event } from '@/lib/types'
 import CreateEventForm from '@/components/CreateEventForm'
-import AdminSignOutButton from '@/components/AdminSignOutButton'
 import AdminEventList from '@/components/AdminEventList'
+import AdminHeader from '@/components/ui/AdminHeader'
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -126,38 +126,31 @@ export default async function AdminDashboard() {
   ;(events || []).forEach((e: Event) => { eventMap[e.id] = e.title })
 
   return (
-    <main className="min-h-screen bg-gray-950">
-      <header className="border-b border-gray-800 bg-gray-900/50 px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img src="/firstruleclublogo.jpg" alt="TFRC" className="w-8 h-8 rounded-full object-cover" />
-          <div>
-            <h1 className="text-white font-semibold text-sm">The First Rule Club</h1>
-            <p className="text-gray-500 text-xs">Admin Dashboard</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href="/admin" className="text-gray-400 hover:text-white text-xs transition-colors">Dashboard</Link>
-          <Link href="/admin/members" className="text-gray-400 hover:text-white text-xs transition-colors">Members</Link>
-          <Link href="/admin/settings" className="text-gray-400 hover:text-white text-xs transition-colors">Settings</Link>
-          <span className="text-gray-500 text-xs hidden md:block">{user.email}</span>
-          <AdminSignOutButton />
-        </div>
-      </header>
+    <main className="min-h-screen bg-black">
+      <AdminHeader
+        subtitle="Admin Dashboard"
+        email={user.email}
+        links={[
+          { href: '/admin', label: 'Dashboard' },
+          { href: '/admin/members', label: 'Members' },
+          { href: '/admin/settings', label: 'Settings' },
+        ]}
+      />
 
       <div className="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8">
 
         {/* BLOCK 1 — Next Event Panel */}
         <section>
-          <h2 className="text-lg font-bold text-white mb-3">Next Event</h2>
+          <h2 className="heading-display text-white text-lg mb-3">Next Event</h2>
           {nextEvent ? (
-            <div className="card border border-[#C9A227]/30 space-y-4">
+            <div className="card border border-gold/30 space-y-4">
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div>
                   <h3 className="text-white font-semibold text-lg">{nextEvent.title}</h3>
                   <p className="text-gray-400 text-sm">
                     {new Date(nextEvent.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
                     {' · '}
-                    <span className="text-[#C9A227]">{daysUntil(nextEvent.date)} days away</span>
+                    <span className="text-gold">{daysUntil(nextEvent.date)} days away</span>
                   </p>
                 </div>
                 <Link
@@ -191,11 +184,11 @@ export default async function AdminDashboard() {
 
         {/* BLOCK 2 — Member Stats */}
         <section>
-          <h2 className="text-lg font-bold text-white mb-3">Member Stats</h2>
+          <h2 className="heading-display text-white text-lg mb-3">Member Stats</h2>
           <div className="grid grid-cols-3 gap-4">
             {[
               { label: 'Total Members', value: totalMembers ?? 0, color: 'text-white' },
-              { label: 'Joined This Week', value: membersThisWeek, color: 'text-[#C9A227]' },
+              { label: 'Joined This Week', value: membersThisWeek, color: 'text-gold' },
               { label: 'Never Showed Up', value: neverShowedUp, color: 'text-gray-400' },
             ].map(({ label, value, color }) => (
               <div key={label} className="card text-center">
@@ -208,7 +201,7 @@ export default async function AdminDashboard() {
 
         {/* BLOCK 3 — Engagement */}
         <section>
-          <h2 className="text-lg font-bold text-white mb-3">Engagement</h2>
+          <h2 className="heading-display text-white text-lg mb-3">Engagement</h2>
           <div className="grid grid-cols-3 gap-4">
             {[
               { label: 'Members Registered', value: membersRegistered, color: 'text-green-400' },
@@ -227,15 +220,15 @@ export default async function AdminDashboard() {
           {/* BLOCK 4 — Recent Joins */}
           <section>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-white">Recent Joins</h2>
-              <Link href="/admin/members" className="text-[#C9A227] hover:underline text-xs">
+              <h2 className="heading-display text-white text-lg">Recent Joins</h2>
+              <Link href="/admin/members" className="text-gold hover:underline text-xs">
                 View all →
               </Link>
             </div>
             <div className="card space-y-3">
               {(last5Members || []).map((m: { member_id: string; name: string; place: string; created_at: string }) => (
                 <div key={m.member_id} className="flex items-center gap-3">
-                  <span className="text-[#C9A227] font-bold text-xs tracking-wider bg-[#C9A227]/10 border border-[#C9A227]/30 px-2 py-1 rounded-lg whitespace-nowrap">
+                  <span className="stat-number text-gold text-xs tracking-wider bg-gold/10 border border-gold/30 px-2 py-1 rounded-lg whitespace-nowrap">
                     {m.member_id}
                   </span>
                   <div className="flex-1 min-w-0">
@@ -253,7 +246,7 @@ export default async function AdminDashboard() {
 
           {/* BLOCK 5 — Needs Attention */}
           <section>
-            <h2 className="text-lg font-bold text-white mb-3">Needs Attention</h2>
+            <h2 className="heading-display text-white text-lg mb-3">Needs Attention</h2>
             <div className="card space-y-3">
               {eventsPendingList.map(([eventId, count]) => (
                 <Link
@@ -280,7 +273,7 @@ export default async function AdminDashboard() {
                 </Link>
               )}
               {eventsMissingImage > 0 && (
-                <div className="flex items-center justify-between bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3">
+                <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-4 py-3">
                   <span className="text-gray-400 text-sm">
                     {eventsMissingImage} event{eventsMissingImage !== 1 ? 's' : ''} missing cover image
                   </span>
@@ -295,13 +288,13 @@ export default async function AdminDashboard() {
 
         {/* Create Event */}
         <section>
-          <h2 className="text-xl font-bold text-white mb-4">Create New Event</h2>
+          <h2 className="heading-display text-white text-xl mb-4">Create New Event</h2>
           <CreateEventForm />
         </section>
 
         {/* Events List */}
         <section>
-          <h2 className="text-xl font-bold text-white mb-4">All Events</h2>
+          <h2 className="heading-display text-white text-xl mb-4">All Events</h2>
           <AdminEventList events={eventsWithStats} />
         </section>
       </div>

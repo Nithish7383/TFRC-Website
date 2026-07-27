@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-server'
 import { Member } from '@/lib/types'
-import AdminSignOutButton from '@/components/AdminSignOutButton'
 import MembersTable from '@/components/MembersTable'
+import AdminHeader from '@/components/ui/AdminHeader'
 
 export default async function AdminMembersPage() {
   const supabase = createClient()
@@ -38,22 +38,15 @@ export default async function AdminMembersPage() {
   const totalDuplicates = dupPhoneCount + dupNameCount
 
   return (
-    <main className="min-h-screen bg-gray-950">
-      <header className="border-b border-gray-800 bg-gray-900/50 px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img src="/firstruleclublogo.jpg" alt="TFRC" className="w-8 h-8 rounded-full object-cover" />
-          <div>
-            <h1 className="text-white font-semibold text-sm">The First Rule Club</h1>
-            <p className="text-gray-500 text-xs">Admin — Members</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href="/admin" className="text-gray-400 hover:text-white text-xs transition-colors">Dashboard</Link>
-          <Link href="/admin/settings" className="text-gray-400 hover:text-white text-xs transition-colors">Settings</Link>
-          <span className="text-gray-500 text-xs hidden md:block">{user.email}</span>
-          <AdminSignOutButton />
-        </div>
-      </header>
+    <main className="min-h-screen bg-black">
+      <AdminHeader
+        subtitle="Admin — Members"
+        email={user.email}
+        links={[
+          { href: '/admin', label: 'Dashboard' },
+          { href: '/admin/settings', label: 'Settings' },
+        ]}
+      />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
         <div className="flex items-center gap-3">
@@ -65,7 +58,7 @@ export default async function AdminMembersPage() {
           {[
             { label: 'Total Members', value: totalMembers, color: 'text-white' },
             { label: 'Level 1', value: level1Count, color: 'text-gray-400' },
-            { label: 'Level 2', value: level2Count, color: 'text-[#C9A227]' },
+            { label: 'Level 2', value: level2Count, color: 'text-gold' },
             { label: 'Avg Runs Attended', value: avgAttended, color: 'text-green-400' },
             { label: 'Duplicates', value: totalDuplicates, color: totalDuplicates > 0 ? 'text-yellow-400' : 'text-gray-600' },
           ].map(({ label, value, color }) => (
