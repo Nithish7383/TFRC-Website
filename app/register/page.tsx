@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
-import { Event } from '@/lib/types'
+import { Event, Question } from '@/lib/types'
 import RegisterForm from '@/components/RegisterForm'
 import SiteHeader from '@/components/ui/SiteHeader'
 
@@ -23,22 +23,37 @@ export default async function RegisterPage({
 
   const eventsWithCounts: EventWithCounts[] = await Promise.all(
     ((events as Event[]) || []).map(async (event) => {
-      const { count: maleCount } = await supabase
-        .from('registrations')
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', event.id)
-        .eq('gender', 'Male')
-
-      const { count: femaleCount } = await supabase
-        .from('registrations')
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', event.id)
-        .eq('gender', 'Female')
+      const [{ count: maleCount }, { count: femaleCount }, { data: customQuestions }, { data: defaultQuestions }] = await Promise.all([
+        supabase
+          .from('registrations')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', event.id)
+          .eq('gender', 'Male'),
+        supabase
+          .from('registrations')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', event.id)
+          .eq('gender', 'Female'),
+        supabase
+          .from('questions')
+          .select('*')
+          .eq('event_id', event.id)
+          .order('order_index', { ascending: true }),
+        event.event_type
+          ? supabase
+              .from('questions')
+              .select('*')
+              .eq('event_type', event.event_type)
+              .eq('is_default', true)
+              .order('order_index', { ascending: true })
+          : Promise.resolve({ data: [] as Question[] }),
+      ])
 
       return {
         ...event,
         male_count: maleCount ?? 0,
         female_count: femaleCount ?? 0,
+        questions: [...((defaultQuestions as Question[]) || []), ...((customQuestions as Question[]) || [])],
       }
     })
   )

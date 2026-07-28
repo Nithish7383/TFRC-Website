@@ -3,13 +3,15 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { Event, Gender } from '@/lib/types'
+import { Event, Gender, Question } from '@/lib/types'
 import { REASON_OPTIONS } from '@/lib/constants'
 import EventPreviewCard from '@/components/EventPreviewCard'
+import { createRegistrationResponses } from '@/app/register/actions'
 
 interface EventWithCounts extends Event {
   male_count: number
   female_count: number
+  questions?: Question[]
 }
 
 // Matches the columns returned by get_member_for_registration() — a
@@ -58,8 +60,26 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [liveCounts, setLiveCounts] = useState<{ male: number; female: number } | null>(null)
+  const [questionAnswers, setQuestionAnswers] = useState<Record<string, string | string[]>>({})
 
   const selectedEvent = events.find((e) => e.id === form.event_id)
+  const eventQuestions = selectedEvent?.questions || []
+
+  const setAnswer = (questionId: string, value: string | string[]) => {
+    setQuestionAnswers((prev) => ({ ...prev, [questionId]: value }))
+    setError('')
+  }
+
+  const toggleMultiselectAnswer = (questionId: string, option: string) => {
+    setQuestionAnswers((prev) => {
+      const current = (prev[questionId] as string[] | undefined) || []
+      const next = current.includes(option)
+        ? current.filter((o) => o !== option)
+        : [...current, option]
+      return { ...prev, [questionId]: next }
+    })
+    setError('')
+  }
 
   useEffect(() => {
     if (!form.event_id) { setLiveCounts(null); return }
@@ -128,6 +148,7 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    if (e.target.name === 'event_id') setQuestionAnswers({})
     setError('')
   }
 
@@ -147,6 +168,16 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
     if (!form.gender) { setError('Please select your gender.'); return }
     if (form.reasons.length === 0) { setError('Please select at least one reason.'); return }
     if (isPastDeadline) { setError('Registration is closed. The deadline has passed.'); return }
+
+    for (const q of eventQuestions) {
+      if (!q.required) continue
+      const answer = questionAnswers[q.id]
+      const isEmpty = q.type === 'multiselect' ? !(answer as string[] | undefined)?.length : !answer
+      if (isEmpty) {
+        setError(`Please answer: ${q.text}`)
+        return
+      }
+    }
 
     setLoading(true)
     setError('')
@@ -188,19 +219,23 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
       return
     }
 
-    const { error: insertError } = await supabase.from('registrations').insert({
-      event_id: form.event_id,
-      name: form.name.trim(),
-      age: parseInt(form.age),
-      place: form.place.trim(),
-      phone: form.phone.trim(),
-      gender: form.gender,
-      occupation: form.occupation.trim(),
-      reason: form.reasons.join(', '),
-      running_experience: form.running_experience || null,
-      emergency_contact_name: form.emergency_contact_name.trim() || null,
-      emergency_contact_phone: form.emergency_contact_phone.trim() || null,
-    })
+    const { data: inserted, error: insertError } = await supabase
+      .from('registrations')
+      .insert({
+        event_id: form.event_id,
+        name: form.name.trim(),
+        age: parseInt(form.age),
+        place: form.place.trim(),
+        phone: form.phone.trim(),
+        gender: form.gender,
+        occupation: form.occupation.trim(),
+        reason: form.reasons.join(', '),
+        running_experience: form.running_experience || null,
+        emergency_contact_name: form.emergency_contact_name.trim() || null,
+        emergency_contact_phone: form.emergency_contact_phone.trim() || null,
+      })
+      .select('id')
+      .single()
 
     if (insertError) {
       if (
@@ -221,6 +256,16 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
       }
       setLoading(false)
       return
+    }
+
+    if (eventQuestions.length > 0 && inserted) {
+      const answers = eventQuestions
+        .filter((q) => questionAnswers[q.id] !== undefined)
+        .map((q) => {
+          const raw = questionAnswers[q.id]
+          return { question_id: q.id, answer: Array.isArray(raw) ? raw.join(', ') : raw }
+        })
+      await createRegistrationResponses(inserted.id, answers)
     }
 
     const params = new URLSearchParams({
@@ -501,6 +546,85 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
             </div>
           )}
         </div>
+
+        {/* Event-specific questions */}
+        {eventQuestions.length > 0 && (
+          <div className="space-y-4 border-t border-white/10 pt-5">
+            <h3 className="text-white font-semibold text-sm">A few more questions for this event</h3>
+            {eventQuestions.map((q) => (
+              <div key={q.id}>
+                <label className="block text-gray-300 text-sm font-medium mb-2">
+                  {q.text} {q.required && <span className="text-red-400">*</span>}
+                </label>
+
+                {(q.type === 'text' || q.type === 'number' || q.type === 'date') && (
+                  <input
+                    type={q.type}
+                    value={(questionAnswers[q.id] as string) || ''}
+                    onChange={(e) => setAnswer(q.id, e.target.value)}
+                    className="input-field"
+                  />
+                )}
+
+                {q.type === 'textarea' && (
+                  <textarea
+                    value={(questionAnswers[q.id] as string) || ''}
+                    onChange={(e) => setAnswer(q.id, e.target.value)}
+                    rows={3}
+                    className="input-field resize-none"
+                  />
+                )}
+
+                {q.type === 'select' && (
+                  <select
+                    value={(questionAnswers[q.id] as string) || ''}
+                    onChange={(e) => setAnswer(q.id, e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">— Select —</option>
+                    {q.options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                )}
+
+                {q.type === 'multiselect' && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {q.options.map((opt) => {
+                      const selected = ((questionAnswers[q.id] as string[]) || []).includes(opt)
+                      return (
+                        <label
+                          key={opt}
+                          className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                            selected ? 'border-gold/60 bg-gold/10' : 'border-white/10 hover:border-white/25'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selected}
+                            onChange={() => toggleMultiselectAnswer(q.id, opt)}
+                            className="accent-gold"
+                          />
+                          <span className="text-sm text-gray-300">{opt}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {q.type === 'checkbox' && (
+                  <label className="flex items-center gap-3 p-3 rounded-lg border border-white/10 cursor-pointer w-fit">
+                    <input
+                      type="checkbox"
+                      checked={questionAnswers[q.id] === 'true'}
+                      onChange={(e) => setAnswer(q.id, e.target.checked ? 'true' : 'false')}
+                      className="accent-gold"
+                    />
+                    <span className="text-sm text-gray-300">Yes</span>
+                  </label>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {error && (

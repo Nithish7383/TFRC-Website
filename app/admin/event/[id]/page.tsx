@@ -7,6 +7,12 @@ import CopyWhatsAppButton from '@/components/CopyWhatsAppButton'
 import EventPhotoManager from '@/components/EventPhotoManager'
 import AdminHeader from '@/components/ui/AdminHeader'
 
+interface ResponseRow {
+  registration_id: string
+  answer: string | null
+  questions: { text: string; order_index: number } | null
+}
+
 export default async function EventDetailPage({
   params,
   searchParams,
@@ -40,6 +46,31 @@ export default async function EventDetailPage({
   const { data: registrations } = await query
 
   const allRegs = registrations || []
+
+  // Question responses for every registration on this event, grouped for
+  // the RegistrationTable's expandable "Answers" row. Fetched here (not
+  // per-row in the client table) to avoid an N+1 fetch pattern.
+  const regIds = allRegs.map((r: Registration) => r.id)
+  const responsesByRegistration: Record<string, { text: string; answer: string | null; order_index: number }[]> = {}
+  if (regIds.length > 0) {
+    const { data: responseRows } = await supabase
+      .from('question_responses')
+      .select('registration_id, answer, questions(text, order_index)')
+      .in('registration_id', regIds)
+
+    ;((responseRows || []) as unknown as ResponseRow[]).forEach((r) => {
+      if (!r.questions) return
+      if (!responsesByRegistration[r.registration_id]) responsesByRegistration[r.registration_id] = []
+      responsesByRegistration[r.registration_id].push({
+        text: r.questions.text,
+        answer: r.answer,
+        order_index: r.questions.order_index,
+      })
+    })
+    Object.values(responsesByRegistration).forEach((list) =>
+      list.sort((a, b) => a.order_index - b.order_index)
+    )
+  }
   const pending = allRegs.filter((r: Registration) => r.status === 'pending').length
   const selected = allRegs.filter((r: Registration) => r.status === 'selected').length
   const rejected = allRegs.filter((r: Registration) => r.status === 'rejected').length
@@ -218,6 +249,7 @@ export default async function EventDetailPage({
             eventId={params.id}
             eventTitle={event.title}
             maxParticipants={event.max_male + event.max_female}
+            responsesByRegistration={responsesByRegistration}
           />
         </div>
 

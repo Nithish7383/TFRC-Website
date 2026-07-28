@@ -1,5 +1,7 @@
 export type Gender = 'Male' | 'Female'
 export type RegistrationStatus = 'pending' | 'selected' | 'rejected'
+export type EventType = 'Running' | 'Trek' | 'Yoga' | 'Turf' | 'Meetup'
+export type QuestionType = 'text' | 'number' | 'select' | 'multiselect' | 'textarea' | 'date' | 'checkbox'
 
 export interface Event {
   id: string
@@ -15,6 +17,29 @@ export interface Event {
   distance?: string | null
   pace_group?: string | null
   cover_image_url?: string | null
+  event_type?: EventType
+  questions?: Question[]
+}
+
+export interface Question {
+  id: string
+  event_id: string | null
+  event_type: EventType | null
+  text: string
+  type: QuestionType
+  required: boolean
+  options: string[]
+  is_default: boolean
+  order_index: number
+  created_at: string
+}
+
+export interface QuestionResponse {
+  id: string
+  registration_id: string
+  question_id: string
+  answer: string | null
+  created_at: string
 }
 
 export interface Registration {

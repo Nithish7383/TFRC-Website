@@ -10,6 +10,7 @@ interface Props {
   eventId: string
   eventTitle?: string
   maxParticipants?: number
+  responsesByRegistration?: Record<string, { text: string; answer: string | null; order_index: number }[]>
 }
 
 const EXPERIENCE_COLORS: Record<string, string> = {
@@ -19,7 +20,7 @@ const EXPERIENCE_COLORS: Record<string, string> = {
   'Competitive': 'bg-red-900/30 text-red-400 border-red-800/40',
 }
 
-export default function RegistrationTable({ registrations, eventId, eventTitle = 'registrations', maxParticipants = 30 }: Props) {
+export default function RegistrationTable({ registrations, eventId, eventTitle = 'registrations', maxParticipants = 30, responsesByRegistration = {} }: Props) {
   const supabase = createClient()
   const router = useRouter()
 
@@ -446,6 +447,20 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
                           <p className="text-gray-300">{new Date(reg.created_at).toLocaleString('en-IN')}</p>
                         </div>
                       </div>
+
+                      {responsesByRegistration[reg.id]?.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-white/10">
+                          <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Event Questions</p>
+                          <div className="grid md:grid-cols-2 gap-3 text-sm">
+                            {responsesByRegistration[reg.id].map((r, i) => (
+                              <div key={i}>
+                                <p className="text-gray-400 text-xs">{r.text}</p>
+                                <p className="text-gray-200">{r.answer || '—'}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 )}
