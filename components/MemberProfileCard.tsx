@@ -34,11 +34,6 @@ export default function MemberProfileCard({ member }: Props) {
         <span className="text-xs bg-white/5 border border-white/10 text-gray-300 px-3 py-1 rounded-full">
           {member.running_experience}
         </span>
-        {member.level === 2 && (
-          <span className="text-xs bg-gold/20 border border-gold/40 text-gold px-3 py-1 rounded-full font-semibold">
-            Level 2
-          </span>
-        )}
       </div>
 
       {/* Goals */}

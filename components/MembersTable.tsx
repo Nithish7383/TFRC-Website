@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { createClient } from '@/lib/supabase'
 import { Member } from '@/lib/types'
 import MergeMembersModal from '@/components/MergeMembersModal'
 
@@ -31,14 +30,10 @@ function computeDuplicates(members: Member[]): Set<string> {
 }
 
 export default function MembersTable({ members }: Props) {
-  const supabase = createClient()
-
   const [search, setSearch] = useState('')
-  const [filterLevel, setFilterLevel] = useState<string>('All')
   const [filterGender, setFilterGender] = useState<string>('All')
   const [filterExperience, setFilterExperience] = useState<string>('All')
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [upgrading, setUpgrading] = useState<string | null>(null)
   const [localMembers, setLocalMembers] = useState<Member[]>(members)
   const [mergeTarget, setMergeTarget] = useState<Member | null>(null)
 
@@ -48,22 +43,14 @@ export default function MembersTable({ members }: Props) {
     const q = search.toLowerCase()
     return localMembers.filter((m) => {
       const matchSearch = !q || m.name.toLowerCase().includes(q) || m.phone.includes(q) || m.member_id?.toLowerCase().includes(q)
-      const matchLevel = filterLevel === 'All' || String(m.level) === filterLevel
       const matchGender = filterGender === 'All' || m.gender === filterGender
       const matchExp = filterExperience === 'All' || m.running_experience === filterExperience
-      return matchSearch && matchLevel && matchGender && matchExp
+      return matchSearch && matchGender && matchExp
     })
-  }, [localMembers, search, filterLevel, filterGender, filterExperience])
-
-  const upgradeToLevel2 = async (id: string) => {
-    setUpgrading(id)
-    await supabase.from('members').update({ level: 2 }).eq('id', id)
-    setLocalMembers((prev) => prev.map((m) => m.id === id ? { ...m, level: 2 as const } : m))
-    setUpgrading(null)
-  }
+  }, [localMembers, search, filterGender, filterExperience])
 
   const exportCSV = () => {
-    const header = 'name,member_id,phone,age,gender,place,occupation,running_experience,goals,attended_count,level,joined_date'
+    const header = 'name,member_id,phone,age,gender,place,occupation,running_experience,goals,attended_count,joined_date'
     const rows = filtered.map((m) =>
       [
         `"${m.name}"`,
@@ -76,7 +63,6 @@ export default function MembersTable({ members }: Props) {
         `"${m.running_experience}"`,
         `"${(m.goals || []).join('; ')}"`,
         m.attended_count,
-        m.level,
         m.created_at,
       ].join(',')
     )
@@ -109,11 +95,6 @@ export default function MembersTable({ members }: Props) {
           placeholder="Search by name, phone, or member ID..."
           className="input-field w-full sm:w-72"
         />
-        <select value={filterLevel} onChange={(e) => setFilterLevel(e.target.value)} className="input-field sm:w-auto">
-          <option value="All">All Levels</option>
-          <option value="1">Level 1</option>
-          <option value="2">Level 2</option>
-        </select>
         <select value={filterGender} onChange={(e) => setFilterGender(e.target.value)} className="input-field sm:w-auto">
           <option value="All">All Genders</option>
           <option value="Male">Male</option>
@@ -137,7 +118,7 @@ export default function MembersTable({ members }: Props) {
         <table className="w-full min-w-[900px] text-sm">
           <thead>
             <tr className="bg-white/[0.03] border-b border-white/10">
-              {['Member ID', 'Name', 'Phone', 'Age / Gender / Place', 'Experience', 'Runs', 'Level', 'Joined', 'Actions'].map((h) => (
+              {['Member ID', 'Name', 'Phone', 'Age / Gender / Place', 'Experience', 'Runs', 'Joined', 'Actions'].map((h) => (
                 <th key={h} className="text-left text-gray-400 font-medium px-4 py-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
@@ -188,29 +169,11 @@ export default function MembersTable({ members }: Props) {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-gray-300 text-center">{member.attended_count}</td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full border ${
-                        member.level === 2
-                          ? 'bg-gold/20 text-gold border-gold/30'
-                          : 'bg-white/10 text-gray-400 border-white/15'
-                      }`}>
-                        Level {member.level}
-                      </span>
-                    </td>
                     <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
                       {new Date(member.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 flex-wrap">
-                        {member.level === 1 && (
-                          <button
-                            onClick={() => upgradeToLevel2(member.id)}
-                            disabled={upgrading === member.id}
-                            className="text-xs px-3 py-1.5 rounded-lg border border-gold/40 text-gold hover:bg-gold/10 transition-colors whitespace-nowrap"
-                          >
-                            {upgrading === member.id ? '...' : 'Upgrade to L2'}
-                          </button>
-                        )}
                         {isDuplicate && (
                           <button
                             onClick={() => setMergeTarget(member)}
@@ -224,7 +187,7 @@ export default function MembersTable({ members }: Props) {
                   </tr>
                   {expandedId === member.id && (
                     <tr key={`${member.id}-exp`} className="bg-white/[0.04] border-b border-white/10">
-                      <td colSpan={9} className="px-6 py-4">
+                      <td colSpan={8} className="px-6 py-4">
                         <div className="grid md:grid-cols-3 gap-4 text-sm">
                           <div>
                             <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Goals</p>
@@ -246,22 +209,18 @@ export default function MembersTable({ members }: Props) {
                             <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Medical / Blood Group</p>
                             <p className="text-gray-300">{[member.medical_conditions, member.blood_group].filter(Boolean).join(' · ') || '—'}</p>
                           </div>
-                          {member.level === 2 && (
-                            <>
-                              <div>
-                                <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Instagram</p>
-                                <p className="text-gray-300">{member.instagram_handle || '—'}</p>
-                              </div>
-                              <div>
-                                <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Running Pace</p>
-                                <p className="text-gray-300">{member.running_pace || '—'}</p>
-                              </div>
-                              <div>
-                                <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Training Days / Week</p>
-                                <p className="text-gray-300">{member.weekly_training_days ?? '—'}</p>
-                              </div>
-                            </>
-                          )}
+                          <div>
+                            <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Instagram</p>
+                            <p className="text-gray-300">{member.instagram_handle || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Running Pace</p>
+                            <p className="text-gray-300">{member.running_pace || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Training Days / Week</p>
+                            <p className="text-gray-300">{member.weekly_training_days ?? '—'}</p>
+                          </div>
                           <div>
                             <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Occupation</p>
                             <p className="text-gray-300">{member.occupation}</p>

@@ -3,14 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase'
-import { GOALS_OPTIONS, normalizePhone } from '@/lib/constants'
+import { GOALS_OPTIONS, INTERESTS_OPTIONS } from '@/lib/constants'
+import { registerMember } from '@/app/join/actions'
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-', 'Unknown']
 
 export default function MemberRegisterForm() {
   const router = useRouter()
-  const supabase = createClient()
 
   const [form, setForm] = useState({
     name: '',
@@ -25,8 +24,19 @@ export default function MemberRegisterForm() {
     emergency_contact_phone: '',
     medical_conditions: '',
     blood_group: '',
+    instagram_handle: '',
+    profile_photo_url: '',
+    birthday: '',
+    height: '',
+    weight: '',
+    running_pace: '',
+    weekly_training_days: '',
+    interests: [] as string[],
+    password: '',
+    confirmPassword: '',
   })
   const [safetyOpen, setSafetyOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [existingMemberId, setExistingMemberId] = useState<string | null>(null)
@@ -45,61 +55,64 @@ export default function MemberRegisterForm() {
     }))
   }
 
+  const toggleInterest = (interest: string) => {
+    setForm((prev) => ({
+      ...prev,
+      interests: prev.interests.includes(interest)
+        ? prev.interests.filter((i) => i !== interest)
+        : [...prev.interests, interest],
+    }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.gender) { setError('Please select your gender.'); return }
     if (!form.running_experience) { setError('Please select your running experience.'); return }
+    if (form.password.length < 8) { setError('Password must be at least 8 characters.'); return }
+    if (form.password !== form.confirmPassword) { setError('Passwords do not match.'); return }
 
     setLoading(true)
     setError('')
     setExistingMemberId(null)
 
-    const normalized = normalizePhone(form.phone)
+    const result = await registerMember({
+      name: form.name.trim(),
+      phone: form.phone,
+      age: parseInt(form.age),
+      gender: form.gender,
+      place: form.place.trim(),
+      occupation: form.occupation.trim(),
+      running_experience: form.running_experience,
+      goals: form.goals,
+      emergency_contact_name: form.emergency_contact_name.trim() || null,
+      emergency_contact_phone: form.emergency_contact_phone.trim() || null,
+      medical_conditions: form.medical_conditions.trim() || null,
+      blood_group: form.blood_group || null,
+      instagram_handle: form.instagram_handle.trim() || null,
+      profile_photo_url: form.profile_photo_url.trim() || null,
+      birthday: form.birthday || null,
+      height: form.height ? parseFloat(form.height) : null,
+      weight: form.weight ? parseFloat(form.weight) : null,
+      running_pace: form.running_pace.trim() || null,
+      weekly_training_days: form.weekly_training_days ? parseInt(form.weekly_training_days) : null,
+      interests: form.interests,
+      password: form.password,
+    })
 
-    const { data: existing } = await supabase
-      .from('members')
-      .select('member_id')
-      .eq('phone', normalized)
-      .maybeSingle()
+    setLoading(false)
 
-    if (existing) {
-      setExistingMemberId(existing.member_id)
-      setLoading(false)
-      return
-    }
-
-    const { data: inserted, error: insertError } = await supabase
-      .from('members')
-      .insert({
-        name: form.name.trim(),
-        phone: normalized,
-        age: parseInt(form.age),
-        gender: form.gender,
-        place: form.place.trim(),
-        occupation: form.occupation.trim(),
-        running_experience: form.running_experience,
-        goals: form.goals,
-        emergency_contact_name: form.emergency_contact_name.trim() || null,
-        emergency_contact_phone: form.emergency_contact_phone.trim() || null,
-        medical_conditions: form.medical_conditions.trim() || null,
-        blood_group: form.blood_group || null,
-        level: 1,
-        attended_count: 0,
-      })
-      .select('member_id, name')
-      .single()
-
-    if (insertError || !inserted) {
-      setError('Something went wrong. Please try again.')
-      setLoading(false)
+    if (!result.ok) {
+      if (result.existingMemberId) setExistingMemberId(result.existingMemberId)
+      setError(result.error)
       return
     }
 
     const params = new URLSearchParams({
-      member_id: inserted.member_id,
-      name: inserted.name,
+      member_id: result.memberId,
+      name: form.name.trim(),
     })
     router.push(`/join/welcome?${params.toString()}`)
+    router.refresh()
   }
 
   return (
@@ -115,10 +128,10 @@ export default function MemberRegisterForm() {
           <p className="text-gray-600 text-sm mt-2 font-mono">Step 1 of 1 — Member Registration</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="card space-y-6">
+        <form onSubmit={handleSubmit} className="card space-y-8">
           {/* Section 1 — Personal */}
           <div className="space-y-4">
-            <h2 className="text-white font-semibold text-lg border-b border-white/10 pb-2">Personal Details</h2>
+            <h2 className="heading-display text-white text-xl border-b border-white/10 pb-3">Personal Details</h2>
 
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-2">
@@ -220,9 +233,49 @@ export default function MemberRegisterForm() {
             </div>
           </div>
 
-          {/* Section 2 — Running */}
+          {/* Section 2 — Account Security */}
           <div className="space-y-4">
-            <h2 className="text-white font-semibold text-lg border-b border-white/10 pb-2">Running Profile</h2>
+            <h2 className="heading-display text-white text-xl border-b border-white/10 pb-3">Set a Password</h2>
+            <p className="text-gray-500 text-sm -mt-2">
+              You&apos;ll use this with your WhatsApp number to log in to your dashboard.
+            </p>
+
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-2">
+                Password <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                required
+                minLength={8}
+                placeholder="At least 8 characters"
+                className="input-field"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-2">
+                Confirm Password <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                required
+                minLength={8}
+                placeholder="Re-enter password"
+                className="input-field"
+              />
+            </div>
+          </div>
+
+          {/* Section 3 — Running */}
+          <div className="space-y-4">
+            <h2 className="heading-display text-white text-xl border-b border-white/10 pb-3">Running Profile</h2>
 
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-3">
@@ -278,14 +331,17 @@ export default function MemberRegisterForm() {
             </div>
           </div>
 
-          {/* Section 3 — Safety (accordion) */}
+          {/* Section 4 — Safety (accordion) */}
           <div className="border border-white/10 rounded-xl overflow-hidden">
             <button
               type="button"
               onClick={() => setSafetyOpen((o) => !o)}
               className="w-full flex items-center justify-between px-5 py-4 text-left bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
             >
-              <span className="text-gray-300 text-sm font-medium">Safety info — optional but recommended</span>
+              <span className="flex items-center gap-2 text-gray-300 text-sm font-medium">
+                Safety info
+                <span className="text-[10px] font-mono uppercase tracking-wide text-gray-500 border border-white/15 rounded-full px-2 py-0.5">Optional</span>
+              </span>
               <span className="text-gray-500 text-lg">{safetyOpen ? '▲' : '▼'}</span>
             </button>
 
@@ -337,6 +393,129 @@ export default function MemberRegisterForm() {
                       <option key={bg} value={bg}>{bg}</option>
                     ))}
                   </select>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Section 5 — Extended Profile (accordion) */}
+          <div className="border border-white/10 rounded-xl overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setMoreOpen((o) => !o)}
+              className="w-full flex items-center justify-between px-5 py-4 text-left bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
+            >
+              <span className="flex items-center gap-2 text-gray-300 text-sm font-medium">
+                Tell us more
+                <span className="text-[10px] font-mono uppercase tracking-wide text-gray-500 border border-white/15 rounded-full px-2 py-0.5">Optional</span>
+              </span>
+              <span className="text-gray-500 text-lg">{moreOpen ? '▲' : '▼'}</span>
+            </button>
+
+            {moreOpen && (
+              <div className="px-5 pb-5 pt-4 space-y-4 bg-white/[0.015]">
+                <div>
+                  <label className="block text-gray-300 text-sm font-medium mb-2">Instagram Handle</label>
+                  <input
+                    type="text"
+                    name="instagram_handle"
+                    value={form.instagram_handle}
+                    onChange={handleChange}
+                    placeholder="@yourhandle"
+                    className="input-field"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-300 text-sm font-medium mb-2">Profile Photo URL</label>
+                  <input
+                    type="text"
+                    name="profile_photo_url"
+                    value={form.profile_photo_url}
+                    onChange={handleChange}
+                    placeholder="https://..."
+                    className="input-field"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-300 text-sm font-medium mb-2">Birthday</label>
+                  <input
+                    type="date"
+                    name="birthday"
+                    value={form.birthday}
+                    onChange={handleChange}
+                    className="input-field"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-300 text-sm font-medium mb-2">Height (cm)</label>
+                    <input
+                      type="number"
+                      name="height"
+                      value={form.height}
+                      onChange={handleChange}
+                      placeholder="e.g. 170"
+                      className="input-field"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 text-sm font-medium mb-2">Weight (kg)</label>
+                    <input
+                      type="number"
+                      name="weight"
+                      value={form.weight}
+                      onChange={handleChange}
+                      placeholder="e.g. 65"
+                      className="input-field"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-gray-300 text-sm font-medium mb-2">Running Pace</label>
+                  <input
+                    type="text"
+                    name="running_pace"
+                    value={form.running_pace}
+                    onChange={handleChange}
+                    placeholder="e.g. 6:30 min/km"
+                    className="input-field"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-300 text-sm font-medium mb-2">Weekly Training Days (1–7)</label>
+                  <input
+                    type="number"
+                    name="weekly_training_days"
+                    value={form.weekly_training_days}
+                    onChange={handleChange}
+                    min="1"
+                    max="7"
+                    placeholder="e.g. 4"
+                    className="input-field"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-300 text-sm font-medium mb-3">Interests</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {INTERESTS_OPTIONS.map((interest) => (
+                      <label
+                        key={interest}
+                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                          form.interests.includes(interest)
+                            ? 'border-gold/60 bg-gold/10'
+                            : 'border-white/10 hover:border-white/25'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={form.interests.includes(interest)}
+                          onChange={() => toggleInterest(interest)}
+                          className="accent-gold"
+                        />
+                        <span className="text-sm text-gray-300">{interest}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

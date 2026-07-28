@@ -37,7 +37,7 @@ export default async function AdminDashboard() {
   ] = await Promise.all([
     supabase.from('events').select('*').order('created_at', { ascending: false }),
     supabase.from('members').select('*', { count: 'exact', head: true }),
-    supabase.from('members').select('attended_count, created_at, level'),
+    supabase.from('members').select('attended_count, created_at'),
     supabase.from('registrations').select('id, event_id, gender, status, attended, phone, created_at'),
     supabase
       .from('events')

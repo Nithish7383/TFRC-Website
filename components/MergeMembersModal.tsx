@@ -54,17 +54,14 @@ export default function MergeMembersModal({ member, allMembers, onClose }: Props
     const newCount = keepMember.attended_count + deleteMember.attended_count
     const updatePayload: Record<string, unknown> = { attended_count: newCount }
 
-    // Copy Level 2 fields if needed
-    if (deleteMember.level === 2 && keepMember.level === 1) {
-      updatePayload.level = 2
-      if (deleteMember.instagram_handle) updatePayload.instagram_handle = deleteMember.instagram_handle
-      if (deleteMember.running_pace) updatePayload.running_pace = deleteMember.running_pace
-      if (deleteMember.weekly_training_days) updatePayload.weekly_training_days = deleteMember.weekly_training_days
-      if (deleteMember.interests?.length) updatePayload.interests = deleteMember.interests
-      if (deleteMember.height) updatePayload.height = deleteMember.height
-      if (deleteMember.weight) updatePayload.weight = deleteMember.weight
-      if (deleteMember.birthday) updatePayload.birthday = deleteMember.birthday
-    }
+    // Fill in any extended profile fields the kept record is missing, from the deleted one
+    if (!keepMember.instagram_handle && deleteMember.instagram_handle) updatePayload.instagram_handle = deleteMember.instagram_handle
+    if (!keepMember.running_pace && deleteMember.running_pace) updatePayload.running_pace = deleteMember.running_pace
+    if (!keepMember.weekly_training_days && deleteMember.weekly_training_days) updatePayload.weekly_training_days = deleteMember.weekly_training_days
+    if (!keepMember.interests?.length && deleteMember.interests?.length) updatePayload.interests = deleteMember.interests
+    if (!keepMember.height && deleteMember.height) updatePayload.height = deleteMember.height
+    if (!keepMember.weight && deleteMember.weight) updatePayload.weight = deleteMember.weight
+    if (!keepMember.birthday && deleteMember.birthday) updatePayload.birthday = deleteMember.birthday
 
     await supabase.from('members').update(updatePayload).eq('id', keepMember.id)
     await supabase.from('members').delete().eq('id', deleteMember.id)
@@ -82,7 +79,6 @@ export default function MergeMembersModal({ member, allMembers, onClose }: Props
         <p className="text-gray-400 text-xs">{m.phone}</p>
         <p className="text-gray-400 text-xs">{m.place}</p>
         <p className="text-gray-400 text-xs">Runs: {m.attended_count}</p>
-        <p className="text-gray-400 text-xs">Level {m.level}</p>
         <p className="text-gray-500 text-xs">Joined {formatDate(m.created_at)}</p>
       </div>
       <button

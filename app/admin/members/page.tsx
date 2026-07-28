@@ -19,8 +19,6 @@ export default async function AdminMembersPage() {
   const allMembers: Member[] = (members || []) as Member[]
 
   const totalMembers = allMembers.length
-  const level1Count = allMembers.filter((m) => m.level === 1).length
-  const level2Count = allMembers.filter((m) => m.level === 2).length
   const avgAttended = totalMembers > 0
     ? (allMembers.reduce((sum, m) => sum + m.attended_count, 0) / totalMembers).toFixed(1)
     : '0'
@@ -54,11 +52,9 @@ export default async function AdminMembersPage() {
         </div>
 
         {/* Stats bar */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           {[
             { label: 'Total Members', value: totalMembers, color: 'text-white' },
-            { label: 'Level 1', value: level1Count, color: 'text-gray-400' },
-            { label: 'Level 2', value: level2Count, color: 'text-gold' },
             { label: 'Avg Runs Attended', value: avgAttended, color: 'text-green-400' },
             { label: 'Duplicates', value: totalDuplicates, color: totalDuplicates > 0 ? 'text-yellow-400' : 'text-gray-600' },
           ].map(({ label, value, color }) => (

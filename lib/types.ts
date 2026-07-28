@@ -64,7 +64,6 @@ export interface Member {
   running_pace?: string
   weekly_training_days?: number
   interests: string[]
-  level: 1 | 2
   attended_count: number
   created_at: string
   auth_user_id?: string | null

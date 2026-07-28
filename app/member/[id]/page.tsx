@@ -4,6 +4,7 @@ import { Member, Registration } from '@/lib/types'
 import MemberProfileCard from '@/components/MemberProfileCard'
 import MemberEventsList from '@/components/MemberEventsList'
 import MemberSignOutButton from '@/components/MemberSignOutButton'
+import EditProfileForm from '@/components/EditProfileForm'
 import SiteHeader from '@/components/ui/SiteHeader'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Avatar from '@/components/ui/Avatar'
@@ -325,6 +326,9 @@ export default async function MemberProfilePage({
 
             {/* Profile details */}
             <MemberProfileCard member={member} />
+
+            {/* Self-edit profile */}
+            <EditProfileForm member={member} />
           </div>
         </div>
       </div>
