@@ -37,7 +37,10 @@ Edit `.env.local`:
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
+
+`SUPABASE_SERVICE_ROLE_KEY` (Settings → API → service_role) is server-only — never expose it with a `NEXT_PUBLIC_` prefix. It's used to create a member's Supabase Auth account the first time they set a password (see `app/login/actions.ts`).
 
 ### 4. Run Locally
 
@@ -119,6 +122,7 @@ vercel
 Add environment variables in Vercel dashboard:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (server-only — do not prefix with `NEXT_PUBLIC_`)
 
 ---
 

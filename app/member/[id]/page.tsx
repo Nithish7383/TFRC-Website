@@ -1,8 +1,9 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import { Member, Registration } from '@/lib/types'
 import MemberProfileCard from '@/components/MemberProfileCard'
 import MemberEventsList from '@/components/MemberEventsList'
+import MemberSignOutButton from '@/components/MemberSignOutButton'
 import SiteHeader from '@/components/ui/SiteHeader'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Avatar from '@/components/ui/Avatar'
@@ -52,13 +53,26 @@ export default async function MemberProfilePage({
 }) {
   const supabase = createClient()
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
   const { data: memberData } = await supabase
     .from('members')
     .select('*')
     .eq('member_id', params.id)
     .single()
 
-  if (!memberData) notFound()
+  // RLS ("Members can read own row") already scopes this select to the
+  // logged-in member's own row, so a mismatched [id] in the URL returns no
+  // row rather than someone else's data — but check explicitly too, since
+  // relying solely on RLS here would silently 404 instead of redirecting to
+  // login, which is confusing if the session itself is simply stale.
+  if (!memberData || memberData.auth_user_id !== user.id) {
+    notFound()
+  }
 
   const member = memberData as Member
   const firstName = member.name.trim().split(/\s+/)[0]
@@ -168,9 +182,12 @@ export default async function MemberProfilePage({
               </p>
             </div>
           </div>
-          <p className="heading-display text-lg text-right text-gray-400">
-            <span className="text-white">Luck is optional.</span> <span className="text-gold">Effort isn&apos;t.</span>
-          </p>
+          <div className="flex items-center gap-4">
+            <p className="heading-display text-lg text-right text-gray-400">
+              <span className="text-white">Luck is optional.</span> <span className="text-gold">Effort isn&apos;t.</span>
+            </p>
+            <MemberSignOutButton />
+          </div>
         </section>
 
         {/* STAT ROW */}

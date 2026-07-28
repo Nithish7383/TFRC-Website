@@ -67,6 +67,7 @@ export interface Member {
   level: 1 | 2
   attended_count: number
   created_at: string
+  auth_user_id?: string | null
 }
 
 export interface EventPhoto {

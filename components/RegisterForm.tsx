@@ -3,13 +3,26 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { Event, Member } from '@/lib/types'
+import { Event, Gender } from '@/lib/types'
 import { REASON_OPTIONS } from '@/lib/constants'
 import EventPreviewCard from '@/components/EventPreviewCard'
 
 interface EventWithCounts extends Event {
   male_count: number
   female_count: number
+}
+
+// Matches the columns returned by get_member_for_registration() — a
+// column-scoped RPC, not the full members row. See supabase-v7-member-auth.sql
+// for why /register can't just select('*') on members anymore.
+interface MemberForRegistration {
+  member_id: string
+  name: string
+  age: number
+  gender: Gender
+  place: string
+  occupation: string
+  running_experience: string
 }
 
 interface Props {
@@ -23,7 +36,7 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
 
   // Member gate state
   const [phoneInput, setPhoneInput] = useState('')
-  const [member, setMember] = useState<Member | null>(null)
+  const [member, setMember] = useState<MemberForRegistration | null>(null)
   const [memberChecked, setMemberChecked] = useState(false)
   const [memberLooking, setMemberLooking] = useState(false)
   const [memberNotFound, setMemberNotFound] = useState(false)
@@ -86,9 +99,7 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
     setMemberChecked(false)
 
     const { data } = await supabase
-      .from('members')
-      .select('*')
-      .eq('phone', phoneInput.trim())
+      .rpc('get_member_for_registration', { lookup_phone: phoneInput.trim() })
       .maybeSingle()
 
     setMemberLooking(false)
@@ -100,7 +111,7 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
       return
     }
 
-    const m = data as Member
+    const m = data as MemberForRegistration
     setMember(m)
     setMemberNotFound(false)
     setForm((prev) => ({
