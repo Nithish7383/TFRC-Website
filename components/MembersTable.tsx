@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Member } from '@/lib/types'
 import MergeMembersModal from '@/components/MergeMembersModal'
 
@@ -30,7 +31,8 @@ function computeDuplicates(members: Member[]): Set<string> {
 }
 
 export default function MembersTable({ members }: Props) {
-  const [search, setSearch] = useState('')
+  const searchParams = useSearchParams()
+  const [search, setSearch] = useState(searchParams.get('q') || '')
   const [filterGender, setFilterGender] = useState<string>('All')
   const [filterExperience, setFilterExperience] = useState<string>('All')
   const [expandedId, setExpandedId] = useState<string | null>(null)

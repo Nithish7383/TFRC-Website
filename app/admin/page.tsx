@@ -5,6 +5,7 @@ import { Event } from '@/lib/types'
 import CreateEventForm from '@/components/CreateEventForm'
 import AdminEventList from '@/components/AdminEventList'
 import AdminHeader from '@/components/ui/AdminHeader'
+import AdminQuickSearch from '@/components/AdminQuickSearch'
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -138,6 +139,9 @@ export default async function AdminDashboard() {
       />
 
       <div className="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8">
+
+        {/* QUICK SEARCH */}
+        <AdminQuickSearch />
 
         {/* BLOCK 1 — Next Event Panel */}
         <section>

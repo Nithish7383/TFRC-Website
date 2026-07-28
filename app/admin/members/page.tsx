@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase-server'
 import { Member } from '@/lib/types'
 import MembersTable from '@/components/MembersTable'
@@ -65,7 +66,9 @@ export default async function AdminMembersPage() {
           ))}
         </div>
 
-        <MembersTable members={allMembers} />
+        <Suspense fallback={<p className="text-gray-500 text-sm">Loading members...</p>}>
+          <MembersTable members={allMembers} />
+        </Suspense>
       </div>
     </main>
   )
