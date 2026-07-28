@@ -25,10 +25,10 @@ const ICONS = {
 
 export default function SocialLinks({ whatsappLink, instagramUrl, youtubeUrl, variant = 'pill' }: Props) {
   const items = [
-    whatsappLink && { key: 'whatsapp', href: whatsappLink, label: 'WhatsApp', hover: 'hover:text-green-400 hover:border-green-400/40', text: 'text-green-500' },
-    instagramUrl && { key: 'instagram', href: instagramUrl, label: 'Instagram', hover: 'hover:text-pink-400 hover:border-pink-400/40', text: 'text-pink-400' },
-    youtubeUrl && { key: 'youtube', href: youtubeUrl, label: 'YouTube', hover: 'hover:text-red-400 hover:border-red-400/40', text: 'text-red-400' },
-  ].filter(Boolean) as { key: keyof typeof ICONS; href: string; label: string; hover: string; text: string }[]
+    whatsappLink && { key: 'whatsapp', href: whatsappLink, label: 'WhatsApp', hover: 'hover:text-gold hover:border-gold/40' },
+    instagramUrl && { key: 'instagram', href: instagramUrl, label: 'Instagram', hover: 'hover:text-gold hover:border-gold/40' },
+    youtubeUrl && { key: 'youtube', href: youtubeUrl, label: 'YouTube', hover: 'hover:text-gold hover:border-gold/40' },
+  ].filter(Boolean) as { key: keyof typeof ICONS; href: string; label: string; hover: string }[]
 
   if (items.length === 0) return null
 
@@ -41,7 +41,7 @@ export default function SocialLinks({ whatsappLink, instagramUrl, youtubeUrl, va
             href={item.href}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${item.text} hover:opacity-80 text-xs transition-opacity`}
+            className={`text-gray-400 ${item.hover} text-xs transition-colors`}
           >
             {item.label}
           </a>

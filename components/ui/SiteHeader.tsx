@@ -10,7 +10,7 @@ export default function SiteHeader({ children }: Props) {
       <div className="max-w-5xl mx-auto flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <img src="/firstruleclublogo.jpg" alt="TFRC" className="w-9 h-9 rounded-full object-cover" />
-          <span className="wordmark text-white text-base hidden sm:block">
+          <span className="font-display font-semibold tracking-wide text-white text-base hidden sm:block">
             The First Rule Club
           </span>
         </Link>

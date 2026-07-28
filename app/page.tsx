@@ -6,6 +6,7 @@ import SiteHeader from '@/components/ui/SiteHeader'
 import SiteFooter from '@/components/ui/SiteFooter'
 import SocialLinks from '@/components/ui/SocialLinks'
 import Reveal from '@/components/ui/Reveal'
+import HeroBackground from '@/components/HeroBackground'
 
 const ACTIVITY_ICONS: Record<string, JSX.Element> = {
   Running: (
@@ -82,6 +83,7 @@ export default async function LandingPage() {
   const showGallery = photos.length > 0
   const displayPhotos = photos.slice(0, 9)
   const hasMorePhotos = photos.length > 9
+  const heroPhotos = photos.slice(0, 6)
 
   const activities = [
     { label: 'Running', desc: 'Weekly group runs' },
@@ -97,8 +99,10 @@ export default async function LandingPage() {
 
       {/* HERO */}
       <section className="relative flex flex-col items-center justify-center text-center px-4 pt-20 pb-24 overflow-hidden">
+        <HeroBackground photos={heroPhotos} />
+
         <svg
-          className="absolute inset-x-0 top-[58%] w-full h-28 opacity-[0.08] pointer-events-none"
+          className="absolute inset-x-0 top-[58%] w-full h-28 opacity-[0.08] pointer-events-none z-[1]"
           viewBox="0 0 800 100"
           preserveAspectRatio="none"
         >
@@ -125,13 +129,16 @@ export default async function LandingPage() {
           />
         </div>
 
-        <h1 className="heading-display relative z-[1] text-white text-5xl md:text-7xl mb-5 max-w-4xl">
-          Run with Madurai&apos;s community.
+        <h1
+          className="heading-display relative z-[1] text-white text-5xl md:text-7xl mb-5 max-w-4xl [text-shadow:0_2px_10px_rgba(0,0,0,0.55)]"
+        >
+          We don&apos;t talk about it.
         </h1>
 
-        <p className="heading-display relative z-[1] text-2xl md:text-3xl mb-8 max-w-2xl">
-          <span className="text-white">Luck is optional.</span>{' '}
-          <span className="text-gold">Effort isn&apos;t.</span>
+        <p
+          className="heading-display relative z-[1] text-gold text-2xl md:text-3xl mb-8 max-w-2xl [text-shadow:0_2px_8px_rgba(0,0,0,0.55)]"
+        >
+          Remember the first rule.
         </p>
 
         <p className="relative z-[1] text-gray-400 max-w-lg mx-auto mb-10 text-base md:text-lg">
@@ -148,6 +155,14 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* SOCIAL LINKS — early touchpoint right after the hero */}
+      <section className="border-t border-white/10 py-8 px-4">
+        <div className="max-w-4xl mx-auto flex flex-col items-center gap-3">
+          <p className="text-gray-600 text-xs font-mono uppercase tracking-[0.2em]">Follow along</p>
+          <SocialLinks whatsappLink={whatsappLink} instagramUrl={instagramUrl} youtubeUrl={youtubeUrl} variant="pill" />
+        </div>
+      </section>
+
       {/* WHY WE STARTED */}
       <Reveal>
         <section className="border-t border-white/10 py-16 px-4">
@@ -156,8 +171,11 @@ export default async function LandingPage() {
               <p className="eyebrow mb-3">The why</p>
               <h2 className="heading-display text-white text-2xl mb-4">Why we started</h2>
               <p className="text-gray-300 leading-relaxed">
-                We started TFRC because running alone gets boring. Madurai needed a crew — not a club
-                with fees and forms, but a group that just shows up every weekend and runs. That&apos;s still what we are.
+                We believe fitness isn&apos;t just about lifting weights or running miles. It&apos;s about
+                building habits, creating memories, and surrounding yourself with people who inspire you
+                to keep showing up. The First Rule Club exists to bring people into a healthier lifestyle
+                through workouts, treks, sports, adventures, and meaningful connections. Because fitness
+                is easier, more exciting, and far more rewarding when you do it together.
               </p>
             </div>
           </div>
@@ -206,14 +224,14 @@ export default async function LandingPage() {
                   </Link>
                 )}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {displayPhotos.map((photo) => (
                   <div key={photo.id} className="group overflow-hidden rounded-xl border border-white/10 hover:border-gold/30 transition-colors">
                     <img
                       src={photo.image_url}
                       alt={photo.caption ?? 'TFRC event'}
                       loading="lazy"
-                      className="w-full h-48 object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                      className="w-full h-64 md:h-72 object-cover group-hover:scale-[1.03] transition-transform duration-300"
                     />
                     {photo.caption && (
                       <p className="text-gray-400 text-xs px-3 py-2">{photo.caption}</p>
