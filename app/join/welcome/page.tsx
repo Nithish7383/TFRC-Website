@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-server'
 import Avatar from '@/components/ui/Avatar'
+import SiteHeader from '@/components/ui/SiteHeader'
 
 export default async function JoinWelcomePage({
   searchParams,
@@ -21,7 +22,9 @@ export default async function JoinWelcomePage({
   const instagramUrl = settings['instagram_url'] || ''
 
   return (
-    <main className="min-h-screen bg-black flex items-center justify-center px-4">
+    <main className="min-h-screen bg-black">
+      <SiteHeader />
+      <div className="flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full text-center">
         <div className="card space-y-6">
           <div className="mx-auto w-fit">
@@ -89,6 +92,7 @@ export default async function JoinWelcomePage({
             )}
           </div>
         </div>
+      </div>
       </div>
     </main>
   )

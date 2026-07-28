@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { lookupMember, setFirstPassword, loginMember } from './actions'
+import SiteHeader from '@/components/ui/SiteHeader'
 
 type Stage = 'phone' | 'password' | 'set-password'
 
@@ -84,7 +85,9 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black flex items-center justify-center px-4">
+    <main className="min-h-screen bg-black">
+      <SiteHeader />
+      <div className="flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         <div className="card space-y-6">
           <div className="flex flex-col items-center gap-3">
@@ -221,6 +224,7 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
+      </div>
       </div>
     </main>
   )

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import SiteHeader from '@/components/ui/SiteHeader'
 
 const TFRC_INSTAGRAM = 'https://www.instagram.com/thefirstruleclub'
 
@@ -24,7 +25,9 @@ export default function ConfirmationPage({
   )
 
   return (
-    <main className="min-h-screen bg-black flex items-center justify-center px-4">
+    <main className="min-h-screen bg-black">
+      <SiteHeader />
+      <div className="flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full text-center">
         <div className="card space-y-5">
           {/* Success icon */}
@@ -92,6 +95,7 @@ export default function ConfirmationPage({
             </Link>
           </div>
         </div>
+      </div>
       </div>
     </main>
   )

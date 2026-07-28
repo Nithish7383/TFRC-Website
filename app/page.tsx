@@ -155,6 +155,36 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* FEATURED EVENT */}
+      {featuredActive && featuredName && (
+        <Reveal>
+          <section className="py-16 px-4">
+            <div className="max-w-3xl mx-auto">
+              <div className="relative border-2 border-gold/50 bg-gold/5 rounded-2xl p-8 overflow-hidden">
+                <div className="absolute top-0 right-0 text-[10px] font-mono tracking-[0.2em] uppercase text-gold/60 px-4 py-2">
+                  Entry open
+                </div>
+                <div className="inline-block text-xs bg-gold/20 text-gold border border-gold/30 px-3 py-1 rounded-full font-semibold uppercase tracking-wide mb-4">
+                  Featured Event
+                </div>
+                <h2 className="heading-display text-white text-3xl md:text-4xl mb-2">{featuredName}</h2>
+                {featuredDate && (
+                  <p className="text-gold font-mono font-medium mb-3">{featuredDate}</p>
+                )}
+                {featuredDesc && (
+                  <p className="text-gray-300 mb-5">{featuredDesc}</p>
+                )}
+                {featuredUrl && (
+                  <a href={featuredUrl} target="_blank" rel="noopener noreferrer" className="btn-primary inline-block">
+                    {featuredBtn}
+                  </a>
+                )}
+              </div>
+            </div>
+          </section>
+        </Reveal>
+      )}
+
       {/* SOCIAL LINKS — early touchpoint right after the hero */}
       <section className="border-t border-white/10 py-8 px-4">
         <div className="max-w-4xl mx-auto flex flex-col items-center gap-3">
@@ -258,36 +288,6 @@ export default async function LandingPage() {
           <SocialLinks whatsappLink={whatsappLink} instagramUrl={instagramUrl} youtubeUrl={youtubeUrl} variant="pill" />
         </div>
       </section>
-
-      {/* FEATURED EVENT */}
-      {featuredActive && featuredName && (
-        <Reveal>
-          <section className="py-16 px-4">
-            <div className="max-w-3xl mx-auto">
-              <div className="relative border-2 border-gold/50 bg-gold/5 rounded-2xl p-8 overflow-hidden">
-                <div className="absolute top-0 right-0 text-[10px] font-mono tracking-[0.2em] uppercase text-gold/60 px-4 py-2">
-                  Entry open
-                </div>
-                <div className="inline-block text-xs bg-gold/20 text-gold border border-gold/30 px-3 py-1 rounded-full font-semibold uppercase tracking-wide mb-4">
-                  Featured Event
-                </div>
-                <h2 className="heading-display text-white text-3xl md:text-4xl mb-2">{featuredName}</h2>
-                {featuredDate && (
-                  <p className="text-gold font-mono font-medium mb-3">{featuredDate}</p>
-                )}
-                {featuredDesc && (
-                  <p className="text-gray-300 mb-5">{featuredDesc}</p>
-                )}
-                {featuredUrl && (
-                  <a href={featuredUrl} target="_blank" rel="noopener noreferrer" className="btn-primary inline-block">
-                    {featuredBtn}
-                  </a>
-                )}
-              </div>
-            </div>
-          </section>
-        </Reveal>
-      )}
 
       {/* MEMBER VOICES */}
       {quotes.length > 0 && (

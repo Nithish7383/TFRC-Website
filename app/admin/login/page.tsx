@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 
 export default function AdminLoginPage() {
@@ -36,6 +37,9 @@ export default function AdminLoginPage() {
   return (
     <main className="min-h-screen bg-black flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
+        <Link href="/" className="text-gray-500 text-sm hover:text-gray-300 block mb-6">
+          ← Back to site
+        </Link>
         <div className="text-center mb-8">
           <img src="/firstruleclublogo.jpg" alt="TFRC" className="w-16 h-16 rounded-full object-cover mx-auto mb-4 ring-2 ring-gold/25" />
           <h1 className="heading-display text-white text-2xl mb-1">Admin Login</h1>

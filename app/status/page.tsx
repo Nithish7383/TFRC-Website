@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { RegistrationStatus } from '@/lib/types'
 import StatusBadge from '@/components/ui/StatusBadge'
+import SiteHeader from '@/components/ui/SiteHeader'
 
 interface RegResult {
   id: string
@@ -42,12 +43,11 @@ export default function StatusPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black py-12 px-4">
+    <main className="min-h-screen bg-black">
+      <SiteHeader />
+      <div className="py-12 px-4">
       <div className="max-w-xl mx-auto">
         <div className="text-center mb-10">
-          <Link href="/" className="text-gray-500 text-sm hover:text-gray-300 block mb-6">
-            ← Back to home
-          </Link>
           <p className="eyebrow mb-2 justify-center w-full">Track your run</p>
           <h1 className="heading-display text-white text-4xl mb-2">Check Registration Status</h1>
           <p className="text-gray-400">Enter your WhatsApp number to see your registration status.</p>
@@ -81,6 +81,7 @@ export default function StatusPage() {
             </div>
           )
         )}
+      </div>
       </div>
     </main>
   )

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { GOALS_OPTIONS, INTERESTS_OPTIONS } from '@/lib/constants'
 import { registerMember } from '@/app/join/actions'
+import SiteHeader from '@/components/ui/SiteHeader'
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-', 'Unknown']
 
@@ -116,12 +117,11 @@ export default function MemberRegisterForm() {
   }
 
   return (
-    <main className="min-h-screen bg-black py-12 px-4">
+    <main className="min-h-screen bg-black">
+      <SiteHeader />
+      <div className="py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
-          <Link href="/" className="text-gray-500 text-sm hover:text-gray-300 block mb-6">
-            ← Home
-          </Link>
           <p className="eyebrow mb-2">Join the movement</p>
           <h1 className="heading-display text-white text-4xl mb-2">Join The First Rule Club</h1>
           <p className="text-gray-400">Create your member profile to register for events.</p>
@@ -549,6 +549,7 @@ export default function MemberRegisterForm() {
             </button>
           )}
         </form>
+      </div>
       </div>
     </main>
   )
