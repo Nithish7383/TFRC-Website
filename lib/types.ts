@@ -78,6 +78,7 @@ export interface EventPhoto {
   instagram_post_url?: string
   display_order: number
   created_at: string
+  storage_path?: string | null
 }
 
 export interface SiteSetting {
@@ -92,4 +93,5 @@ export interface GalleryPhoto {
   caption?: string
   display_order: number
   created_at: string
+  storage_path?: string | null
 }

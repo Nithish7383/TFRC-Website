@@ -1,21 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { GalleryPhoto } from '@/lib/types'
+import { uploadPhoto, deletePhotoFile } from '@/lib/photo-upload'
 
 export default function HomepageGalleryManager() {
   const supabase = createClient()
 
   const [photos, setPhotos] = useState<GalleryPhoto[]>([])
   const [loading, setLoading] = useState(true)
-  const [imageUrl, setImageUrl] = useState('')
   const [caption, setCaption] = useState('')
   const [displayOrder, setDisplayOrder] = useState(0)
   const [saving, setSaving] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const fetchPhotos = async () => {
     setLoading(true)
@@ -31,13 +32,25 @@ export default function HomepageGalleryManager() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!imageUrl.trim()) return
+    const file = fileInputRef.current?.files?.[0]
+    if (!file) {
+      setError('Please choose an image to upload.')
+      return
+    }
     setSaving(true)
     setError('')
     setSuccess('')
 
+    const uploaded = await uploadPhoto(supabase, file, 'gallery')
+    if ('error' in uploaded) {
+      setSaving(false)
+      setError(uploaded.error)
+      return
+    }
+
     const { error: insertError } = await supabase.from('gallery_photos').insert({
-      image_url: imageUrl.trim(),
+      image_url: uploaded.url,
+      storage_path: uploaded.path,
       caption: caption.trim() || null,
       display_order: displayOrder,
     })
@@ -48,19 +61,20 @@ export default function HomepageGalleryManager() {
       return
     }
 
-    setImageUrl('')
+    if (fileInputRef.current) fileInputRef.current.value = ''
     setCaption('')
     setDisplayOrder(0)
     setSuccess('Photo added.')
     fetchPhotos()
   }
 
-  const handleDelete = async (id: string) => {
-    if (deleteConfirm !== id) {
-      setDeleteConfirm(id)
+  const handleDelete = async (photo: GalleryPhoto) => {
+    if (deleteConfirm !== photo.id) {
+      setDeleteConfirm(photo.id)
       return
     }
-    await supabase.from('gallery_photos').delete().eq('id', id)
+    await supabase.from('gallery_photos').delete().eq('id', photo.id)
+    await deletePhotoFile(supabase, photo.storage_path)
     setDeleteConfirm(null)
     fetchPhotos()
   }
@@ -71,15 +85,15 @@ export default function HomepageGalleryManager() {
       <form onSubmit={handleAdd} className="space-y-4 border border-white/15 rounded-xl p-5">
         <h4 className="text-white font-medium">Add Photo</h4>
         <div>
-          <label className="block text-gray-400 text-xs mb-1">Image URL <span className="text-red-400">*</span></label>
+          <label className="block text-gray-400 text-xs mb-1">Photo <span className="text-red-400">*</span></label>
           <input
-            type="url"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            placeholder="https://..."
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            ref={fileInputRef}
             required
             className="input-field"
           />
+          <p className="text-gray-600 text-xs mt-1">JPG, PNG, or WEBP — up to 5MB.</p>
         </div>
         <div>
           <label className="block text-gray-400 text-xs mb-1">Caption (optional)</label>
@@ -103,7 +117,7 @@ export default function HomepageGalleryManager() {
         {error && <p className="text-red-400 text-sm">{error}</p>}
         {success && <p className="text-green-400 text-sm">{success}</p>}
         <button type="submit" disabled={saving} className="btn-primary">
-          {saving ? 'Adding...' : 'Add Photo'}
+          {saving ? 'Uploading...' : 'Add Photo'}
         </button>
       </form>
 
@@ -126,7 +140,7 @@ export default function HomepageGalleryManager() {
                 <p className="text-gray-600 text-xs">Order: {photo.display_order}</p>
               </div>
               <button
-                onClick={() => handleDelete(photo.id)}
+                onClick={() => handleDelete(photo)}
                 className={`text-xs px-3 py-1.5 rounded-lg border transition-colors whitespace-nowrap ${
                   deleteConfirm === photo.id
                     ? 'bg-red-900/50 border-red-700 text-red-300'

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { EventPhoto } from '@/lib/types'
+import { uploadPhoto, deletePhotoFile } from '@/lib/photo-upload'
 
 interface Props {
   eventId: string
@@ -16,8 +17,9 @@ export default function EventPhotoManager({ eventId }: Props) {
   const [addOpen, setAddOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [uploadError, setUploadError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [form, setForm] = useState({
-    image_url: '',
     caption: '',
     instagram_post_url: '',
     display_order: '0',
@@ -39,29 +41,44 @@ export default function EventPhotoManager({ eventId }: Props) {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.image_url.trim()) return
+    const file = fileInputRef.current?.files?.[0]
+    if (!file) {
+      setUploadError('Please choose an image to upload.')
+      return
+    }
     setSaving(true)
+    setUploadError('')
+
+    const uploaded = await uploadPhoto(supabase, file, `events/${eventId}`)
+    if ('error' in uploaded) {
+      setSaving(false)
+      setUploadError(uploaded.error)
+      return
+    }
 
     await supabase.from('event_photos').insert({
       event_id: eventId,
-      image_url: form.image_url.trim(),
+      image_url: uploaded.url,
+      storage_path: uploaded.path,
       caption: form.caption.trim() || null,
       instagram_post_url: form.instagram_post_url.trim() || null,
       display_order: parseInt(form.display_order) || 0,
     })
 
-    setForm({ image_url: '', caption: '', instagram_post_url: '', display_order: '0' })
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    setForm({ caption: '', instagram_post_url: '', display_order: '0' })
     setSaving(false)
     setAddOpen(false)
     fetchPhotos()
   }
 
-  const handleDelete = async (id: string) => {
-    if (confirmDelete !== id) {
-      setConfirmDelete(id)
+  const handleDelete = async (photo: EventPhoto) => {
+    if (confirmDelete !== photo.id) {
+      setConfirmDelete(photo.id)
       return
     }
-    await supabase.from('event_photos').delete().eq('id', id)
+    await supabase.from('event_photos').delete().eq('id', photo.id)
+    await deletePhotoFile(supabase, photo.storage_path)
     setConfirmDelete(null)
     fetchPhotos()
   }
@@ -86,15 +103,15 @@ export default function EventPhotoManager({ eventId }: Props) {
       {addOpen && (
         <form onSubmit={handleSave} className="card border-gold/20 bg-gold/5 space-y-3">
           <div>
-            <label className="block text-gray-300 text-sm font-medium mb-1">Image URL <span className="text-red-400">*</span></label>
+            <label className="block text-gray-300 text-sm font-medium mb-1">Photo <span className="text-red-400">*</span></label>
             <input
-              type="text"
-              value={form.image_url}
-              onChange={(e) => setForm((p) => ({ ...p, image_url: e.target.value }))}
-              placeholder="https://..."
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              ref={fileInputRef}
               required
               className="input-field"
             />
+            <p className="text-gray-500 text-xs mt-1">JPG, PNG, or WEBP — up to 5MB.</p>
           </div>
           <div>
             <label className="block text-gray-300 text-sm font-medium mb-1">Caption</label>
@@ -125,8 +142,9 @@ export default function EventPhotoManager({ eventId }: Props) {
               className="input-field w-24"
             />
           </div>
+          {uploadError && <p className="text-red-400 text-sm">{uploadError}</p>}
           <button type="submit" disabled={saving} className="btn-primary text-sm py-2">
-            {saving ? 'Saving...' : 'Save Photo'}
+            {saving ? 'Uploading...' : 'Save Photo'}
           </button>
         </form>
       )}
@@ -158,7 +176,7 @@ export default function EventPhotoManager({ eventId }: Props) {
                 )}
               </div>
               <button
-                onClick={() => handleDelete(photo.id)}
+                onClick={() => handleDelete(photo)}
                 className={`text-xs px-3 py-1.5 rounded-lg border transition-colors flex-shrink-0 ${
                   confirmDelete === photo.id
                     ? 'bg-red-800 text-white border-red-700'
