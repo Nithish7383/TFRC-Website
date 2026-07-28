@@ -285,7 +285,7 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
 
   // Member found — show full form
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Member badge */}
       {member && (
         <div className="flex items-center gap-3 bg-green-900/20 border border-green-800/30 rounded-xl px-4 py-3">
@@ -337,6 +337,8 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
       )}
 
       <div className="card space-y-5">
+        <h2 className="heading-display text-white text-xl border-b border-white/10 pb-3">Your Details</h2>
+
         {/* Name */}
         <div>
           <label className="block text-gray-300 text-sm font-medium mb-2">
@@ -480,7 +482,10 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
             onClick={() => setSafetyOpen((o) => !o)}
             className="w-full flex items-center justify-between px-5 py-4 text-left bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
           >
-            <span className="text-gray-300 text-sm font-medium">Safety info (optional but recommended)</span>
+            <span className="flex items-center gap-2 text-gray-300 text-sm font-medium">
+              Safety info
+              <span className="text-[10px] font-mono uppercase tracking-wide text-gray-500 border border-white/15 rounded-full px-2 py-0.5">Optional</span>
+            </span>
             <span className="text-gray-500 text-lg">{safetyOpen ? '▲' : '▼'}</span>
           </button>
           {safetyOpen && (
