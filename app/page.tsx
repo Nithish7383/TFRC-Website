@@ -1,12 +1,15 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-server'
-import { GalleryPhoto } from '@/lib/types'
+import { GalleryPhoto, Event } from '@/lib/types'
 import { TFRC_LOCATION } from '@/lib/constants'
-import SiteHeader from '@/components/ui/SiteHeader'
 import SiteFooter from '@/components/ui/SiteFooter'
 import SocialLinks from '@/components/ui/SocialLinks'
 import Reveal from '@/components/ui/Reveal'
-import HeroBackground from '@/components/HeroBackground'
+import HeroVideo from '@/components/HeroVideo'
+import HomepageEventsSection from '@/components/HomepageEventsSection'
+import WelcomeBackBanner from '@/components/WelcomeBackBanner'
+import PillNav from '@/components/PillNav'
+import ScrollToEventsButton from '@/components/ScrollToEventsButton'
 
 const ACTIVITY_ICONS: Record<string, JSX.Element> = {
   Running: (
@@ -57,6 +60,18 @@ export default async function LandingPage() {
     supabase.from('events').select('*').eq('is_active', true).order('date', { ascending: true }),
   ])
 
+  // Slots-left per event, for the poster cards' "closing_soon" CTA label.
+  const eventsWithSlotsLeft = await Promise.all(
+    ((activeEvents || []) as Event[]).map(async (event) => {
+      const [{ count: maleCount }, { count: femaleCount }] = await Promise.all([
+        supabase.from('registrations').select('*', { count: 'exact', head: true }).eq('event_id', event.id).eq('gender', 'Male'),
+        supabase.from('registrations').select('*', { count: 'exact', head: true }).eq('event_id', event.id).eq('gender', 'Female'),
+      ])
+      const slotsLeft = Math.max(event.max_male - (maleCount ?? 0), 0) + Math.max(event.max_female - (femaleCount ?? 0), 0)
+      return { ...event, slotsLeft }
+    })
+  )
+
   const s: Record<string, string> = {}
   ;(settingsRows || []).forEach((r: { key: string; value: string }) => {
     s[r.key] = r.value
@@ -73,6 +88,8 @@ export default async function LandingPage() {
   const featuredDesc = s['featured_event_desc'] || ''
   const featuredUrl = s['featured_event_url'] || ''
   const featuredBtn = s['featured_event_btn'] || 'Register Now'
+  const heroVideoMobileUrl = s['hero_video_mobile_url'] || ''
+  const heroVideoDesktopUrl = s['hero_video_desktop_url'] || ''
 
   const quotes = [
     { text: s['quote_1_text'] || '', name: s['quote_1_name'] || '' },
@@ -95,64 +112,40 @@ export default async function LandingPage() {
 
   return (
     <main className="min-h-screen bg-black">
-      <SiteHeader />
+      <PillNav />
+      <WelcomeBackBanner />
 
       {/* HERO */}
-      <section className="relative flex flex-col items-center justify-center text-center px-4 pt-20 pb-24 overflow-hidden">
-        <HeroBackground photos={heroPhotos} />
-
-        <svg
-          className="absolute inset-x-0 top-[58%] w-full h-28 opacity-[0.08] pointer-events-none z-[1]"
-          viewBox="0 0 800 100"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M0,55 C120,15 200,90 320,50 C440,10 520,85 640,45 C700,25 750,55 800,40"
-            stroke="#C8A435"
-            strokeWidth="2"
-            strokeDasharray="7 11"
-            strokeLinecap="round"
-            fill="none"
-          />
-        </svg>
+      <section id="home" className="relative flex flex-col items-center justify-center text-center px-4 pt-32 pb-24 overflow-hidden min-h-screen">
+        <HeroVideo
+          mobileVideoUrl={heroVideoMobileUrl}
+          desktopVideoUrl={heroVideoDesktopUrl}
+          posterUrl="/firstruleclublogo.jpg"
+          photos={heroPhotos}
+        />
 
         <div className="eyebrow relative z-[1] border border-gold/30 bg-gold/5 px-3 py-1.5 rounded-full mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse-slow" />
           Start line · {TFRC_LOCATION}
         </div>
 
-        <div className="w-24 h-24 mb-7 relative z-[1]">
-          <img
-            src="/firstruleclublogo.jpg"
-            alt="First Rule Club"
-            className="w-24 h-24 rounded-full object-cover ring-2 ring-gold/25"
-          />
-        </div>
-
         <h1
-          className="heading-display relative z-[1] text-white text-5xl md:text-7xl mb-5 max-w-4xl [text-shadow:0_2px_10px_rgba(0,0,0,0.55)]"
+          className="heading-display relative z-[1] text-white text-5xl md:text-8xl mb-5 max-w-5xl [text-shadow:0_2px_10px_rgba(0,0,0,0.55)]"
         >
-          We don&apos;t talk about it.
+          The First Rule Club
         </h1>
 
         <p
-          className="heading-display relative z-[1] text-gold text-2xl md:text-3xl mb-8 max-w-2xl [text-shadow:0_2px_8px_rgba(0,0,0,0.55)]"
+          className="heading-display relative z-[1] text-gold text-xl md:text-2xl mb-8 max-w-2xl [text-shadow:0_2px_8px_rgba(0,0,0,0.55)]"
         >
-          Remember the first rule.
+          <span className="text-white">We don&apos;t talk about it.</span> Remember the first rule.
         </p>
 
         <p className="relative z-[1] text-gray-400 max-w-lg mx-auto mb-10 text-base md:text-lg">
-          The First Rule Club — no entry fee, no ego. Just show up and run.
+          No entry fee, no ego. Just show up and run.
         </p>
 
-        <div className="relative z-[1] flex flex-col sm:flex-row gap-3 items-center">
-          <Link href="/join" className="btn-primary text-base px-9 py-4 inline-block">
-            Join as Member →
-          </Link>
-          <Link href="/login" className="btn-secondary text-base px-7 py-4 inline-block">
-            Member Login
-          </Link>
-        </div>
+        <ScrollToEventsButton />
       </section>
 
       {/* FEATURED EVENT */}
@@ -184,6 +177,8 @@ export default async function LandingPage() {
           </section>
         </Reveal>
       )}
+
+      <HomepageEventsSection events={eventsWithSlotsLeft} whatsappLink={whatsappLink} />
 
       {/* SOCIAL LINKS — early touchpoint right after the hero */}
       <section className="border-t border-white/10 py-8 px-4">

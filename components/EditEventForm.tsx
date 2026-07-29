@@ -3,7 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { Event } from '@/lib/types'
+import { Event, EventStatus } from '@/lib/types'
+
+const EVENT_STATUSES: { value: EventStatus; label: string }[] = [
+  { value: 'open', label: 'Open — accepting registrations' },
+  { value: 'closing_soon', label: 'Closing Soon — shows slots-left urgency' },
+  { value: 'not_open_yet', label: 'Not Open Yet — CTA disabled' },
+]
 
 interface Props {
   event: Event
@@ -17,6 +23,7 @@ export default function EditEventForm({ event, onClose }: Props) {
   const [form, setForm] = useState({
     title: event.title,
     date: event.date ? event.date.split('T')[0] : '',
+    status: event.status || 'open',
     max_male: String(event.max_male),
     max_female: String(event.max_female),
     group_link: event.group_link || '',
@@ -31,7 +38,7 @@ export default function EditEventForm({ event, onClose }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
     setError('')
   }
@@ -46,6 +53,7 @@ export default function EditEventForm({ event, onClose }: Props) {
       .update({
         title: form.title.trim(),
         date: form.date,
+        status: form.status,
         max_male: parseInt(form.max_male),
         max_female: parseInt(form.max_female),
         group_link: form.group_link.trim() || null,
@@ -108,6 +116,15 @@ export default function EditEventForm({ event, onClose }: Props) {
               required
               className="input-field"
             />
+          </div>
+
+          <div>
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              Registration Status <span className="text-red-400">*</span>
+            </label>
+            <select name="status" value={form.status} onChange={handleChange} required className="input-field">
+              {EVENT_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+            </select>
           </div>
 
           <div>

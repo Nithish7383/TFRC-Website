@@ -1,12 +1,13 @@
 'use server'
 
 import { createClient } from '@/lib/supabase-server'
-import { EventType, QuestionType } from '@/lib/types'
+import { EventType, EventStatus, QuestionType } from '@/lib/types'
 
 export interface NewEventInput {
   title: string
   date: string
   event_type: EventType
+  status: EventStatus
   max_male: number
   max_female: number
   group_link: string | null
@@ -50,6 +51,7 @@ export async function createEventWithQuestions(
       title: eventData.title,
       date: eventData.date,
       event_type: eventData.event_type,
+      status: eventData.status,
       max_male: eventData.max_male,
       max_female: eventData.max_female,
       group_link: eventData.group_link,

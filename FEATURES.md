@@ -9,7 +9,7 @@ This document describes the current features and functionality implemented in th
 The site serves **The First Rule Club (TFRC)**, a running community (based in Madurai). It combines:
 
 - A public marketing/landing site with a photo gallery
-- A **member system**: join → get a unique Member ID (e.g. `TFRC0001`) → phone-based "login" → personal dashboard → self-service event registration
+- A **member system**: join → get a unique Member ID (e.g. `TFRC0001`) → phone+password login → register for events inline from the homepage. There is no personal dashboard — login exists only to gate identity for registration, not to show a member their own stats.
 - A **guest/public event registration flow** (which is actually member-gated)
 - A full **admin back-office**: dashboard, event management, registration triage, member management & merging, site content editing, and photo gallery management
 
@@ -21,12 +21,11 @@ The site serves **The First Rule Club (TFRC)**, a running community (based in Ma
 
 | Page | Purpose |
 |---|---|
-| `/` | Landing page — hero, "why we started," activities offered (Running/Treks/Yoga/Turf/Meetups), homepage photo gallery preview, live member count stat, social links, optional admin-configured "Featured Event" banner, rotating "Member Voices" testimonials. |
+| `/` | Landing page — hero, an "Upcoming Events" section (each event has a Register button that opens an inline login modal for logged-out visitors, or an inline confirm card for a logged-in member — no page navigation), "why we started," activities offered (Running/Treks/Yoga/Turf/Meetups), homepage photo gallery preview, live member count stat, social links, optional admin-configured "Featured Event" banner, rotating "Member Voices" testimonials. |
 | `/join` | New member sign-up form. Collects name, phone, age, gender, place, occupation, running experience, goals, a password, plus optional emergency contact/medical info and extended profile fields (Instagram, photo, birthday, height/weight, pace, training days, interests). Blocks duplicate joins by phone. Assigns a Member ID automatically, creates the member's login, and redirects to the welcome page. |
-| `/join/welcome` | Post-join confirmation — displays the new Member ID, links to the member dashboard, WhatsApp community, and Instagram. |
-| `/login` | Member login — phone number + password (first-time members without a password yet are prompted to set one). |
-| `/member/[id]` | **Member dashboard** — the richest page, requires a matching session. Shows loyalty tier (Rookie/Rising/Regular/Elite based on runs attended), attendance streak, upcoming events with inline self-registration, recent registration history, club-wide stats, a top-5 leaderboard, a motivational quote, profile badges, and an Edit Profile section covering every profile field. |
-| `/register` | Public event registration form. Requires the phone number to match an existing member (pre-fills their profile if so); otherwise prompts to join first. Shows live gender-based slot availability, collects reasons for joining and optional emergency contact info, and enforces per-gender slot caps and duplicate-registration prevention. |
+| `/join/welcome` | Post-join confirmation — displays the new Member ID, links back to the homepage to browse events, WhatsApp community, and Instagram. |
+| `/login` | Member login — phone number + password (first-time members without a password yet are prompted to set one). Redirects to the homepage on success. This same phone+password flow is also available inline as a modal directly on the homepage's event cards. |
+| `/register` | Public event registration form. Requires the phone number to match an existing member (pre-fills their profile if so); otherwise prompts to join first. Shows live gender-based slot availability, collects reasons for joining and optional emergency contact info, and enforces per-gender slot caps and duplicate-registration prevention. Kept as a separate standalone entry point alongside the homepage's inline flow. |
 | `/confirmation` | Success page shown after registering for an event via `/register`, with next-step guidance and links to check status, join WhatsApp, or register for another event. |
 | `/status` | Registration status lookup by phone number — shows pending/selected/rejected status per event, WhatsApp group link if selected, and a "register for next event" prompt if rejected. |
 | `/gallery` | Full photo gallery, grouped by event, pulling photos an admin has uploaded per event. |
@@ -75,7 +74,8 @@ Protected by Supabase Auth (email/password) — both via `middleware.ts` route p
 ## 5. Authentication & Security Notes
 
 - **Admin auth** is real: Supabase Auth (email/password) with session cookies, refreshed via `middleware.ts`, and re-checked on every admin page.
-- **Member "login" is not authenticated** — `/login` and the member dashboard rely purely on knowing a phone number / Member ID, since member records are publicly readable via RLS. There is no password or session tied to a specific member. This is a reasonable tradeoff for a low-stakes community site, but worth knowing if member data ever includes anything sensitive.
+- **Member auth is real**: phone + password via Supabase Auth (a synthetic `{phone}@members.tfrc.local` address is used as the Auth identifier, since Supabase requires an email-shaped one). Members RLS restricts a logged-in member to reading/updating only their own row (`auth.uid() = members.auth_user_id`). There is intentionally no member-facing dashboard — login exists only to gate identity for event registration, not to expose stats to the member.
+- "Forgot password" is admin-assisted (an admin resets a member's password from `/admin/members`), not self-service SMS/OTP — this project has no SMS provider (e.g. Twilio) configured, which real phone-OTP reset would require.
 - No custom REST API layer exists apart from one legacy route (`/api/events/toggle`); nearly all reads/writes go directly through the Supabase client from Server or Client Components.
 
 ---
@@ -86,4 +86,4 @@ Protected by Supabase Auth (email/password) — both via `middleware.ts` route p
 - No `.env.local.example` file exists despite the README referencing one.
 - No automated tests (no Jest/Vitest/Playwright configured).
 - Images are unoptimized (`next.config.js` disables Next Image optimization) since photo URLs are arbitrary external links entered by admins.
-- "Weekly Challenge" on the member dashboard is a placeholder ("Coming Soon") — not yet implemented.
+- Members cannot self-edit their profile after joining (no dashboard, no edit-profile page) — only an admin can update a member's details, via `/admin/members`.

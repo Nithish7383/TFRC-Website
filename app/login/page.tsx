@@ -48,7 +48,7 @@ export default function LoginPage() {
       return
     }
 
-    router.push(`/member/${result.memberId}`)
+    router.push('/?welcome=1')
     router.refresh()
   }
 
@@ -73,7 +73,7 @@ export default function LoginPage() {
       return
     }
 
-    router.push(`/member/${result.memberId}`)
+    router.push('/?welcome=1')
     router.refresh()
   }
 

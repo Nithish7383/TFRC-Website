@@ -3,10 +3,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { EventType, Question, QuestionType } from '@/lib/types'
+import { EventType, EventStatus, Question, QuestionType } from '@/lib/types'
 import { createEventWithQuestions, NewQuestionInput } from '@/app/admin/event/actions'
 
 const EVENT_TYPES: EventType[] = ['Running', 'Trek', 'Yoga', 'Turf', 'Meetup']
+
+const EVENT_STATUSES: { value: EventStatus; label: string }[] = [
+  { value: 'open', label: 'Open — accepting registrations' },
+  { value: 'closing_soon', label: 'Closing Soon — shows slots-left urgency' },
+  { value: 'not_open_yet', label: 'Not Open Yet — CTA disabled' },
+]
 
 const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
   { value: 'text', label: 'Short text' },
@@ -38,6 +44,7 @@ export default function CreateEventForm() {
     title: '',
     date: '',
     event_type: 'Running' as EventType,
+    status: 'open' as EventStatus,
     max_male: '20',
     max_female: '20',
     group_link: '',
@@ -69,7 +76,15 @@ export default function CreateEventForm() {
   useEffect(() => { fetchDefaults(form.event_type) }, [form.event_type, fetchDefaults])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    const { name, value } = e.target
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+      // Distance/Pace Group are running-only fields — clear them if the
+      // admin switches away from Running so a stale value can't get
+      // submitted for an event type where the field is hidden.
+      ...(name === 'event_type' && value !== 'Running' ? { distance: '', pace_group: '' } : {}),
+    }))
     setError('')
     setSuccess(false)
   }
@@ -128,6 +143,7 @@ export default function CreateEventForm() {
         title: form.title.trim(),
         date: form.date,
         event_type: form.event_type,
+        status: form.status,
         max_male: parseInt(form.max_male),
         max_female: parseInt(form.max_female),
         group_link: form.group_link.trim() || null,
@@ -150,7 +166,7 @@ export default function CreateEventForm() {
 
     setSuccess(true)
     setForm({
-      title: '', date: '', event_type: 'Running', max_male: '20', max_female: '20', group_link: '',
+      title: '', date: '', event_type: 'Running', status: 'open', max_male: '20', max_female: '20', group_link: '',
       registration_deadline: '', meeting_point_url: '', distance: '', pace_group: '', cover_image_url: '',
     })
     setCustomQuestions([])
@@ -182,6 +198,16 @@ export default function CreateEventForm() {
           <select name="event_type" value={form.event_type} onChange={handleChange} required className="input-field">
             {EVENT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
+        </div>
+
+        <div>
+          <label className="block text-gray-300 text-sm font-medium mb-2">
+            Registration Status <span className="text-red-400">*</span>
+          </label>
+          <select name="status" value={form.status} onChange={handleChange} required className="input-field">
+            {EVENT_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
+          <p className="text-gray-600 text-xs mt-1">Controls the homepage event card's CTA button state.</p>
         </div>
 
         <div>
@@ -230,33 +256,37 @@ export default function CreateEventForm() {
           />
         </div>
 
-        <div>
-          <label className="block text-gray-300 text-sm font-medium mb-2">
-            Distance
-          </label>
-          <input
-            type="text"
-            name="distance"
-            value={form.distance}
-            onChange={handleChange}
-            placeholder="e.g. 5K, 10K, Half Marathon"
-            className="input-field"
-          />
-        </div>
+        {form.event_type === 'Running' && (
+          <>
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-2">
+                Distance
+              </label>
+              <input
+                type="text"
+                name="distance"
+                value={form.distance}
+                onChange={handleChange}
+                placeholder="e.g. 5K, 10K, Half Marathon"
+                className="input-field"
+              />
+            </div>
 
-        <div>
-          <label className="block text-gray-300 text-sm font-medium mb-2">
-            Pace Group
-          </label>
-          <input
-            type="text"
-            name="pace_group"
-            value={form.pace_group}
-            onChange={handleChange}
-            placeholder="e.g. Beginner / All pace welcome"
-            className="input-field"
-          />
-        </div>
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-2">
+                Pace Group
+              </label>
+              <input
+                type="text"
+                name="pace_group"
+                value={form.pace_group}
+                onChange={handleChange}
+                placeholder="e.g. Beginner / All pace welcome"
+                className="input-field"
+              />
+            </div>
+          </>
+        )}
 
         <div>
           <label className="block text-gray-300 text-sm font-medium mb-2">

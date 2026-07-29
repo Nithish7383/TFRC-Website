@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { SiteSetting } from '@/lib/types'
 import HomepageGalleryManager from '@/components/HomepageGalleryManager'
+import { uploadVideo } from '@/lib/video-upload'
 
 interface Props {
   settings: SiteSetting[]
@@ -40,8 +41,37 @@ export default function SiteSettingsForm({ settings }: Props) {
   const [q3text, setQ3text] = useState(init['quote_3_text'] ?? '')
   const [q3name, setQ3name] = useState(init['quote_3_name'] ?? '')
 
+  const [heroVideoMobile, setHeroVideoMobile] = useState(init['hero_video_mobile_url'] ?? '')
+  const [heroVideoDesktop, setHeroVideoDesktop] = useState(init['hero_video_desktop_url'] ?? '')
+  const [uploadingVideo, setUploadingVideo] = useState<'mobile' | 'desktop' | null>(null)
+  const [videoUploadError, setVideoUploadError] = useState('')
+  const mobileVideoInputRef = useRef<HTMLInputElement>(null)
+  const desktopVideoInputRef = useRef<HTMLInputElement>(null)
+
   const [saving, setSaving] = useState<string | null>(null)
   const [saved, setSaved] = useState<string | null>(null)
+
+  const handleVideoUpload = async (slot: 'mobile' | 'desktop', file: File) => {
+    setUploadingVideo(slot)
+    setVideoUploadError('')
+
+    const result = await uploadVideo(supabase, file, 'hero')
+
+    setUploadingVideo(null)
+
+    if ('error' in result) {
+      setVideoUploadError(result.error)
+      return
+    }
+
+    const key = slot === 'mobile' ? 'hero_video_mobile_url' : 'hero_video_desktop_url'
+    if (slot === 'mobile') setHeroVideoMobile(result.url)
+    else setHeroVideoDesktop(result.url)
+
+    await upsert(supabase, { [key]: result.url })
+    setSaved('hero-video')
+    setTimeout(() => setSaved(null), 2000)
+  }
 
   const save = async (section: string, pairs: Record<string, string>) => {
     setSaving(section)
@@ -194,6 +224,57 @@ export default function SiteSettingsForm({ settings }: Props) {
           </div>
         ))}
         <SaveBtn section="quotes" />
+      </div>
+
+      {/* Section 4.5 — Hero Video */}
+      <div className="card space-y-4">
+        <h3 className="text-white font-semibold">Hero Background Video</h3>
+        <p className="text-gray-500 text-xs">
+          Upload two crops of the same footage — a portrait crop for mobile and a
+          landscape crop for desktop. Until both are uploaded, the hero falls back
+          to the existing rotating photo background.
+        </p>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label className="block text-gray-400 text-xs mb-1">Mobile (portrait) video</label>
+            {heroVideoMobile && (
+              <video src={heroVideoMobile} className="w-full rounded-lg border border-white/10" muted controls />
+            )}
+            <input
+              type="file"
+              accept="video/mp4,video/webm"
+              ref={mobileVideoInputRef}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleVideoUpload('mobile', file)
+              }}
+              className="input-field text-sm"
+            />
+            {uploadingVideo === 'mobile' && <p className="text-gold text-xs">Uploading...</p>}
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-gray-400 text-xs mb-1">Desktop (landscape) video</label>
+            {heroVideoDesktop && (
+              <video src={heroVideoDesktop} className="w-full rounded-lg border border-white/10" muted controls />
+            )}
+            <input
+              type="file"
+              accept="video/mp4,video/webm"
+              ref={desktopVideoInputRef}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleVideoUpload('desktop', file)
+              }}
+              className="input-field text-sm"
+            />
+            {uploadingVideo === 'desktop' && <p className="text-gold text-xs">Uploading...</p>}
+          </div>
+        </div>
+
+        {videoUploadError && <p className="text-red-400 text-sm">{videoUploadError}</p>}
+        {saved === 'hero-video' && <p className="text-green-400 text-sm">Saved ✓</p>}
       </div>
 
       {/* Section 5 — Gallery */}

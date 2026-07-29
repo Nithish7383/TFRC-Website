@@ -59,12 +59,12 @@ export default async function JoinWelcomePage({
           </div>
 
           <div className="flex flex-col gap-3">
-            {/* Primary — view profile */}
+            {/* Primary — go register for an event */}
             <Link
-              href={`/member/${member_id}`}
+              href="/?welcome=1"
               className="btn-primary block text-center"
             >
-              View Your Dashboard →
+              Browse Events →
             </Link>
 
             {/* WhatsApp — only if set */}

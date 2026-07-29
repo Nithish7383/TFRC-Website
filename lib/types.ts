@@ -1,6 +1,7 @@
 export type Gender = 'Male' | 'Female'
 export type RegistrationStatus = 'pending' | 'selected' | 'rejected'
 export type EventType = 'Running' | 'Trek' | 'Yoga' | 'Turf' | 'Meetup'
+export type EventStatus = 'open' | 'closing_soon' | 'not_open_yet'
 export type QuestionType = 'text' | 'number' | 'select' | 'multiselect' | 'textarea' | 'date' | 'checkbox'
 
 export interface Event {
@@ -18,6 +19,7 @@ export interface Event {
   pace_group?: string | null
   cover_image_url?: string | null
   event_type?: EventType
+  status?: EventStatus
   questions?: Question[]
 }
 

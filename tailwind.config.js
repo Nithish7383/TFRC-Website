@@ -28,10 +28,15 @@ module.exports = {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.4' },
         },
+        'pulse-glow': {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(200, 164, 53, 0.55)' },
+          '50%': { boxShadow: '0 0 0 10px rgba(200, 164, 53, 0)' },
+        },
       },
       animation: {
         'fade-up': 'fade-up 0.6s ease-out forwards',
         'pulse-slow': 'pulse-slow 2s ease-in-out infinite',
+        'pulse-glow': 'pulse-glow 1.8s ease-out infinite',
       },
     },
   },
