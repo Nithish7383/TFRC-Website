@@ -145,7 +145,12 @@ export default async function LandingPage() {
           No entry fee, no ego. Just show up and run.
         </p>
 
-        <ScrollToEventsButton />
+        <div className="relative z-[1] flex flex-col sm:flex-row items-center gap-4">
+          <ScrollToEventsButton />
+          <Link href="/join" className="text-gray-300 hover:text-white text-sm font-medium underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors px-2 py-4">
+            or join as a member →
+          </Link>
+        </div>
       </section>
 
       {/* FEATURED EVENT */}
@@ -190,18 +195,40 @@ export default async function LandingPage() {
 
       {/* WHY WE STARTED */}
       <Reveal>
-        <section className="border-t border-white/10 py-16 px-4">
-          <div className="max-w-2xl mx-auto">
-            <div className="card border-l-2 border-l-gold">
+        <section className="border-t border-white/10 py-20 md:py-28 px-4">
+          <div className="max-w-5xl mx-auto grid md:grid-cols-[1.2fr_1fr] gap-12 md:gap-16 items-center">
+            <div>
               <p className="eyebrow mb-3">The why</p>
-              <h2 className="heading-display text-white text-2xl mb-4">Why we started</h2>
-              <p className="text-gray-300 leading-relaxed">
+              <h2 className="heading-display text-white text-3xl md:text-4xl mb-6">
+                Why we started
+              </h2>
+              <p className="text-gray-300 leading-relaxed text-base md:text-lg">
                 We believe fitness isn&apos;t just about lifting weights or running miles. It&apos;s about
                 building habits, creating memories, and surrounding yourself with people who inspire you
-                to keep showing up. The First Rule Club exists to bring people into a healthier lifestyle
-                through workouts, treks, sports, adventures, and meaningful connections. Because fitness
-                is easier, more exciting, and far more rewarding when you do it together.
+                to keep showing up.
               </p>
+              <p className="text-gray-400 leading-relaxed mt-4">
+                The First Rule Club exists to bring people into a healthier lifestyle through workouts,
+                treks, sports, adventures, and meaningful connections. Because fitness is easier, more
+                exciting, and far more rewarding when you do it together.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { value: communityStatValue, label: 'Members on the roster' },
+                { value: '0', label: 'Entry fee, ever' },
+                { value: activities.length.toString(), label: 'Ways to move with us' },
+                { value: TFRC_LOCATION.split(',')[0], label: 'Home base' },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="border border-white/10 hover:border-gold/30 rounded-2xl px-5 py-6 text-center transition-colors bg-white/[0.02]"
+                >
+                  <p className="stat-number text-gold text-2xl md:text-3xl leading-none mb-2">{stat.value}</p>
+                  <p className="text-gray-500 text-xs leading-snug">{stat.label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -209,23 +236,36 @@ export default async function LandingPage() {
 
       {/* WHAT WE DO */}
       <Reveal>
-        <section className="border-t border-white/10 bg-white/[0.02] py-16 px-4">
-          <div className="max-w-4xl mx-auto">
-            <p className="eyebrow mb-2 justify-center w-full">On the schedule</p>
-            <h2 className="heading-display text-white text-2xl mb-8 text-center">What we do</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-              {activities.map(({ label, desc }) => (
+        <section className="border-t border-white/10 bg-white/[0.02] py-20 md:py-28 px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-end justify-between mb-10 flex-wrap gap-3">
+              <div>
+                <p className="eyebrow mb-2">On the schedule</p>
+                <h2 className="heading-display text-white text-3xl md:text-4xl">What we do</h2>
+              </div>
+              <p className="text-gray-500 text-sm max-w-xs">
+                Five ways to show up — pick one, or come for all of them.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {activities.map(({ label, desc }, i) => (
                 <div
                   key={label}
-                  className="group bg-white/[0.02] border border-white/10 hover:border-gold/40 rounded-2xl px-4 py-6 text-center transition-colors"
+                  className={`group relative overflow-hidden bg-white/[0.02] border border-white/10 hover:border-gold/40 rounded-2xl px-6 py-8 transition-colors ${
+                    i === 0 ? 'sm:col-span-2 lg:col-span-2 lg:row-span-1' : ''
+                  }`}
                 >
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white/5 border border-white/10 group-hover:border-gold/50 flex items-center justify-center text-gray-300 group-hover:text-gold transition-colors">
+                  <span className="absolute top-4 right-5 font-mono text-[11px] text-white/10 group-hover:text-gold/30 transition-colors tabular-nums">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <div className="w-11 h-11 mb-4 rounded-full bg-white/5 border border-white/10 group-hover:border-gold/50 flex items-center justify-center text-gray-300 group-hover:text-gold transition-colors">
                     {ACTIVITY_ICONS[label]}
                   </div>
-                  <p className="text-white font-mono font-semibold text-xs tracking-wide uppercase">
+                  <p className="text-white font-mono font-semibold text-sm tracking-wide uppercase mb-1">
                     {label}
                   </p>
-                  <p className="text-gray-500 text-xs mt-1">{desc}</p>
+                  <p className="text-gray-500 text-sm">{desc}</p>
                 </div>
               ))}
             </div>
@@ -236,15 +276,15 @@ export default async function LandingPage() {
       {/* GALLERY */}
       {showGallery && (
         <Reveal>
-          <section className="border-t border-white/10 py-16 px-4">
+          <section className="border-t border-white/10 py-20 md:py-28 px-4">
             <div className="max-w-4xl mx-auto">
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-10">
                 <div>
                   <p className="eyebrow mb-2">Race day</p>
-                  <h2 className="heading-display text-white text-2xl">Past Events</h2>
+                  <h2 className="heading-display text-white text-3xl md:text-4xl">Past Events</h2>
                 </div>
                 {hasMorePhotos && (
-                  <Link href="/gallery" className="text-gold hover:underline text-sm">
+                  <Link href="/gallery" className="text-gold hover:underline text-sm whitespace-nowrap">
                     See more →
                   </Link>
                 )}
@@ -269,31 +309,32 @@ export default async function LandingPage() {
         </Reveal>
       )}
 
-      {/* SOCIAL PROOF / BIB TAG STRIP */}
-      <section className="border-y border-white/10 py-10 px-4">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="border-2 border-gold rounded-lg px-4 py-2 text-center min-w-[92px]">
-              <p className="stat-number text-white text-2xl leading-none">{communityStatValue}</p>
-              <p className="text-gold text-[9px] font-mono tracking-[0.2em] uppercase mt-1">Members</p>
-            </div>
-            <p className="text-gray-500 text-sm">Runners on the roster · {TFRC_LOCATION}</p>
+      {/* JOIN CTA STRIP */}
+      <section className="border-y border-white/10 bg-gold/[0.03] py-10 px-4">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+          <div>
+            <p className="text-white font-semibold text-lg">
+              {communityStatValue} runners strong, and counting.
+            </p>
+            <p className="text-gray-500 text-sm mt-1">No entry fee, no ego — just show up.</p>
           </div>
-
-          <SocialLinks whatsappLink={whatsappLink} instagramUrl={instagramUrl} youtubeUrl={youtubeUrl} variant="pill" />
+          <Link href="/join" className="btn-primary whitespace-nowrap">
+            Join as Member →
+          </Link>
         </div>
       </section>
 
       {/* MEMBER VOICES */}
       {quotes.length > 0 && (
         <Reveal>
-          <section className="border-t border-white/10 bg-white/[0.02] py-16 px-4">
+          <section className="border-t border-white/10 bg-white/[0.02] py-20 md:py-28 px-4">
             <div className="max-w-5xl mx-auto">
               <p className="eyebrow mb-2 justify-center w-full">From the pack</p>
-              <h2 className="heading-display text-white text-2xl mb-8 text-center">What members say</h2>
+              <h2 className="heading-display text-white text-3xl md:text-4xl mb-10 text-center">What members say</h2>
               <div className="grid gap-6 md:grid-cols-3">
                 {quotes.map((q, i) => (
-                  <div key={i} className="card space-y-3">
+                  <div key={i} className="card space-y-4 relative">
+                    <span className="absolute top-4 right-5 font-display text-4xl text-gold/15 leading-none select-none">&rdquo;</span>
                     <p className="text-gray-300 italic leading-relaxed">&ldquo;{q.text}&rdquo;</p>
                     {q.name && (
                       <p className="text-gold text-xs font-mono font-medium tracking-wide uppercase">

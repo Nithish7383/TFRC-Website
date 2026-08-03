@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { EventType, EventStatus, Question, QuestionType } from '@/lib/types'
 import { createEventWithQuestions, NewQuestionInput } from '@/app/admin/event/actions'
+import { uploadPhoto } from '@/lib/photo-upload'
 
 const EVENT_TYPES: EventType[] = ['Running', 'Trek', 'Yoga', 'Turf', 'Meetup']
 
@@ -60,6 +61,9 @@ export default function CreateEventForm() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [uploadingCover, setUploadingCover] = useState(false)
+  const [coverUploadError, setCoverUploadError] = useState('')
+  const coverFileInputRef = useRef<HTMLInputElement>(null)
 
   const fetchDefaults = useCallback(async (eventType: EventType) => {
     setLoadingDefaults(true)
@@ -99,6 +103,24 @@ export default function CreateEventForm() {
 
   const removeQuestion = (key: string) => {
     setCustomQuestions((prev) => prev.filter((q) => q.key !== key))
+  }
+
+  const handleCoverFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingCover(true)
+    setCoverUploadError('')
+
+    const uploaded = await uploadPhoto(supabase, file, 'events/covers')
+    setUploadingCover(false)
+
+    if ('error' in uploaded) {
+      setCoverUploadError(uploaded.error)
+      if (coverFileInputRef.current) coverFileInputRef.current.value = ''
+      return
+    }
+
+    setForm((prev) => ({ ...prev, cover_image_url: uploaded.url }))
   }
 
   const moveQuestion = (index: number, direction: -1 | 1) => {
@@ -170,6 +192,8 @@ export default function CreateEventForm() {
       registration_deadline: '', meeting_point_url: '', distance: '', pace_group: '', cover_image_url: '',
     })
     setCustomQuestions([])
+    setCoverUploadError('')
+    if (coverFileInputRef.current) coverFileInputRef.current.value = ''
     router.refresh()
   }
 
@@ -334,16 +358,36 @@ export default function CreateEventForm() {
 
         <div className="md:col-span-2">
           <label className="block text-gray-300 text-sm font-medium mb-2">
-            Cover Image URL (optional)
+            Cover Image (optional)
           </label>
-          <input
-            type="text"
-            name="cover_image_url"
-            value={form.cover_image_url}
-            onChange={handleChange}
-            placeholder="https://... — used as event thumbnail"
-            className="input-field"
-          />
+          <div className="flex items-center gap-3">
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              ref={coverFileInputRef}
+              onChange={handleCoverFileChange}
+              disabled={uploadingCover}
+              className="input-field"
+            />
+            {uploadingCover && <span className="text-gray-500 text-xs whitespace-nowrap">Uploading...</span>}
+          </div>
+          <p className="text-gray-600 text-xs mt-1">JPG, PNG, or WEBP — up to 5MB. Used as the event thumbnail.</p>
+          {coverUploadError && <p className="text-red-400 text-xs mt-1">{coverUploadError}</p>}
+          {form.cover_image_url && (
+            <div className="mt-2 flex items-center gap-3">
+              <img src={form.cover_image_url} alt="Cover preview" className="w-16 h-16 object-cover rounded-lg border border-white/10" />
+              <button
+                type="button"
+                onClick={() => {
+                  setForm((prev) => ({ ...prev, cover_image_url: '' }))
+                  if (coverFileInputRef.current) coverFileInputRef.current.value = ''
+                }}
+                className="text-red-400 hover:text-red-300 text-xs"
+              >
+                Remove
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -17,18 +17,55 @@ const EXPERIENCE_COLORS: Record<string, string> = {
   'Competitive': 'bg-red-900/30 text-red-400 border-red-800/40',
 }
 
-function computeDuplicates(members: Member[]): Set<string> {
+export type DuplicateConfidence = 'phone' | 'possible'
+
+// Same phone number is treated as certain — one person, re-registered.
+// Same name is only a "possible" match: narrowed by requiring place and/or
+// age to also line up, since common names alone produce false positives.
+function isPossibleNameMatch(a: Member, b: Member): boolean {
+  if (a.name.toLowerCase().trim() !== b.name.toLowerCase().trim()) return false
+  const samePlace = a.place.toLowerCase().trim() === b.place.toLowerCase().trim()
+  const closeAge = Math.abs(a.age - b.age) <= 1
+  return samePlace || closeAge
+}
+
+/** Maps each member id to the set of ids it duplicate-matches, plus the strongest confidence found. */
+function computeDuplicates(members: Member[]): Map<string, { matchIds: Set<string>; confidence: DuplicateConfidence }> {
+  const result = new Map<string, { matchIds: Set<string>; confidence: DuplicateConfidence }>()
+
+  const addMatch = (idA: string, idB: string, confidence: DuplicateConfidence) => {
+    for (const [id, otherId] of [[idA, idB], [idB, idA]]) {
+      const existing = result.get(id)
+      if (existing) {
+        existing.matchIds.add(otherId)
+        if (confidence === 'phone') existing.confidence = 'phone'
+      } else {
+        result.set(id, { matchIds: new Set([otherId]), confidence })
+      }
+    }
+  }
+
   const phoneMap: Record<string, string[]> = {}
-  const nameMap: Record<string, string[]> = {}
   members.forEach((m) => {
     phoneMap[m.phone] = [...(phoneMap[m.phone] || []), m.id]
-    const norm = m.name.toLowerCase().trim()
-    nameMap[norm] = [...(nameMap[norm] || []), m.id]
   })
-  const dupIds = new Set<string>()
-  Object.values(phoneMap).filter((ids) => ids.length > 1).forEach((ids) => ids.forEach((id) => dupIds.add(id)))
-  Object.values(nameMap).filter((ids) => ids.length > 1).forEach((ids) => ids.forEach((id) => dupIds.add(id)))
-  return dupIds
+  Object.values(phoneMap)
+    .filter((ids) => ids.length > 1)
+    .forEach((ids) => {
+      for (let i = 0; i < ids.length; i++) {
+        for (let j = i + 1; j < ids.length; j++) addMatch(ids[i], ids[j], 'phone')
+      }
+    })
+
+  for (let i = 0; i < members.length; i++) {
+    for (let j = i + 1; j < members.length; j++) {
+      if (isPossibleNameMatch(members[i], members[j])) {
+        addMatch(members[i].id, members[j].id, 'possible')
+      }
+    }
+  }
+
+  return result
 }
 
 export default function MembersTable({ members }: Props) {
@@ -60,7 +97,7 @@ export default function MembersTable({ members }: Props) {
     setTimeout(() => setResetSuccessId(null), 4000)
   }
 
-  const duplicateIds = useMemo(() => computeDuplicates(localMembers), [localMembers])
+  const duplicates = useMemo(() => computeDuplicates(localMembers), [localMembers])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -104,7 +141,8 @@ export default function MembersTable({ members }: Props) {
       {mergeTarget && (
         <MergeMembersModal
           member={mergeTarget}
-          allMembers={localMembers}
+          candidates={localMembers.filter((m) => duplicates.get(mergeTarget.id)?.matchIds.has(m.id))}
+          confidence={duplicates.get(mergeTarget.id)?.confidence ?? 'possible'}
           onClose={() => setMergeTarget(null)}
         />
       )}
@@ -148,7 +186,8 @@ export default function MembersTable({ members }: Props) {
           </thead>
           <tbody className="divide-y divide-white/10">
             {filtered.map((member) => {
-              const isDuplicate = duplicateIds.has(member.id)
+              const dup = duplicates.get(member.id)
+              const isDuplicate = !!dup
               return (
                 <>
                   <tr key={member.id} className={`hover:bg-white/5 transition-colors ${isDuplicate ? 'bg-yellow-900/10' : ''}`}>
@@ -157,9 +196,16 @@ export default function MembersTable({ members }: Props) {
                         <span className="text-gold font-bold text-xs tracking-wider bg-gold/10 border border-gold/30 px-2 py-1 rounded-lg">
                           {member.member_id}
                         </span>
-                        {isDuplicate && (
-                          <span className="text-xs bg-yellow-900/40 text-yellow-400 border border-yellow-700/40 px-1.5 py-0.5 rounded">
-                            DUP
+                        {dup && (
+                          <span
+                            title={dup.confidence === 'phone' ? 'Same phone number as another member' : 'Same name, and place or age also matches'}
+                            className={`text-xs px-1.5 py-0.5 rounded border ${
+                              dup.confidence === 'phone'
+                                ? 'bg-red-900/40 text-red-400 border-red-700/40'
+                                : 'bg-yellow-900/40 text-yellow-400 border-yellow-700/40'
+                            }`}
+                          >
+                            {dup.confidence === 'phone' ? 'DUP · same phone' : 'DUP · possible'}
                           </span>
                         )}
                       </div>

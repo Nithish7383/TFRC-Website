@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Event, EventStatus } from '@/lib/types'
+import { uploadPhoto } from '@/lib/photo-upload'
 
 const EVENT_STATUSES: { value: EventStatus; label: string }[] = [
   { value: 'open', label: 'Open — accepting registrations' },
@@ -37,10 +38,31 @@ export default function EditEventForm({ event, onClose }: Props) {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [uploadingCover, setUploadingCover] = useState(false)
+  const [coverUploadError, setCoverUploadError] = useState('')
+  const coverFileInputRef = useRef<HTMLInputElement>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
     setError('')
+  }
+
+  const handleCoverFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingCover(true)
+    setCoverUploadError('')
+
+    const uploaded = await uploadPhoto(supabase, file, 'events/covers')
+    setUploadingCover(false)
+
+    if ('error' in uploaded) {
+      setCoverUploadError(uploaded.error)
+      if (coverFileInputRef.current) coverFileInputRef.current.value = ''
+      return
+    }
+
+    setForm((prev) => ({ ...prev, cover_image_url: uploaded.url }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -226,16 +248,36 @@ export default function EditEventForm({ event, onClose }: Props) {
 
           <div className="md:col-span-2">
             <label className="block text-gray-300 text-sm font-medium mb-2">
-              Cover Image URL (optional)
+              Cover Image (optional)
             </label>
-            <input
-              type="text"
-              name="cover_image_url"
-              value={form.cover_image_url}
-              onChange={handleChange}
-              placeholder="https://... — used as event thumbnail"
-              className="input-field"
-            />
+            <div className="flex items-center gap-3">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                ref={coverFileInputRef}
+                onChange={handleCoverFileChange}
+                disabled={uploadingCover}
+                className="input-field"
+              />
+              {uploadingCover && <span className="text-gray-500 text-xs whitespace-nowrap">Uploading...</span>}
+            </div>
+            <p className="text-gray-600 text-xs mt-1">JPG, PNG, or WEBP — up to 5MB. Used as the event thumbnail.</p>
+            {coverUploadError && <p className="text-red-400 text-xs mt-1">{coverUploadError}</p>}
+            {form.cover_image_url && (
+              <div className="mt-2 flex items-center gap-3">
+                <img src={form.cover_image_url} alt="Cover preview" className="w-16 h-16 object-cover rounded-lg border border-white/10" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForm((prev) => ({ ...prev, cover_image_url: '' }))
+                    if (coverFileInputRef.current) coverFileInputRef.current.value = ''
+                  }}
+                  className="text-red-400 hover:text-red-300 text-xs"
+                >
+                  Remove
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

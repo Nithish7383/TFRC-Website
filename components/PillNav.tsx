@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
 
 const LINKS = [
   { id: 'home', label: 'Home' },
@@ -65,6 +66,12 @@ export default function PillNav() {
               {link.label}
             </button>
           ))}
+          <Link
+            href="/join"
+            className="text-xs sm:text-sm px-3 py-1.5 rounded-full whitespace-nowrap bg-gold text-black font-semibold hover:bg-gold/90 transition-colors"
+          >
+            Join
+          </Link>
         </div>
       </div>
     </nav>

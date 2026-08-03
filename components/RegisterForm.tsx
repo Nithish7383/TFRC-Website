@@ -301,7 +301,7 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
     )
   }
 
-  // Not a member
+  // Not a member — phone lookup stays visible behind a popup prompting them to join
   if (memberNotFound) {
     return (
       <div className="card space-y-5">
@@ -317,12 +317,39 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
             {memberLooking ? 'Checking...' : 'Continue →'}
           </button>
         </form>
-        <div className="bg-red-900/20 border border-red-800/40 rounded-xl p-5 space-y-3">
-          <p className="text-red-300 font-semibold">This number isn&apos;t registered as a TFRC member yet.</p>
-          <p className="text-gray-400 text-sm">You need a free member profile before you can register for events.</p>
-          <a href="/join" className="btn-primary inline-block">
-            Join as Member →
-          </a>
+
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/70 backdrop-blur-sm">
+          <div className="card max-w-sm w-full border-gold/30 space-y-4 relative">
+            <button
+              type="button"
+              onClick={() => setMemberNotFound(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-300 text-xl leading-none px-1"
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center">
+              <svg className="w-6 h-6 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-white font-semibold text-lg">You&apos;re not a member yet</p>
+              <p className="text-gray-400 text-sm mt-1">
+                This number isn&apos;t registered with TFRC. Create a free member profile first — it only takes a minute — then come back here to register for events.
+              </p>
+            </div>
+            <a href="/join" className="btn-primary w-full text-center block">
+              Join as Member →
+            </a>
+            <button
+              type="button"
+              onClick={() => setMemberNotFound(false)}
+              className="text-gray-500 hover:text-gray-300 text-sm w-full text-center"
+            >
+              Try a different number
+            </button>
+          </div>
         </div>
       </div>
     )
