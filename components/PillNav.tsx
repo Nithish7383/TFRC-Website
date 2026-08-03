@@ -6,7 +6,7 @@ import Link from 'next/link'
 const LINKS = [
   { id: 'home', label: 'Home' },
   { id: 'events', label: 'Events' },
-  { id: 'about', label: 'About' },
+  { id: 'gallery', label: 'Gallery' },
   { id: 'contact', label: 'Contact' },
 ]
 
@@ -48,9 +48,10 @@ export default function PillNav() {
       <div className="flex items-center justify-between gap-2 rounded-full border border-white/10 bg-black/60 backdrop-blur-md px-3 py-2 shadow-lg shadow-black/40">
         <button
           onClick={() => handleClick('home')}
-          className="font-display font-semibold text-gold text-sm px-2 whitespace-nowrap"
+          aria-label="TFRC — Home"
+          className="flex items-center justify-center w-9 h-9 rounded-full border border-gold/40 overflow-hidden flex-shrink-0"
         >
-          TFRC
+          <img src="/firstruleclublogo.jpg" alt="" className="w-full h-full object-cover" />
         </button>
         <div className="flex items-center gap-1">
           {LINKS.map((link) => (

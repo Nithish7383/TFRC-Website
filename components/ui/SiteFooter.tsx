@@ -10,7 +10,9 @@ interface Props {
 
 export default function SiteFooter({ whatsappLink, instagramUrl, youtubeUrl }: Props) {
   return (
-    <footer className="border-t border-white/10 py-12 px-4 text-center">
+    <footer id="contact" className="border-t border-white/10 py-12 px-4 text-center scroll-mt-24">
+      <img src="/firstruleclublogo.jpg" alt="TFRC" className="w-12 h-12 rounded-full object-cover mx-auto mb-5 border border-gold/30" />
+
       <div className="eyebrow border border-gold/30 bg-gold/5 px-3 py-1.5 rounded-full mb-6">
         <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse-slow" />
         Finish line
