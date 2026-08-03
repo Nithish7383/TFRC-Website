@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
 
 const LINKS = [
   { id: 'home', label: 'Home' },
@@ -44,21 +43,21 @@ export default function PillNav() {
   }
 
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-30 w-[calc(100%-2rem)] max-w-md sm:max-w-lg">
-      <div className="flex items-center justify-between gap-2 rounded-full border border-white/10 bg-black/60 backdrop-blur-md px-3 py-2 shadow-lg shadow-black/40">
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-30">
+      <div className="flex items-center gap-3 sm:gap-5 rounded-full border border-white/10 bg-black/70 backdrop-blur-md px-5 py-2 shadow-lg shadow-black/40">
         <button
           onClick={() => handleClick('home')}
-          aria-label="TFRC — Home"
-          className="flex items-center justify-center w-9 h-9 rounded-full border border-gold/40 overflow-hidden flex-shrink-0"
+          className="wordmark text-gold text-base flex-shrink-0"
         >
-          <img src="/firstruleclublogo.jpg" alt="" className="w-full h-full object-cover" />
+          TFRC
         </button>
-        <div className="flex items-center gap-1">
+
+        <div className="hidden sm:flex items-center gap-1">
           {LINKS.map((link) => (
             <button
               key={link.id}
               onClick={() => handleClick(link.id)}
-              className={`text-xs sm:text-sm px-3 py-1.5 rounded-full transition-colors whitespace-nowrap ${
+              className={`text-sm px-3 py-1.5 rounded-full transition-colors whitespace-nowrap ${
                 active === link.id
                   ? 'bg-white text-black font-medium'
                   : 'text-gray-300 hover:text-white'
@@ -67,12 +66,6 @@ export default function PillNav() {
               {link.label}
             </button>
           ))}
-          <Link
-            href="/join"
-            className="text-xs sm:text-sm px-3 py-1.5 rounded-full whitespace-nowrap bg-gold text-black font-semibold hover:bg-gold/90 transition-colors"
-          >
-            Join
-          </Link>
         </div>
       </div>
     </nav>

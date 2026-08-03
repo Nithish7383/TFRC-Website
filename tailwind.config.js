@@ -32,11 +32,21 @@ module.exports = {
           '0%, 100%': { boxShadow: '0 0 0 0 rgba(200, 164, 53, 0.55)' },
           '50%': { boxShadow: '0 0 0 10px rgba(200, 164, 53, 0)' },
         },
+        'marquee-left': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+        'marquee-right': {
+          '0%': { transform: 'translateX(-50%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
       },
       animation: {
         'fade-up': 'fade-up 0.6s ease-out forwards',
         'pulse-slow': 'pulse-slow 2s ease-in-out infinite',
         'pulse-glow': 'pulse-glow 1.8s ease-out infinite',
+        'marquee-left': 'marquee-left 40s linear infinite',
+        'marquee-right': 'marquee-right 40s linear infinite',
       },
     },
   },

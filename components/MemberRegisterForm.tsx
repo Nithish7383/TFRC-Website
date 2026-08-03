@@ -33,8 +33,6 @@ export default function MemberRegisterForm() {
     running_pace: '',
     weekly_training_days: '',
     interests: [] as string[],
-    password: '',
-    confirmPassword: '',
   })
   const [safetyOpen, setSafetyOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
@@ -69,8 +67,6 @@ export default function MemberRegisterForm() {
     e.preventDefault()
     if (!form.gender) { setError('Please select your gender.'); return }
     if (!form.running_experience) { setError('Please select your running experience.'); return }
-    if (form.password.length < 8) { setError('Password must be at least 8 characters.'); return }
-    if (form.password !== form.confirmPassword) { setError('Passwords do not match.'); return }
 
     setLoading(true)
     setError('')
@@ -97,7 +93,6 @@ export default function MemberRegisterForm() {
       running_pace: form.running_pace.trim() || null,
       weekly_training_days: form.weekly_training_days ? parseInt(form.weekly_training_days) : null,
       interests: form.interests,
-      password: form.password,
     })
 
     setLoading(false)
@@ -233,47 +228,7 @@ export default function MemberRegisterForm() {
             </div>
           </div>
 
-          {/* Section 2 — Account Security */}
-          <div className="space-y-4">
-            <h2 className="heading-display text-white text-xl border-b border-white/10 pb-3">Set a Password</h2>
-            <p className="text-gray-500 text-sm -mt-2">
-              You&apos;ll use this with your WhatsApp number to log in to your dashboard.
-            </p>
-
-            <div>
-              <label className="block text-gray-300 text-sm font-medium mb-2">
-                Password <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                required
-                minLength={8}
-                placeholder="At least 8 characters"
-                className="input-field"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-300 text-sm font-medium mb-2">
-                Confirm Password <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                required
-                minLength={8}
-                placeholder="Re-enter password"
-                className="input-field"
-              />
-            </div>
-          </div>
-
-          {/* Section 3 — Running */}
+          {/* Section 2 — Running */}
           <div className="space-y-4">
             <h2 className="heading-display text-white text-xl border-b border-white/10 pb-3">Running Profile</h2>
 
@@ -527,8 +482,8 @@ export default function MemberRegisterForm() {
                 You&apos;re already a TFRC member! Your ID is{' '}
                 <span className="tracking-widest font-mono">{existingMemberId}</span>.
               </p>
-              <Link href="/login" className="btn-primary inline-block">
-                Go to Member Login →
+              <Link href="/register" className="btn-primary inline-block">
+                Register for an Event →
               </Link>
             </div>
           )}

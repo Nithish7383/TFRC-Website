@@ -30,6 +30,11 @@ function weekLabel(dateStr: string) {
 
 export default function EventCard({ event, slotsLeft, onRegisterClick, disabled }: Props) {
   const status = event.status || 'open'
+  const isPastDeadline = event.registration_deadline
+    ? new Date() > new Date(event.registration_deadline)
+    : false
+  const isFull = slotsLeft <= 0
+  const isClosed = status !== 'not_open_yet' && (isPastDeadline || isFull)
 
   return (
     <div className="relative rounded-[20px] overflow-hidden border border-white/10 bg-white/[0.02] aspect-[3/4.3] flex flex-col group">
@@ -70,20 +75,20 @@ export default function EventCard({ event, slotsLeft, onRegisterClick, disabled 
           {status === 'closing_soon' && (
             <button
               onClick={onRegisterClick}
-              disabled={disabled}
-              className="relative w-full text-center btn-primary py-3 animate-pulse-glow rounded-lg"
+              disabled={disabled || isClosed}
+              className={`relative w-full text-center btn-primary py-3 rounded-lg ${isClosed ? '' : 'animate-pulse-glow'}`}
             >
-              {slotsLeft > 0 ? `${slotsLeft} Slot${slotsLeft !== 1 ? 's' : ''} Left` : 'Register Now'}
+              {isFull ? 'Slots Full' : isPastDeadline ? 'Registration Closed' : slotsLeft > 0 ? `${slotsLeft} Slot${slotsLeft !== 1 ? 's' : ''} Left` : 'Register Now'}
             </button>
           )}
 
           {status === 'open' && (
             <button
               onClick={onRegisterClick}
-              disabled={disabled}
+              disabled={disabled || isClosed}
               className="w-full text-center btn-primary py-3"
             >
-              Register Now
+              {isFull ? 'Slots Full' : isPastDeadline ? 'Registration Closed' : 'Register Now'}
             </button>
           )}
         </div>

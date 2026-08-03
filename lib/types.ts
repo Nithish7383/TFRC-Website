@@ -93,7 +93,6 @@ export interface Member {
   interests: string[]
   attended_count: number
   created_at: string
-  auth_user_id?: string | null
 }
 
 export interface EventPhoto {

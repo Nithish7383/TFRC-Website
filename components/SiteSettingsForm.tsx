@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { SiteSetting } from '@/lib/types'
 import HomepageGalleryManager from '@/components/HomepageGalleryManager'
 import { uploadVideo } from '@/lib/video-upload'
+import { uploadPhoto } from '@/lib/photo-upload'
 
 interface Props {
   settings: SiteSetting[]
@@ -34,6 +35,10 @@ export default function SiteSettingsForm({ settings }: Props) {
   const [featDesc, setFeatDesc] = useState(init['featured_event_desc'] ?? '')
   const [featUrl, setFeatUrl] = useState(init['featured_event_url'] ?? '')
   const [featBtn, setFeatBtn] = useState(init['featured_event_btn'] ?? 'Register Now')
+  const [featImage, setFeatImage] = useState(init['featured_event_image_url'] ?? '')
+  const [uploadingFeatImage, setUploadingFeatImage] = useState(false)
+  const [featImageError, setFeatImageError] = useState('')
+  const featImageInputRef = useRef<HTMLInputElement>(null)
   const [q1text, setQ1text] = useState(init['quote_1_text'] ?? '')
   const [q1name, setQ1name] = useState(init['quote_1_name'] ?? '')
   const [q2text, setQ2text] = useState(init['quote_2_text'] ?? '')
@@ -70,6 +75,25 @@ export default function SiteSettingsForm({ settings }: Props) {
 
     await upsert(supabase, { [key]: result.url })
     setSaved('hero-video')
+    setTimeout(() => setSaved(null), 2000)
+  }
+
+  const handleFeatImageUpload = async (file: File) => {
+    setUploadingFeatImage(true)
+    setFeatImageError('')
+
+    const result = await uploadPhoto(supabase, file, 'featured-event')
+
+    setUploadingFeatImage(false)
+
+    if ('error' in result) {
+      setFeatImageError(result.error)
+      return
+    }
+
+    setFeatImage(result.url)
+    await upsert(supabase, { featured_event_image_url: result.url })
+    setSaved('featured-image')
     setTimeout(() => setSaved(null), 2000)
   }
 
@@ -174,6 +198,26 @@ export default function SiteSettingsForm({ settings }: Props) {
           />
           <span className="text-gray-300 text-sm">Show featured event banner on homepage</span>
         </label>
+        <div>
+          <label className="block text-gray-400 text-xs mb-1">Banner Image (optional)</label>
+          {featImage && (
+            <img src={featImage} alt="Featured event" className="w-full h-40 object-cover rounded-lg border border-white/10 mb-2" />
+          )}
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            ref={featImageInputRef}
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) handleFeatImageUpload(file)
+            }}
+            disabled={uploadingFeatImage}
+            className="input-field text-sm"
+          />
+          {uploadingFeatImage && <p className="text-gold text-xs mt-1">Uploading...</p>}
+          {featImageError && <p className="text-red-400 text-xs mt-1">{featImageError}</p>}
+          {saved === 'featured-image' && <p className="text-green-400 text-xs mt-1">Saved ✓</p>}
+        </div>
         <div>
           <label className="block text-gray-400 text-xs mb-1">Event Name</label>
           <input type="text" value={featName} onChange={(e) => setFeatName(e.target.value)} className="input-field" />

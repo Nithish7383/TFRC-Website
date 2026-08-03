@@ -20,9 +20,6 @@ export default function SiteHeader({ children }: Props) {
               <Link href="/gallery" className="text-gray-400 hover:text-white text-sm transition-colors">
                 Gallery
               </Link>
-              <Link href="/login" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Member Login
-              </Link>
               <Link
                 href="/admin/login"
                 className="text-xs text-gray-500 hover:text-gold border border-white/15 hover:border-gold/50 px-3 py-1.5 rounded-md transition-colors"

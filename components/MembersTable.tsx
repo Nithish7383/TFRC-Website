@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Member } from '@/lib/types'
 import MergeMembersModal from '@/components/MergeMembersModal'
-import { resetMemberPassword } from '@/app/admin/members/actions'
 
 interface Props {
   members: Member[]
@@ -76,26 +75,6 @@ export default function MembersTable({ members }: Props) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [localMembers, setLocalMembers] = useState<Member[]>(members)
   const [mergeTarget, setMergeTarget] = useState<Member | null>(null)
-  const [resetTarget, setResetTarget] = useState<string | null>(null)
-  const [resetPassword, setResetPassword] = useState('')
-  const [resetSaving, setResetSaving] = useState(false)
-  const [resetError, setResetError] = useState('')
-  const [resetSuccessId, setResetSuccessId] = useState<string | null>(null)
-
-  const submitReset = async (memberId: string) => {
-    setResetSaving(true)
-    setResetError('')
-    const result = await resetMemberPassword(memberId, resetPassword)
-    setResetSaving(false)
-    if (!result.ok) {
-      setResetError(result.error)
-      return
-    }
-    setResetTarget(null)
-    setResetPassword('')
-    setResetSuccessId(memberId)
-    setTimeout(() => setResetSuccessId(null), 4000)
-  }
 
   const duplicates = useMemo(() => computeDuplicates(localMembers), [localMembers])
 
@@ -251,51 +230,9 @@ export default function MembersTable({ members }: Props) {
                             Merge
                           </button>
                         )}
-                        {resetSuccessId === member.member_id ? (
-                          <span className="text-xs text-green-400 whitespace-nowrap">✓ Password reset</span>
-                        ) : (
-                          <button
-                            onClick={() => { setResetTarget(member.member_id); setResetError(''); setResetPassword('') }}
-                            className="text-xs px-3 py-1.5 rounded-lg border border-white/15 text-gray-400 hover:border-gold/40 hover:text-gold transition-colors whitespace-nowrap"
-                          >
-                            Reset Password
-                          </button>
-                        )}
                       </div>
                     </td>
                   </tr>
-                  {resetTarget === member.member_id && (
-                    <tr className="bg-gold/[0.03] border-b border-white/10">
-                      <td colSpan={8} className="px-6 py-4">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                          <p className="text-gray-300 text-sm whitespace-nowrap">
-                            New password for <span className="text-gold font-mono">{member.member_id}</span>:
-                          </p>
-                          <input
-                            type="text"
-                            value={resetPassword}
-                            onChange={(e) => setResetPassword(e.target.value)}
-                            placeholder="At least 8 characters"
-                            className="input-field text-sm py-1.5 w-full sm:w-56"
-                          />
-                          <button
-                            onClick={() => submitReset(member.member_id)}
-                            disabled={resetSaving}
-                            className="btn-primary text-xs py-1.5 px-3 whitespace-nowrap"
-                          >
-                            {resetSaving ? 'Saving...' : 'Set Password'}
-                          </button>
-                          <button
-                            onClick={() => setResetTarget(null)}
-                            className="text-xs text-gray-500 hover:text-gray-300 whitespace-nowrap"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                        {resetError && <p className="text-red-400 text-xs mt-2">{resetError}</p>}
-                      </td>
-                    </tr>
-                  )}
                   {expandedId === member.id && (
                     <tr key={`${member.id}-exp`} className="bg-white/[0.04] border-b border-white/10">
                       <td colSpan={8} className="px-6 py-4">
