@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Event } from '@/lib/types'
 import EventCard from '@/components/EventCard'
 
@@ -33,43 +34,46 @@ export default function EventsCarousel({ events, onRegisterClick, disabled }: Pr
         className="relative mx-auto"
         style={{ perspective: '1500px', maxWidth: '340px', height: 'min(70vh, 560px)' }}
       >
-        {events.map((event, i) => {
-          // Shortest signed distance from the active card, wrapping around
-          // the ends so the last card can sit "before" the first.
-          let offset = i - index
-          if (offset > events.length / 2) offset -= events.length
-          if (offset < -events.length / 2) offset += events.length
+        <AnimatePresence initial={false}>
+          {events.map((event, i) => {
+            // Shortest signed distance from the active card, wrapping around
+            // the ends so the last card can sit "before" the first.
+            let offset = i - index
+            if (offset > events.length / 2) offset -= events.length
+            if (offset < -events.length / 2) offset += events.length
 
-          const abs = Math.abs(offset)
-          if (abs > MAX_VISIBLE_OFFSET) return null
+            const abs = Math.abs(offset)
+            if (abs > MAX_VISIBLE_OFFSET) return null
 
-          const isActive = offset === 0
-          const translateX = offset * 36
-          const scale = isActive ? 1 : Math.max(1 - abs * 0.12, 0.7)
-          const opacity = isActive ? 1 : Math.max(1 - abs * 0.4, 0)
+            const isActive = offset === 0
+            const translateX = offset * 36
+            const scale = isActive ? 1 : Math.max(1 - abs * 0.12, 0.7)
+            const opacity = isActive ? 1 : Math.max(1 - abs * 0.4, 0)
 
-          return (
-            <div
-              key={event.id}
-              onClick={() => !isActive && goTo(i)}
-              className="absolute inset-0 transition-all duration-500 ease-out"
-              style={{
-                transform: `translateX(${translateX}px) scale(${scale})`,
-                opacity,
-                zIndex: 20 - abs,
-                pointerEvents: isActive ? 'auto' : abs <= MAX_VISIBLE_OFFSET ? 'auto' : 'none',
-                cursor: isActive ? 'default' : 'pointer',
-              }}
-            >
-              <EventCard
-                event={event}
-                slotsLeft={event.slotsLeft}
-                onRegisterClick={() => onRegisterClick(event)}
-                disabled={disabled}
-              />
-            </div>
-          )
-        })}
+            return (
+              <motion.div
+                key={event.id}
+                onClick={() => !isActive && goTo(i)}
+                className="absolute inset-0"
+                initial={false}
+                animate={{ x: translateX, scale, opacity }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                style={{
+                  zIndex: 20 - abs,
+                  pointerEvents: isActive ? 'auto' : abs <= MAX_VISIBLE_OFFSET ? 'auto' : 'none',
+                  cursor: isActive ? 'default' : 'pointer',
+                }}
+              >
+                <EventCard
+                  event={event}
+                  slotsLeft={event.slotsLeft}
+                  onRegisterClick={() => onRegisterClick(event)}
+                  disabled={disabled}
+                />
+              </motion.div>
+            )
+          })}
+        </AnimatePresence>
       </div>
 
       {events.length > 1 && (

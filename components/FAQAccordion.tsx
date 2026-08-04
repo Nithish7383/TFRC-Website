@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface FAQItem {
   question: string
@@ -27,19 +28,37 @@ export default function FAQAccordion({ items }: Props) {
               className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-white/[0.03] transition-colors"
             >
               <span className="text-white font-medium text-sm">{item.question}</span>
-              <span className={`text-gold text-lg leading-none flex-shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}>
+              <motion.span
+                animate={{ rotate: isOpen ? 45 : 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className="text-gold text-lg leading-none flex-shrink-0"
+              >
                 +
-              </span>
+              </motion.span>
             </button>
-            <div
-              id={`faq-panel-${i}`}
-              className="grid transition-[grid-template-rows] duration-300 ease-out"
-              style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}
-            >
-              <div className="overflow-hidden">
-                <p className="text-gray-400 text-sm leading-relaxed px-5 pb-4">{item.answer}</p>
-              </div>
-            </div>
+            <AnimatePresence initial={false}>
+              {isOpen && (
+                <motion.div
+                  id={`faq-panel-${i}`}
+                  key="content"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  className="overflow-hidden"
+                >
+                  <motion.p
+                    initial={{ y: -8 }}
+                    animate={{ y: 0 }}
+                    exit={{ y: -8 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                    className="text-gray-400 text-sm leading-relaxed px-5 pb-4"
+                  >
+                    {item.answer}
+                  </motion.p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )
       })}

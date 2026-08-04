@@ -10,6 +10,7 @@ import WelcomeBackBanner from '@/components/WelcomeBackBanner'
 import PillNav from '@/components/PillNav'
 import PhotoMarquee from '@/components/PhotoMarquee'
 import FAQAccordion from '@/components/FAQAccordion'
+import ScrollProgressBar from '@/components/ScrollProgressBar'
 
 const FAQ_ITEMS = [
   {
@@ -88,6 +89,7 @@ export default async function LandingPage() {
 
   return (
     <main className="min-h-screen bg-black">
+      <ScrollProgressBar />
       <PillNav />
       <WelcomeBackBanner />
 
