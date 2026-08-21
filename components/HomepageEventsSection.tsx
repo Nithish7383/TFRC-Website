@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
 import { Event, Gender } from '@/lib/types'
 import EventsCarousel from '@/components/EventsCarousel'
+import Reveal from '@/components/ui/Reveal'
 
 interface EventWithSlots extends Event {
   slotsLeft: number
@@ -131,10 +133,16 @@ export default function HomepageEventsSection({ events }: Props) {
   if (events.length === 0) return null
 
   return (
-    <section id="events" className="border-t border-white/10 py-16 px-4 scroll-mt-24">
-      <div className="max-w-5xl mx-auto">
-        <p className="eyebrow mb-2 text-center">On the calendar</p>
-        <h2 className="heading-display text-white text-2xl mb-10 text-center">Upcoming Events</h2>
+    <section id="events" className="relative border-t border-white/10 py-20 md:py-28 px-4 scroll-mt-24 overflow-hidden">
+      <div className="relative max-w-5xl mx-auto">
+        <Reveal>
+          <div className="text-center mb-12">
+            <p className="eyebrow eyebrow-line mb-3">On the calendar</p>
+            <h2 className="heading-display text-white text-3xl md:text-5xl">
+              Upcoming <span className="text-gold-sheen">Events</span>
+            </h2>
+          </div>
+        </Reveal>
 
         <EventsCarousel
           events={events}
@@ -142,16 +150,51 @@ export default function HomepageEventsSection({ events }: Props) {
         />
       </div>
 
+      <AnimatePresence>
       {registerOpenFor && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center px-4" onClick={resetModal}>
-          <div className="card max-w-sm w-full space-y-5" onClick={(e) => e.stopPropagation()}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
+          className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center px-4"
+          onClick={resetModal}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 24, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.97 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="card max-w-sm w-full space-y-5 border-gold/20 shadow-gold-glow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
             {success ? (
               <div className="text-center space-y-4">
-                <div className="w-14 h-14 bg-green-900/40 border-2 border-green-700/50 rounded-full flex items-center justify-center mx-auto">
-                  <svg className="w-7 h-7 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
+                <motion.div
+                  initial={{ scale: 0, rotate: -30 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 16, delay: 0.1 }}
+                  className="w-16 h-16 bg-green-900/40 border-2 border-green-600/50 rounded-full
+                             flex items-center justify-center mx-auto
+                             shadow-[0_0_30px_-6px_rgba(34,197,94,0.6)]"
+                >
+                  <motion.svg
+                    className="w-8 h-8 text-green-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <motion.path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M5 13l4 4L19 7"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.5, delay: 0.3, ease: 'easeOut' }}
+                    />
+                  </motion.svg>
+                </motion.div>
                 <h2 className="heading-display text-white text-xl">You&apos;re registered!</h2>
                 <p className="text-gray-400 text-sm">
                   You&apos;ll be notified on WhatsApp if you&apos;re selected for {registerOpenFor.title}.
@@ -169,9 +212,14 @@ export default function HomepageEventsSection({ events }: Props) {
                   </h2>
                 </div>
                 {error && (
-                  <div className="bg-red-900/20 border border-red-800/50 rounded-lg px-4 py-3 text-red-400 text-sm">
+                  <motion.div
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: [0, -6, 6, -4, 4, 0] }}
+                    transition={{ duration: 0.4 }}
+                    className="bg-red-900/20 border border-red-800/50 rounded-lg px-4 py-3 text-red-400 text-sm"
+                  >
                     {error}
-                  </div>
+                  </motion.div>
                 )}
                 <div className="flex flex-col gap-3">
                   <button onClick={handleConfirm} disabled={submitting} className="btn-primary w-full text-center">
@@ -217,9 +265,10 @@ export default function HomepageEventsSection({ events }: Props) {
                 </button>
               </div>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </section>
   )
 }

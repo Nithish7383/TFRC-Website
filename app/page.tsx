@@ -4,13 +4,16 @@ import { GalleryPhoto, Event } from '@/lib/types'
 import SiteFooter from '@/components/ui/SiteFooter'
 import SocialLinks from '@/components/ui/SocialLinks'
 import Reveal from '@/components/ui/Reveal'
+import StaggerReveal, { StaggerItem } from '@/components/ui/StaggerReveal'
 import HeroVideo from '@/components/HeroVideo'
+import HeroContent from '@/components/HeroContent'
 import HomepageEventsSection from '@/components/HomepageEventsSection'
 import WelcomeBackBanner from '@/components/WelcomeBackBanner'
 import PillNav from '@/components/PillNav'
 import PhotoMarquee from '@/components/PhotoMarquee'
 import FAQAccordion from '@/components/FAQAccordion'
 import ScrollProgressBar from '@/components/ScrollProgressBar'
+import ScrollCue from '@/components/ScrollCue'
 
 const FAQ_ITEMS = [
   {
@@ -102,42 +105,34 @@ export default async function LandingPage() {
           photos={heroPhotos}
         />
 
-        <h1
-          className="heading-display relative z-[1] text-gold text-5xl md:text-8xl mb-5 max-w-5xl [text-shadow:0_2px_10px_rgba(0,0,0,0.55)]"
-        >
-          The First Rule Club
-        </h1>
-
-        <p className="heading-display relative z-[1] text-white text-lg md:text-xl mb-10 [text-shadow:0_2px_8px_rgba(0,0,0,0.55)]">
-          Remember the first rule.
-        </p>
-
-        <div className="relative z-[1]">
-          <Link href="/join" className="btn-primary text-base px-9 py-4 inline-block">
-            Join Now →
-          </Link>
-        </div>
+        <HeroContent />
+        <ScrollCue />
       </section>
 
       {/* FEATURED EVENT */}
       {featuredActive && featuredName && (
-        <Reveal>
+        <Reveal scale>
           <section className="py-16 px-4">
             <div className="max-w-3xl mx-auto">
-              <div className="relative border-2 border-gold/50 rounded-2xl p-8 overflow-hidden">
+              <div className="group relative border-2 border-gold/50 rounded-2xl p-8 overflow-hidden
+                             shadow-gold-glow transition-all duration-500 ease-out-expo
+                             hover:border-gold hover:shadow-gold-glow-lg">
                 {featuredImageUrl ? (
-                  <>
-                    <div className="absolute inset-0">
-                      <img src={featuredImageUrl} alt="" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-black/40" />
-                    </div>
-                  </>
+                  <div className="absolute inset-0">
+                    <img
+                      src={featuredImageUrl}
+                      alt=""
+                      className="w-full h-full object-cover transition-transform duration-[1200ms] ease-out-expo group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-black/40" />
+                  </div>
                 ) : (
                   <div className="absolute inset-0 bg-gold/5" />
                 )}
 
                 <div className="relative z-[1]">
-                  <div className="absolute -top-4 right-0 text-[10px] font-mono tracking-[0.2em] uppercase text-gold/60 px-4 py-2">
+                  <div className="absolute -top-4 right-0 flex items-center gap-1.5 text-[10px] font-mono tracking-[0.2em] uppercase text-gold/70 px-4 py-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse-slow" />
                     Entry open
                   </div>
                   <div className="inline-block text-xs bg-gold/20 text-gold border border-gold/30 px-3 py-1 rounded-full font-semibold uppercase tracking-wide mb-4">
@@ -170,11 +165,11 @@ export default async function LandingPage() {
           <section id="gallery" className="border-t border-white/10 py-20 md:py-28 scroll-mt-24">
             <div className="max-w-4xl mx-auto px-4 flex items-center justify-between mb-10">
               <div>
-                <p className="eyebrow mb-2">Race day</p>
+                <p className="eyebrow eyebrow-line mb-2">Race day</p>
                 <h2 className="heading-display text-white text-3xl md:text-4xl">Our Community</h2>
               </div>
               {hasMorePhotos && (
-                <Link href="/gallery" className="text-gold hover:underline text-sm whitespace-nowrap">
+                <Link href="/gallery" className="link-underline text-gold text-sm whitespace-nowrap">
                   See more →
                 </Link>
               )}
@@ -185,29 +180,32 @@ export default async function LandingPage() {
       )}
 
       {/* SOCIAL LINKS — early touchpoint right after the hero */}
-      <section className="border-t border-white/10 py-8 px-4">
-        <div className="max-w-4xl mx-auto flex flex-col items-center gap-3">
-          <p className="text-gray-600 text-xs font-mono uppercase tracking-[0.2em]">Follow along</p>
-          <SocialLinks whatsappLink={whatsappLink} instagramUrl={instagramUrl} youtubeUrl={youtubeUrl} variant="pill" />
-        </div>
-      </section>
+      <Reveal>
+        <section className="border-t border-white/10 py-8 px-4">
+          <div className="max-w-4xl mx-auto flex flex-col items-center gap-3">
+            <p className="text-gray-600 text-xs font-mono uppercase tracking-[0.2em]">Follow along</p>
+            <SocialLinks whatsappLink={whatsappLink} instagramUrl={instagramUrl} youtubeUrl={youtubeUrl} variant="pill" />
+          </div>
+        </section>
+      </Reveal>
 
       {/* WHO WE ARE */}
       {photos[0] && (
-        <Reveal>
+        <Reveal scale>
           <section className="relative border-t border-white/10 py-24 md:py-32 px-4 overflow-hidden">
             <div className="absolute inset-0">
               <img
                 src={photos[0].image_url}
                 alt=""
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-center scale-105"
               />
               <div className="absolute inset-0 bg-black/70" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40" />
             </div>
             <div className="relative z-[1] max-w-4xl mx-auto text-center">
               <p className="eyebrow mb-4 justify-center w-full">Who we are</p>
               <h2 className="heading-display text-white text-4xl md:text-6xl mb-6">
-                More than a run club.
+                More than a <span className="text-gold-sheen">run club.</span>
               </h2>
               <p className="text-gray-200 leading-relaxed text-base md:text-lg max-w-2xl mx-auto">
                 We&apos;re building a culture where movement feels less like a workout and more like
@@ -220,41 +218,51 @@ export default async function LandingPage() {
       )}
 
       {/* WHY WE STARTED */}
-      <Reveal>
-        <section className="border-t border-white/10 py-20 md:py-28 px-4">
-          <div className="max-w-2xl mx-auto text-center">
+      <section className="relative border-t border-white/10 py-20 md:py-28 px-4 overflow-hidden">
+        <div className="glow-orb w-[380px] h-[380px] top-0 right-0 opacity-40" />
+        <StaggerReveal className="relative max-w-2xl mx-auto text-center" stagger={0.12}>
+          <StaggerItem>
             <p className="eyebrow mb-3 justify-center w-full">The why</p>
+          </StaggerItem>
+          <StaggerItem>
             <h2 className="heading-display text-white text-3xl md:text-4xl mb-6">
               Why we started
             </h2>
+          </StaggerItem>
+          <StaggerItem>
             <p className="text-gray-300 leading-relaxed text-base md:text-lg">
               We believe fitness isn&apos;t just about lifting weights or running miles. It&apos;s about
               building habits, creating memories, and surrounding yourself with people who inspire you
               to keep showing up.
             </p>
+          </StaggerItem>
+          <StaggerItem>
             <p className="text-gray-400 leading-relaxed mt-4">
               The First Rule Club exists to bring people into a healthier lifestyle through workouts,
               treks, sports, adventures, and meaningful connections. Because fitness is easier, more
               exciting, and far more rewarding when you do it together.
             </p>
+          </StaggerItem>
+        </StaggerReveal>
+      </section>
+
+      {/* JOIN CTA STRIP */}
+      <Reveal>
+        <section className="relative border-y border-white/10 bg-gold/[0.03] py-10 px-4 overflow-hidden">
+          <div className="absolute inset-0 bg-gold-sheen opacity-[0.03]" />
+          <div className="relative max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+            <div>
+              <p className="text-white font-semibold text-lg">
+                <span className="stat-number text-gold">{communityStatValue}</span> runners strong, and counting.
+              </p>
+              <p className="text-gray-500 text-sm mt-1">No entry fee, no ego — just show up.</p>
+            </div>
+            <Link href="/join" className="btn-primary whitespace-nowrap">
+              Join as Member →
+            </Link>
           </div>
         </section>
       </Reveal>
-
-      {/* JOIN CTA STRIP */}
-      <section className="border-y border-white/10 bg-gold/[0.03] py-10 px-4">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-          <div>
-            <p className="text-white font-semibold text-lg">
-              {communityStatValue} runners strong, and counting.
-            </p>
-            <p className="text-gray-500 text-sm mt-1">No entry fee, no ego — just show up.</p>
-          </div>
-          <Link href="/join" className="btn-primary whitespace-nowrap">
-            Join as Member →
-          </Link>
-        </div>
-      </section>
 
       {/* FAQ */}
       <Reveal>

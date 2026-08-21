@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
 import { GOALS_OPTIONS, INTERESTS_OPTIONS } from '@/lib/constants'
 import { registerMember } from '@/app/join/actions'
 import SiteHeader from '@/components/ui/SiteHeader'
+import Reveal from '@/components/ui/Reveal'
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-', 'Unknown']
 
@@ -116,13 +118,16 @@ export default function MemberRegisterForm() {
       <SiteHeader />
       <div className="py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <p className="eyebrow mb-2">Join the movement</p>
-          <h1 className="heading-display text-white text-4xl mb-2">Join The First Rule Club</h1>
-          <p className="text-gray-400">Create your member profile to register for events.</p>
-          <p className="text-gray-600 text-sm mt-2 font-mono">Step 1 of 1 — Member Registration</p>
-        </div>
+        <Reveal>
+          <div className="mb-8">
+            <p className="eyebrow eyebrow-line mb-2">Join the movement</p>
+            <h1 className="heading-display text-white text-4xl mb-2">Join The First Rule Club</h1>
+            <p className="text-gray-400">Create your member profile to register for events.</p>
+            <p className="text-gray-600 text-sm mt-2 font-mono">Step 1 of 1 — Member Registration</p>
+          </div>
+        </Reveal>
 
+        <Reveal delay={100}>
         <form onSubmit={handleSubmit} className="card space-y-8">
           {/* Section 1 — Personal */}
           <div className="space-y-4">
@@ -185,10 +190,8 @@ export default function MemberRegisterForm() {
                     key={g}
                     type="button"
                     onClick={() => { setForm((p) => ({ ...p, gender: g })); setError('') }}
-                    className={`flex-1 py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all ${
-                      form.gender === g
-                        ? 'border-gold text-gold bg-gold/10'
-                        : 'border-white/15 text-gray-400 hover:border-white/30'
+                    className={`option-tile flex-1 py-3 px-4 ${
+                      form.gender === g ? 'option-tile-on' : 'option-tile-off'
                     }`}
                   >
                     {g}
@@ -247,10 +250,8 @@ export default function MemberRegisterForm() {
                     key={value}
                     type="button"
                     onClick={() => { setForm((p) => ({ ...p, running_experience: value })); setError('') }}
-                    className={`py-3 px-4 rounded-xl border-2 text-sm font-medium transition-all text-left ${
-                      form.running_experience === value
-                        ? 'border-gold text-gold bg-gold/10'
-                        : 'border-white/15 text-gray-400 hover:border-white/30'
+                    className={`option-tile py-3 px-4 text-left font-medium ${
+                      form.running_experience === value ? 'option-tile-on' : 'option-tile-off'
                     }`}
                   >
                     {label}
@@ -267,10 +268,11 @@ export default function MemberRegisterForm() {
                 {GOALS_OPTIONS.map((goal) => (
                   <label
                     key={goal}
-                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer
+                               transition-all duration-300 ease-out-expo ${
                       form.goals.includes(goal)
-                        ? 'border-gold/60 bg-gold/10'
-                        : 'border-white/10 hover:border-white/25'
+                        ? 'border-gold/60 bg-gold/10 shadow-gold-glow'
+                        : 'border-white/10 hover:border-white/25 hover:bg-white/[0.03]'
                     }`}
                   >
                     <input
@@ -291,16 +293,31 @@ export default function MemberRegisterForm() {
             <button
               type="button"
               onClick={() => setSafetyOpen((o) => !o)}
+              aria-expanded={safetyOpen}
               className="w-full flex items-center justify-between px-5 py-4 text-left bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
             >
               <span className="flex items-center gap-2 text-gray-300 text-sm font-medium">
                 Safety info
                 <span className="text-[10px] font-mono uppercase tracking-wide text-gray-500 border border-white/15 rounded-full px-2 py-0.5">Optional</span>
               </span>
-              <span className="text-gray-500 text-lg">{safetyOpen ? '▲' : '▼'}</span>
+              <motion.span
+                animate={{ rotate: safetyOpen ? 180 : 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className="text-gray-500"
+              >
+                ▼
+              </motion.span>
             </button>
 
+            <AnimatePresence initial={false}>
             {safetyOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="overflow-hidden"
+              >
               <div className="px-5 pb-5 pt-4 space-y-4 bg-white/[0.015]">
                 <div>
                   <label className="block text-gray-300 text-sm font-medium mb-2">Emergency Contact Name</label>
@@ -350,7 +367,9 @@ export default function MemberRegisterForm() {
                   </select>
                 </div>
               </div>
+              </motion.div>
             )}
+            </AnimatePresence>
           </div>
 
           {/* Section 5 — Extended Profile (accordion) */}
@@ -358,16 +377,31 @@ export default function MemberRegisterForm() {
             <button
               type="button"
               onClick={() => setMoreOpen((o) => !o)}
+              aria-expanded={moreOpen}
               className="w-full flex items-center justify-between px-5 py-4 text-left bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
             >
               <span className="flex items-center gap-2 text-gray-300 text-sm font-medium">
                 Tell us more
                 <span className="text-[10px] font-mono uppercase tracking-wide text-gray-500 border border-white/15 rounded-full px-2 py-0.5">Optional</span>
               </span>
-              <span className="text-gray-500 text-lg">{moreOpen ? '▲' : '▼'}</span>
+              <motion.span
+                animate={{ rotate: moreOpen ? 180 : 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className="text-gray-500"
+              >
+                ▼
+              </motion.span>
             </button>
 
+            <AnimatePresence initial={false}>
             {moreOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="overflow-hidden"
+              >
               <div className="px-5 pb-5 pt-4 space-y-4 bg-white/[0.015]">
                 <div>
                   <label className="block text-gray-300 text-sm font-medium mb-2">Instagram Handle</label>
@@ -455,10 +489,11 @@ export default function MemberRegisterForm() {
                     {INTERESTS_OPTIONS.map((interest) => (
                       <label
                         key={interest}
-                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer
+                                   transition-all duration-300 ease-out-expo ${
                           form.interests.includes(interest)
-                            ? 'border-gold/60 bg-gold/10'
-                            : 'border-white/10 hover:border-white/25'
+                            ? 'border-gold/60 bg-gold/10 shadow-gold-glow'
+                            : 'border-white/10 hover:border-white/25 hover:bg-white/[0.03]'
                         }`}
                       >
                         <input
@@ -473,7 +508,9 @@ export default function MemberRegisterForm() {
                   </div>
                 </div>
               </div>
+              </motion.div>
             )}
+            </AnimatePresence>
           </div>
 
           {existingMemberId && (
@@ -488,11 +525,19 @@ export default function MemberRegisterForm() {
             </div>
           )}
 
+          <AnimatePresence>
           {error && (
-            <div className="bg-red-900/20 border border-red-800/50 rounded-lg px-4 py-3 text-red-400 text-sm">
+            <motion.div
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: [0, -6, 6, -4, 4, 0] }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="bg-red-900/20 border border-red-800/50 rounded-lg px-4 py-3 text-red-400 text-sm"
+            >
               {error}
-            </div>
+            </motion.div>
           )}
+          </AnimatePresence>
 
           {!existingMemberId && (
             <button
@@ -504,6 +549,7 @@ export default function MemberRegisterForm() {
             </button>
           )}
         </form>
+        </Reveal>
       </div>
       </div>
     </main>

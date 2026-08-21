@@ -4,51 +4,364 @@
 
 :root {
   --gold: #C8A435;
+  --gold-light: #D9BB5E;
+  --gold-lighter: #E8D28C;
+  --ring: 0 0 0 2px rgba(200, 164, 53, 0.55);
 }
 
 @layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   ::selection {
     background-color: #C8A435;
     color: #000000;
   }
+
+  /* Slim, on-brand scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #000;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(200,164,53,0.55), rgba(200,164,53,0.25));
+    border-radius: 999px;
+    border: 2px solid #000;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(217,187,94,0.85), rgba(200,164,53,0.5));
+  }
+
+  /* Consistent keyboard focus across every interactive element */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: 8px;
+  }
+
+  /* Nicer native form bits on dark backgrounds */
+  input[type='date']::-webkit-calendar-picker-indicator,
+  input[type='time']::-webkit-calendar-picker-indicator {
+    filter: invert(0.7) sepia(1) saturate(3) hue-rotate(5deg);
+    cursor: pointer;
+  }
+
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  select option {
+    background-color: #0A0A0A;
+    color: #fff;
+  }
 }
 
 @layer components {
-  /* Buttons */
+  /* ---------------------------------------------------------------------
+     Buttons — shared plate: press-down feedback, glow lift, sheen sweep.
+     --------------------------------------------------------------------- */
+  .btn-base {
+    @apply relative inline-flex items-center justify-center gap-2 rounded-lg font-semibold
+           select-none overflow-hidden isolate
+           transition-all duration-300 ease-out-expo
+           active:scale-[0.97] disabled:opacity-45 disabled:cursor-not-allowed
+           disabled:active:scale-100 disabled:pointer-events-none;
+  }
+
   .btn-primary {
-    @apply bg-gold hover:bg-gold-light text-black font-bold uppercase tracking-wide text-sm px-6 py-3 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply btn-base bg-gold text-black font-bold uppercase tracking-wide text-sm px-6 py-3
+           shadow-[0_4px_18px_-6px_rgba(200,164,53,0.6)]
+           hover:bg-gold-light hover:shadow-gold-glow hover:-translate-y-0.5;
   }
+
+  /* Light sweep across the button on hover. */
+  .btn-primary::after,
+  .btn-ghost-gold::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      100deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.45) 50%,
+      transparent 80%
+    );
+    transform: translateX(-120%);
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-primary:hover::after,
+  .btn-ghost-gold:hover::after {
+    transform: translateX(120%);
+  }
+
   .btn-secondary {
-    @apply bg-transparent hover:bg-white/5 text-white font-semibold px-4 py-2.5 rounded-md border border-white/20 hover:border-white/40 transition-colors;
+    @apply btn-base bg-white/[0.03] text-white px-5 py-2.5 border border-white/15
+           hover:bg-white/[0.08] hover:border-white/35 hover:-translate-y-0.5
+           hover:shadow-lift;
   }
+
+  .btn-ghost-gold {
+    @apply btn-base bg-transparent text-gold px-5 py-2.5 border border-gold/40
+           uppercase tracking-wide text-sm font-bold
+           hover:bg-gold/10 hover:border-gold hover:-translate-y-0.5 hover:shadow-gold-glow;
+  }
+
   .btn-danger {
-    @apply bg-red-950/60 hover:bg-red-900/70 text-red-300 font-medium px-4 py-2 rounded-md transition-colors border border-red-800/50;
+    @apply btn-base bg-red-950/60 text-red-300 font-medium px-4 py-2 border border-red-800/50
+           hover:bg-red-900/70 hover:border-red-600/60 hover:-translate-y-0.5
+           hover:shadow-[0_8px_24px_-10px_rgba(220,38,38,0.6)];
   }
+
   .btn-success {
-    @apply bg-green-950/60 hover:bg-green-900/70 text-green-300 font-medium px-4 py-2 rounded-md transition-colors border border-green-800/50;
+    @apply btn-base bg-green-950/60 text-green-300 font-medium px-4 py-2 border border-green-800/50
+           hover:bg-green-900/70 hover:border-green-600/60 hover:-translate-y-0.5
+           hover:shadow-[0_8px_24px_-10px_rgba(22,163,74,0.6)];
   }
 
-  /* Form */
+  .btn-whatsapp {
+    @apply btn-base bg-[#128C7E] text-white font-semibold px-6 py-3
+           hover:bg-[#25D366] hover:-translate-y-0.5
+           hover:shadow-[0_10px_30px_-10px_rgba(37,211,102,0.7)];
+  }
+
+  /* ---------------------------------------------------------------------
+     Form fields
+     --------------------------------------------------------------------- */
   .input-field {
-    @apply w-full bg-black border border-white/15 rounded-md px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-gold transition-colors;
+    @apply w-full bg-black/60 border border-white/15 rounded-lg px-4 py-3 text-white
+           placeholder-gray-600 outline-none
+           transition-all duration-200 ease-out
+           hover:border-white/25
+           focus:border-gold focus:bg-black/80
+           focus:shadow-[0_0_0_3px_rgba(200,164,53,0.14)];
   }
 
-  /* Surfaces */
+  .field-label {
+    @apply block text-gray-300 text-sm font-medium mb-2;
+  }
+
+  /* Selectable option tile (gender, experience, interests) */
+  .option-tile {
+    @apply relative rounded-xl border-2 text-sm font-semibold overflow-hidden
+           transition-all duration-300 ease-out-expo
+           active:scale-[0.97];
+  }
+  .option-tile-off {
+    @apply border-white/15 text-gray-400 bg-white/[0.02]
+           hover:border-white/30 hover:text-gray-200 hover:bg-white/[0.05] hover:-translate-y-0.5;
+  }
+  .option-tile-on {
+    @apply border-gold text-gold bg-gold/10 shadow-gold-glow -translate-y-0.5;
+  }
+
+  /* ---------------------------------------------------------------------
+     Surfaces
+     --------------------------------------------------------------------- */
   .card {
-    @apply bg-[#0A0A0A] border border-white/10 rounded-xl p-6;
+    @apply relative bg-ink-800/90 border border-white/10 rounded-2xl p-6
+           shadow-lift shadow-inner-hair backdrop-blur-sm;
   }
 
-  /* Typography helpers */
+  /* Card that reacts to the pointer */
+  .card-interactive {
+    @apply card transition-all duration-400 ease-out-expo
+           hover:border-gold/35 hover:-translate-y-1 hover:shadow-gold-glow;
+  }
+
+  /* Thin gradient hairline used to separate sections */
+  .rule-gold {
+    @apply h-px w-full border-0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(200, 164, 53, 0.35),
+      transparent
+    );
+  }
+
+  /* Frosted glass panel (nav, overlays) */
+  .glass {
+    @apply bg-black/60 backdrop-blur-xl border border-white/10;
+  }
+
+  /* ---------------------------------------------------------------------
+     Typography helpers
+     --------------------------------------------------------------------- */
   .eyebrow {
     @apply inline-flex items-center gap-2 text-[11px] font-mono tracking-[0.25em] uppercase text-gold;
   }
+
+  /* Eyebrow with a small leading dash — used on section headers */
+  .eyebrow-line::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.6;
+  }
+
   .heading-display {
     @apply font-display uppercase tracking-tight leading-[0.95];
   }
+
   .stat-number {
     @apply font-mono font-bold tabular-nums;
   }
+
   .wordmark {
     @apply font-display italic font-semibold tracking-tight;
+  }
+
+  /* Metallic gold text for headline accents */
+  .text-gold-sheen {
+    background: linear-gradient(
+      100deg,
+      #A9862A 0%,
+      #C8A435 30%,
+      #F0DCA0 50%,
+      #C8A435 70%,
+      #A9862A 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 6s linear infinite;
+  }
+
+  /* Outlined display text (footer watermark) */
+  .text-stroke-gold {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(200, 164, 53, 0.18);
+  }
+
+  /* Underline that grows from the left on hover */
+  .link-underline {
+    @apply relative inline-block transition-colors duration-200;
+  }
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    height: 1px;
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .link-underline:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  /* ---------------------------------------------------------------------
+     Decorative
+     --------------------------------------------------------------------- */
+  /* Soft radial gold glow — drop behind a section for depth */
+  .glow-orb {
+    @apply pointer-events-none absolute rounded-full blur-[90px];
+    background: radial-gradient(circle, rgba(200, 164, 53, 0.22), transparent 70%);
+  }
+
+  /* Subtle film grain over dark photography */
+  .grain-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: theme('backgroundImage.grain');
+    opacity: 0.04;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  /* Edge fade for horizontally scrolling strips */
+  .edge-fade-x {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
+  }
+
+  /* Skeleton shimmer for loading states */
+  .skeleton {
+    @apply rounded-lg bg-white/5;
+    background-image: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      rgba(255, 255, 255, 0.09) 50%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .text-shadow-hero {
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.75), 0 1px 4px rgba(0, 0, 0, 0.6);
+  }
+
+  .perspective-1500 {
+    perspective: 1500px;
+  }
+}
+
+/* Respect users who ask for less motion — kill decorative loops and
+   collapse transitions rather than letting them run at full amplitude. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

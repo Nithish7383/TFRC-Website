@@ -8,7 +8,9 @@ export default function ScrollProgressBar() {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 right-0 h-[3px] bg-gold origin-left z-[100]"
+      className="fixed top-0 left-0 right-0 h-[3px] origin-left z-[100]
+                 bg-gradient-to-r from-gold-dark via-gold to-gold-lighter
+                 shadow-[0_0_12px_rgba(200,164,53,0.6)]"
       style={{ scaleX }}
     />
   )

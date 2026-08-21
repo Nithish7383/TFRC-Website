@@ -9,17 +9,24 @@ function Row({ photos, direction }: { photos: GalleryPhoto[]; direction: 'left' 
   const doubled = [...photos, ...photos]
 
   return (
-    <div className="flex gap-4 w-max" style={{ animation: `marquee-${direction} 40s linear infinite` }}>
+    <div
+      className="group/row flex gap-4 w-max"
+      style={{ animation: `marquee-${direction} 40s linear infinite` }}
+    >
       {doubled.map((photo, i) => (
         <div
           key={`${photo.id}-${i}`}
-          className="flex-shrink-0 w-[220px] sm:w-[300px] md:w-[380px] h-[150px] sm:h-[190px] md:h-[240px] rounded-xl overflow-hidden border border-white/10"
+          className="flex-shrink-0 w-[220px] sm:w-[300px] md:w-[380px] h-[150px] sm:h-[190px] md:h-[240px]
+                     rounded-xl overflow-hidden border border-white/10 relative
+                     transition-all duration-500 ease-out-expo
+                     [animation-play-state:running] group-hover/row:[animation-play-state:paused]
+                     hover:!scale-[1.03] hover:z-10 hover:border-gold/40 hover:shadow-gold-glow"
         >
           <img
             src={photo.image_url}
             alt={photo.caption ?? 'TFRC crew'}
             loading="lazy"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-700 ease-out-expo hover:scale-110"
           />
         </div>
       ))}

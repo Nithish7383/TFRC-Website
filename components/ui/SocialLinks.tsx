@@ -23,12 +23,20 @@ const ICONS = {
   ),
 }
 
+// Each network keeps its own hover tint so the row reads as real brand links
+// rather than four identical gold pills.
+const HOVER: Record<keyof typeof ICONS, string> = {
+  whatsapp: 'hover:text-[#25D366] hover:border-[#25D366]/50 hover:shadow-[0_8px_24px_-10px_rgba(37,211,102,0.55)]',
+  instagram: 'hover:text-[#E1306C] hover:border-[#E1306C]/50 hover:shadow-[0_8px_24px_-10px_rgba(225,48,108,0.55)]',
+  youtube: 'hover:text-[#FF0000] hover:border-[#FF0000]/50 hover:shadow-[0_8px_24px_-10px_rgba(255,0,0,0.5)]',
+}
+
 export default function SocialLinks({ whatsappLink, instagramUrl, youtubeUrl, variant = 'pill' }: Props) {
   const items = [
-    whatsappLink && { key: 'whatsapp', href: whatsappLink, label: 'WhatsApp', hover: 'hover:text-gold hover:border-gold/40' },
-    instagramUrl && { key: 'instagram', href: instagramUrl, label: 'Instagram', hover: 'hover:text-gold hover:border-gold/40' },
-    youtubeUrl && { key: 'youtube', href: youtubeUrl, label: 'YouTube', hover: 'hover:text-gold hover:border-gold/40' },
-  ].filter(Boolean) as { key: keyof typeof ICONS; href: string; label: string; hover: string }[]
+    whatsappLink && { key: 'whatsapp', href: whatsappLink, label: 'WhatsApp' },
+    instagramUrl && { key: 'instagram', href: instagramUrl, label: 'Instagram' },
+    youtubeUrl && { key: 'youtube', href: youtubeUrl, label: 'YouTube' },
+  ].filter(Boolean) as { key: keyof typeof ICONS; href: string; label: string }[]
 
   if (items.length === 0) return null
 
@@ -41,7 +49,7 @@ export default function SocialLinks({ whatsappLink, instagramUrl, youtubeUrl, va
             href={item.href}
             target="_blank"
             rel="noopener noreferrer"
-            className={`text-gray-400 ${item.hover} text-xs transition-colors`}
+            className="link-underline text-gray-400 hover:text-gold text-xs"
           >
             {item.label}
           </a>
@@ -58,9 +66,15 @@ export default function SocialLinks({ whatsappLink, instagramUrl, youtubeUrl, va
           href={item.href}
           target="_blank"
           rel="noopener noreferrer"
-          className={`flex items-center gap-2 text-sm text-gray-400 ${item.hover} border border-white/10 rounded-full px-3 py-1.5 transition-colors`}
+          className={`group flex items-center gap-2 text-sm text-gray-400 border border-white/10
+                      bg-white/[0.02] rounded-full px-4 py-2
+                      transition-all duration-300 ease-out-expo
+                      hover:-translate-y-0.5 hover:bg-white/[0.06] active:scale-95
+                      ${HOVER[item.key]}`}
         >
-          {ICONS[item.key]}
+          <span className="transition-transform duration-300 ease-spring group-hover:scale-110 group-hover:-rotate-6">
+            {ICONS[item.key]}
+          </span>
           {item.label}
         </a>
       ))}
