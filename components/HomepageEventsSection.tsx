@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
 import { Event, Gender } from '@/lib/types'
@@ -30,6 +31,7 @@ interface MemberForRegistration {
 
 export default function HomepageEventsSection({ events }: Props) {
   const supabase = createClient()
+  const router = useRouter()
 
   const [registerOpenFor, setRegisterOpenFor] = useState<EventWithSlots | null>(null)
   const [phoneInput, setPhoneInput] = useState('')
@@ -52,6 +54,12 @@ export default function HomepageEventsSection({ events }: Props) {
   }
 
   const handleRegisterClick = (event: EventWithSlots) => {
+    // Paid events skip this quick modal entirely — the payment-screenshot
+    // upload step only lives in the full /register form.
+    if (event.is_paid) {
+      router.push(`/register?event=${event.id}`)
+      return
+    }
     setRegisterOpenFor(event)
   }
 
@@ -77,6 +85,9 @@ export default function HomepageEventsSection({ events }: Props) {
     setMember(data as MemberForRegistration)
   }
 
+  // Only ever reached for free events — handleRegisterClick redirects paid
+  // events straight to /register before this modal (and this function) can
+  // be reached, so no payment handling is needed here.
   const handleConfirm = async () => {
     if (!registerOpenFor || !member) return
     setSubmitting(true)

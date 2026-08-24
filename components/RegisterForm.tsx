@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Event, Gender, Question } from '@/lib/types'
 import { REASON_OPTIONS } from '@/lib/constants'
 import EventPreviewCard from '@/components/EventPreviewCard'
 import { createRegistrationResponses } from '@/app/register/actions'
+import { validatePhotoFile } from '@/lib/photo-upload'
+import { uploadPaymentScreenshot } from '@/lib/payment-upload'
 
 interface EventWithCounts extends Event {
   male_count: number
@@ -30,9 +32,10 @@ interface MemberForRegistration {
 interface Props {
   events: EventWithCounts[]
   preselectedEventId?: string
+  paymentQrUrl?: string | null
 }
 
-export default function RegisterForm({ events, preselectedEventId }: Props) {
+export default function RegisterForm({ events, preselectedEventId, paymentQrUrl }: Props) {
   const router = useRouter()
   const supabase = createClient()
 
@@ -55,12 +58,17 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
     running_experience: '',
     emergency_contact_name: '',
     emergency_contact_phone: '',
+    payment_screenshot_url: '',
+    payment_screenshot_path: '',
   })
   const [safetyOpen, setSafetyOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [liveCounts, setLiveCounts] = useState<{ male: number; female: number } | null>(null)
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, string | string[]>>({})
+  const [uploadingPayment, setUploadingPayment] = useState(false)
+  const [paymentUploadError, setPaymentUploadError] = useState('')
+  const paymentFileInputRef = useRef<HTMLInputElement>(null)
 
   const selectedEvent = events.find((e) => e.id === form.event_id)
   const eventQuestions = selectedEvent?.questions || []
@@ -152,6 +160,33 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
     setError('')
   }
 
+  const handlePaymentFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const validationError = validatePhotoFile(file)
+    if (validationError) {
+      setPaymentUploadError(validationError)
+      if (paymentFileInputRef.current) paymentFileInputRef.current.value = ''
+      return
+    }
+
+    setUploadingPayment(true)
+    setPaymentUploadError('')
+
+    const uploaded = await uploadPaymentScreenshot(supabase, file)
+    setUploadingPayment(false)
+
+    if ('error' in uploaded) {
+      setPaymentUploadError(uploaded.error)
+      if (paymentFileInputRef.current) paymentFileInputRef.current.value = ''
+      return
+    }
+
+    setForm((prev) => ({ ...prev, payment_screenshot_url: uploaded.url, payment_screenshot_path: uploaded.path }))
+    setError('')
+  }
+
   const toggleReason = (reason: string) => {
     setForm((prev) => ({
       ...prev,
@@ -168,6 +203,10 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
     if (!form.gender) { setError('Please select your gender.'); return }
     if (form.reasons.length === 0) { setError('Please select at least one reason.'); return }
     if (isPastDeadline) { setError('Registration is closed. The deadline has passed.'); return }
+    if (selectedEvent?.is_paid && !form.payment_screenshot_url) {
+      setError('Please upload your payment screenshot to continue.')
+      return
+    }
 
     for (const q of eventQuestions) {
       if (!q.required) continue
@@ -233,6 +272,9 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
         running_experience: form.running_experience || null,
         emergency_contact_name: form.emergency_contact_name.trim() || null,
         emergency_contact_phone: form.emergency_contact_phone.trim() || null,
+        payment_screenshot_url: selectedEvent?.is_paid ? form.payment_screenshot_url : null,
+        payment_screenshot_path: selectedEvent?.is_paid ? form.payment_screenshot_path : null,
+        payment_status: selectedEvent?.is_paid ? 'pending' : 'not_required',
       })
       .select('id')
       .single()
@@ -653,6 +695,47 @@ export default function RegisterForm({ events, preselectedEventId }: Props) {
           </div>
         )}
       </div>
+
+      {/* Payment — only for paid events, required before submit */}
+      {selectedEvent?.is_paid && (
+        <div className="card space-y-4">
+          <h2 className="heading-display text-white text-xl border-b border-white/10 pb-3">Payment</h2>
+          <p className="text-gray-300 text-sm">
+            This event costs <span className="text-gold font-semibold">₹{selectedEvent.price_inr}</span>.
+            Scan the QR code below to pay, then upload a screenshot of your payment confirmation.
+          </p>
+
+          {paymentQrUrl ? (
+            <img src={paymentQrUrl} alt="Payment QR code" className="w-48 h-48 object-contain rounded-lg border border-white/10 bg-white p-2 mx-auto" />
+          ) : (
+            <p className="text-red-400 text-sm bg-red-900/20 border border-red-800/40 rounded-lg px-4 py-2">
+              Payment QR code isn&apos;t set up yet — please contact us before registering.
+            </p>
+          )}
+
+          <div>
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              Payment Screenshot <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              ref={paymentFileInputRef}
+              onChange={handlePaymentFileChange}
+              disabled={uploadingPayment}
+              className="input-field"
+            />
+            {uploadingPayment && <p className="text-gold text-xs mt-1">Uploading...</p>}
+            {paymentUploadError && <p className="text-red-400 text-xs mt-1">{paymentUploadError}</p>}
+            {form.payment_screenshot_url && (
+              <div className="mt-2 flex items-center gap-3">
+                <img src={form.payment_screenshot_url} alt="Payment screenshot preview" className="w-16 h-16 object-cover rounded-lg border border-white/10" />
+                <span className="text-green-400 text-xs">Screenshot uploaded ✓</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="bg-red-900/20 border border-red-800/50 rounded-lg px-4 py-3 text-red-400 text-sm">

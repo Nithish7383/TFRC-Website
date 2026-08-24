@@ -54,6 +54,8 @@ export default function CreateEventForm() {
     distance: '',
     pace_group: '',
     cover_image_url: '',
+    is_paid: false,
+    price_inr: '',
   })
   const [customQuestions, setCustomQuestions] = useState<CustomQuestionDraft[]>([])
   const [defaultQuestions, setDefaultQuestions] = useState<Question[]>([])
@@ -88,6 +90,19 @@ export default function CreateEventForm() {
       // admin switches away from Running so a stale value can't get
       // submitted for an event type where the field is hidden.
       ...(name === 'event_type' && value !== 'Running' ? { distance: '', pace_group: '' } : {}),
+    }))
+    setError('')
+    setSuccess(false)
+  }
+
+  const handlePaidToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked
+    setForm((prev) => ({
+      ...prev,
+      is_paid: checked,
+      // Price is only meaningful while paid — clear it if the admin
+      // unchecks so a stale value can't get submitted for a now-free event.
+      ...(checked ? {} : { price_inr: '' }),
     }))
     setError('')
     setSuccess(false)
@@ -147,6 +162,11 @@ export default function CreateEventForm() {
       }
     }
 
+    if (form.is_paid && !parseInt(form.price_inr)) {
+      setError('Enter a price for this paid event.')
+      return
+    }
+
     setLoading(true)
     setError('')
 
@@ -174,6 +194,8 @@ export default function CreateEventForm() {
         distance: form.distance.trim() || null,
         pace_group: form.pace_group.trim() || null,
         cover_image_url: form.cover_image_url.trim() || null,
+        is_paid: form.is_paid,
+        price_inr: form.is_paid ? parseInt(form.price_inr) || null : null,
       },
       [], // new admin-authored defaults aren't built in this form — see Section 4 note below
       customPayload
@@ -190,6 +212,7 @@ export default function CreateEventForm() {
     setForm({
       title: '', date: '', event_type: 'Running', status: 'open', max_male: '20', max_female: '20', group_link: '',
       registration_deadline: '', meeting_point_url: '', distance: '', pace_group: '', cover_image_url: '',
+      is_paid: false, price_inr: '',
     })
     setCustomQuestions([])
     setCoverUploadError('')
@@ -233,6 +256,39 @@ export default function CreateEventForm() {
           </select>
           <p className="text-gray-600 text-xs mt-1">Controls the homepage event card's CTA button state.</p>
         </div>
+
+        <div className="md:col-span-2">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.is_paid}
+              onChange={handlePaidToggle}
+              className="accent-gold w-4 h-4"
+            />
+            <span className="text-gray-300 text-sm font-medium">This is a paid event</span>
+          </label>
+          <p className="text-gray-600 text-xs mt-1">
+            Registrants pay via the site-wide QR code (set in Settings) and upload a screenshot to register.
+          </p>
+        </div>
+
+        {form.is_paid && (
+          <div>
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              Price (₹) <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="number"
+              name="price_inr"
+              value={form.price_inr}
+              onChange={handleChange}
+              required
+              min="1"
+              placeholder="e.g. 299"
+              className="input-field"
+            />
+          </div>
+        )}
 
         <div>
           <label className="block text-gray-300 text-sm font-medium mb-2">

@@ -78,7 +78,12 @@ export default async function EventDetailPage({
   const maleCount = allRegs.filter((r: Registration) => r.gender === 'Male').length
   const femaleCount = allRegs.filter((r: Registration) => r.gender === 'Female').length
 
-  const selectedUsers = allRegs.filter((r: Registration) => r.status === 'selected')
+  // For paid events, only send the WhatsApp link to registrants whose
+  // payment has actually been verified — status === 'selected' alone isn't
+  // enough once money is involved. Free events are unaffected.
+  const selectedUsers = allRegs.filter(
+    (r: Registration) => r.status === 'selected' && (!event.is_paid || r.payment_status === 'verified')
+  )
 
   return (
     <main className="min-h-screen bg-black">
@@ -104,6 +109,11 @@ export default async function EventDetailPage({
               })}
             </p>
           </div>
+          {event.is_paid && (
+            <span className="text-xs font-medium px-2.5 py-1 rounded-full border flex-shrink-0 bg-gold/10 text-gold border-gold/30">
+              ₹{event.price_inr}
+            </span>
+          )}
           <span className={`text-xs font-medium px-2.5 py-1 rounded-full border flex-shrink-0 ${
             event.is_active
               ? 'bg-green-900/30 text-green-400 border-green-800/40'
@@ -250,6 +260,7 @@ export default async function EventDetailPage({
             eventTitle={event.title}
             maxParticipants={event.max_male + event.max_female}
             responsesByRegistration={responsesByRegistration}
+            eventIsPaid={event.is_paid}
           />
         </div>
 

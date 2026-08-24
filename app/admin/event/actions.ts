@@ -16,6 +16,8 @@ export interface NewEventInput {
   distance: string | null
   pace_group: string | null
   cover_image_url: string | null
+  is_paid: boolean
+  price_inr: number | null
 }
 
 export interface NewQuestionInput {
@@ -61,6 +63,8 @@ export async function createEventWithQuestions(
       distance: eventData.distance,
       pace_group: eventData.pace_group,
       cover_image_url: eventData.cover_image_url,
+      is_paid: eventData.is_paid,
+      price_inr: eventData.price_inr,
     })
     .select('id')
     .single()

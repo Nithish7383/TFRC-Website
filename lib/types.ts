@@ -3,6 +3,7 @@ export type RegistrationStatus = 'pending' | 'selected' | 'rejected'
 export type EventType = 'Running' | 'Trek' | 'Yoga' | 'Turf' | 'Meetup'
 export type EventStatus = 'open' | 'closing_soon' | 'not_open_yet'
 export type QuestionType = 'text' | 'number' | 'select' | 'multiselect' | 'textarea' | 'date' | 'checkbox'
+export type PaymentStatus = 'not_required' | 'pending' | 'verified' | 'rejected'
 
 export interface Event {
   id: string
@@ -20,6 +21,8 @@ export interface Event {
   cover_image_url?: string | null
   event_type?: EventType
   status?: EventStatus
+  is_paid: boolean
+  price_inr?: number | null
   questions?: Question[]
 }
 
@@ -61,6 +64,9 @@ export interface Registration {
   running_experience?: string | null
   emergency_contact_name?: string | null
   emergency_contact_phone?: string | null
+  payment_screenshot_url?: string | null
+  payment_screenshot_path?: string | null
+  payment_status: PaymentStatus
 }
 
 export interface RegistrationWithEvent extends Registration {

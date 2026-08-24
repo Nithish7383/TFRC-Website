@@ -28,6 +28,8 @@ export default function CloneEventButton({ event }: Props) {
       pace_group: event.pace_group || null,
       meeting_point_url: event.meeting_point_url || null,
       registration_deadline: null,
+      is_paid: event.is_paid,
+      price_inr: event.price_inr,
     })
     setLoading(false)
     setDone(true)

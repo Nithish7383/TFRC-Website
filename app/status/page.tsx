@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
-import { RegistrationStatus } from '@/lib/types'
+import { RegistrationStatus, PaymentStatus } from '@/lib/types'
 import StatusBadge from '@/components/ui/StatusBadge'
 import SiteHeader from '@/components/ui/SiteHeader'
 import Reveal from '@/components/ui/Reveal'
@@ -13,11 +13,14 @@ import StaggerReveal, { StaggerItem } from '@/components/ui/StaggerReveal'
 interface RegResult {
   id: string
   status: RegistrationStatus
+  payment_status: PaymentStatus
   created_at: string
   events: {
     title: string
     date: string
     group_link: string | null
+    is_paid: boolean
+    price_inr: number | null
   }
 }
 
@@ -36,7 +39,7 @@ export default function StatusPage() {
 
     const { data } = await supabase
       .from('registrations')
-      .select('id, status, created_at, events(title, date, group_link)')
+      .select('id, status, payment_status, created_at, events(title, date, group_link, is_paid, price_inr)')
       .eq('phone', phone.trim())
       .order('created_at', { ascending: false })
 
@@ -165,7 +168,15 @@ function StatusCard({ reg }: { reg: RegResult }) {
       )}
 
       {reg.status === 'selected' && (
-        reg.events.group_link ? (
+        reg.events.is_paid && reg.payment_status !== 'verified' ? (
+          <div className="bg-white/[0.03] border border-white/10 rounded-lg px-4 py-3">
+            <p className="text-sm text-gray-400">
+              {reg.payment_status === 'rejected'
+                ? "We couldn't verify your payment — please contact us to resolve this."
+                : "You're selected! We're verifying your payment — your WhatsApp group link will appear here once confirmed."}
+            </p>
+          </div>
+        ) : reg.events.group_link ? (
           <a
             href={reg.events.group_link}
             target="_blank"

@@ -46,6 +46,11 @@ export default function SiteSettingsForm({ settings }: Props) {
   const [q3text, setQ3text] = useState(init['quote_3_text'] ?? '')
   const [q3name, setQ3name] = useState(init['quote_3_name'] ?? '')
 
+  const [paymentQr, setPaymentQr] = useState(init['payment_qr_code_url'] ?? '')
+  const [uploadingQr, setUploadingQr] = useState(false)
+  const [qrUploadError, setQrUploadError] = useState('')
+  const qrFileInputRef = useRef<HTMLInputElement>(null)
+
   const [heroVideoMobile, setHeroVideoMobile] = useState(init['hero_video_mobile_url'] ?? '')
   const [heroVideoDesktop, setHeroVideoDesktop] = useState(init['hero_video_desktop_url'] ?? '')
   const [uploadingVideo, setUploadingVideo] = useState<'mobile' | 'desktop' | null>(null)
@@ -94,6 +99,25 @@ export default function SiteSettingsForm({ settings }: Props) {
     setFeatImage(result.url)
     await upsert(supabase, { featured_event_image_url: result.url })
     setSaved('featured-image')
+    setTimeout(() => setSaved(null), 2000)
+  }
+
+  const handleQrUpload = async (file: File) => {
+    setUploadingQr(true)
+    setQrUploadError('')
+
+    const result = await uploadPhoto(supabase, file, 'payment-qr')
+
+    setUploadingQr(false)
+
+    if ('error' in result) {
+      setQrUploadError(result.error)
+      return
+    }
+
+    setPaymentQr(result.url)
+    await upsert(supabase, { payment_qr_code_url: result.url })
+    setSaved('payment-qr')
     setTimeout(() => setSaved(null), 2000)
   }
 
@@ -268,6 +292,35 @@ export default function SiteSettingsForm({ settings }: Props) {
           </div>
         ))}
         <SaveBtn section="quotes" />
+      </div>
+
+      {/* Section 3.5 — Payments */}
+      <div className="card space-y-4">
+        <h3 className="text-white font-semibold">Payments</h3>
+        <p className="text-gray-500 text-xs">
+          One QR code, shown on the registration form for any event marked as paid.
+          Each paid event sets its own price separately when it&apos;s created or edited.
+        </p>
+        <div>
+          <label className="block text-gray-400 text-xs mb-1">Payment QR Code</label>
+          {paymentQr && (
+            <img src={paymentQr} alt="Payment QR code" className="w-40 h-40 object-contain rounded-lg border border-white/10 mb-2 bg-white p-2" />
+          )}
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            ref={qrFileInputRef}
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) handleQrUpload(file)
+            }}
+            disabled={uploadingQr}
+            className="input-field text-sm"
+          />
+          {uploadingQr && <p className="text-gold text-xs mt-1">Uploading...</p>}
+          {qrUploadError && <p className="text-red-400 text-xs mt-1">{qrUploadError}</p>}
+          {saved === 'payment-qr' && <p className="text-green-400 text-xs mt-1">Saved ✓</p>}
+        </div>
       </div>
 
       {/* Section 4.5 — Hero Video */}

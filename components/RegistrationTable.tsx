@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
-import { Registration, RegistrationStatus } from '@/lib/types'
+import { Registration, RegistrationStatus, PaymentStatus } from '@/lib/types'
 import { useRouter } from 'next/navigation'
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
   eventTitle?: string
   maxParticipants?: number
   responsesByRegistration?: Record<string, { text: string; answer: string | null; order_index: number }[]>
+  eventIsPaid?: boolean
 }
 
 const EXPERIENCE_COLORS: Record<string, string> = {
@@ -20,7 +21,7 @@ const EXPERIENCE_COLORS: Record<string, string> = {
   'Competitive': 'bg-red-900/30 text-red-400 border-red-800/40',
 }
 
-export default function RegistrationTable({ registrations, eventId, eventTitle = 'registrations', maxParticipants = 30, responsesByRegistration = {} }: Props) {
+export default function RegistrationTable({ registrations, eventId, eventTitle = 'registrations', maxParticipants = 30, responsesByRegistration = {}, eventIsPaid = false }: Props) {
   const supabase = createClient()
   const router = useRouter()
 
@@ -66,6 +67,13 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
     setUpdating(id)
     await supabase.from('registrations').update({ status }).eq('id', id)
     setLocalRegs((prev) => prev.map((r) => r.id === id ? { ...r, status } : r))
+    setUpdating(null)
+  }
+
+  const updatePaymentStatus = async (id: string, payment_status: PaymentStatus) => {
+    setUpdating(id)
+    await supabase.from('registrations').update({ payment_status }).eq('id', id)
+    setLocalRegs((prev) => prev.map((r) => r.id === id ? { ...r, payment_status } : r))
     setUpdating(null)
   }
 
@@ -134,7 +142,9 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
 
   const handleAutoSelect = async () => {
     setAutoSelecting(true)
-    const pending = localRegs.filter((r) => r.status !== 'selected')
+    // Never auto-select an unpaid registrant into a paid event — free
+    // events are unaffected since !eventIsPaid short-circuits true.
+    const pending = localRegs.filter((r) => r.status !== 'selected' && (!eventIsPaid || r.payment_status === 'verified'))
     let toSelect: Registration[] = []
 
     if (autoSelectMode === 'first') {
@@ -304,7 +314,11 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
                   className="accent-gold"
                 />
               </th>
-              {['Name', 'Age', 'Gender', 'Place', 'Phone', 'Experience', 'Status', 'Attended', 'Notes', 'Actions'].map((h) => (
+              {[
+                'Name', 'Age', 'Gender', 'Place', 'Phone', 'Experience', 'Status',
+                ...(eventIsPaid ? ['Payment'] : []),
+                'Attended', 'Notes', 'Actions',
+              ].map((h) => (
                 <th key={h} className="text-left text-gray-400 font-medium px-4 py-3 whitespace-nowrap">
                   {h}
                 </th>
@@ -361,6 +375,46 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
                   <td className="px-4 py-3">
                     <StatusBadge status={reg.status} />
                   </td>
+                  {eventIsPaid && (
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-2">
+                          <PaymentStatusBadge status={reg.payment_status} />
+                          {reg.payment_screenshot_url && (
+                            <a
+                              href={reg.payment_screenshot_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-gold hover:underline text-xs whitespace-nowrap"
+                            >
+                              View
+                            </a>
+                          )}
+                        </div>
+                        {!reg.payment_screenshot_url && (
+                          <span className="text-gray-600 text-xs">No screenshot</span>
+                        )}
+                        {reg.payment_status === 'pending' && (
+                          <div className="flex gap-1.5">
+                            <button
+                              onClick={() => updatePaymentStatus(reg.id, 'verified')}
+                              disabled={updating === reg.id}
+                              className="btn-success text-xs py-1 px-2"
+                            >
+                              Verify
+                            </button>
+                            <button
+                              onClick={() => updatePaymentStatus(reg.id, 'rejected')}
+                              disabled={updating === reg.id}
+                              className="btn-danger text-xs py-1 px-2"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  )}
                   <td className="px-4 py-3">
                     <input
                       type="checkbox"
@@ -422,7 +476,7 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
                 </tr>
                 {expandedId === reg.id && (
                   <tr key={`${reg.id}-exp`} className="bg-white/[0.04] border-b border-white/10">
-                    <td colSpan={11} className="px-6 py-4">
+                    <td colSpan={eventIsPaid ? 12 : 11} className="px-6 py-4">
                       <div className="grid md:grid-cols-2 gap-4 text-sm">
                         <div>
                           <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Reason for joining</p>
@@ -482,6 +536,26 @@ function StatusBadge({ status }: { status: RegistrationStatus }) {
   return (
     <span className={`text-xs font-medium px-2 py-0.5 rounded-full border capitalize ${styles[status]}`}>
       {status}
+    </span>
+  )
+}
+
+function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
+  const styles: Record<PaymentStatus, string> = {
+    not_required: 'bg-white/5 text-gray-500 border-white/10',
+    pending: 'bg-yellow-900/30 text-yellow-400 border-yellow-800/40',
+    verified: 'bg-green-900/30 text-green-400 border-green-800/40',
+    rejected: 'bg-red-900/30 text-red-400 border-red-800/40',
+  }
+  const labels: Record<PaymentStatus, string> = {
+    not_required: 'N/A',
+    pending: 'Pending',
+    verified: 'Verified',
+    rejected: 'Rejected',
+  }
+  return (
+    <span className={`text-xs font-medium px-2 py-0.5 rounded-full border whitespace-nowrap ${styles[status]}`}>
+      {labels[status]}
     </span>
   )
 }

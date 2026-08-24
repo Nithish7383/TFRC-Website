@@ -15,11 +15,18 @@ export default async function RegisterPage({
 }) {
   const supabase = createClient()
 
-  const { data: events } = await supabase
-    .from('events')
-    .select('*')
-    .eq('is_active', true)
-    .order('date', { ascending: true })
+  const [{ data: events }, { data: qrSetting }] = await Promise.all([
+    supabase
+      .from('events')
+      .select('*')
+      .eq('is_active', true)
+      .order('date', { ascending: true }),
+    supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'payment_qr_code_url')
+      .maybeSingle(),
+  ])
 
   const eventsWithCounts: EventWithCounts[] = await Promise.all(
     ((events as Event[]) || []).map(async (event) => {
@@ -71,6 +78,7 @@ export default async function RegisterPage({
         <RegisterForm
           events={eventsWithCounts}
           preselectedEventId={searchParams.event}
+          paymentQrUrl={qrSetting?.value ?? null}
         />
       </div>
       </div>

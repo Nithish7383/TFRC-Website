@@ -35,6 +35,8 @@ export default function EditEventForm({ event, onClose }: Props) {
     distance: event.distance || '',
     pace_group: event.pace_group || '',
     cover_image_url: event.cover_image_url || '',
+    is_paid: event.is_paid || false,
+    price_inr: event.price_inr ? String(event.price_inr) : '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -44,6 +46,16 @@ export default function EditEventForm({ event, onClose }: Props) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    setError('')
+  }
+
+  const handlePaidToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked
+    setForm((prev) => ({
+      ...prev,
+      is_paid: checked,
+      ...(checked ? {} : { price_inr: '' }),
+    }))
     setError('')
   }
 
@@ -67,6 +79,12 @@ export default function EditEventForm({ event, onClose }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (form.is_paid && !parseInt(form.price_inr)) {
+      setError('Enter a price for this paid event.')
+      return
+    }
+
     setLoading(true)
     setError('')
 
@@ -84,6 +102,8 @@ export default function EditEventForm({ event, onClose }: Props) {
         distance: form.distance.trim() || null,
         pace_group: form.pace_group.trim() || null,
         cover_image_url: form.cover_image_url.trim() || null,
+        is_paid: form.is_paid,
+        price_inr: form.is_paid ? parseInt(form.price_inr) || null : null,
       })
       .eq('id', event.id)
 
@@ -148,6 +168,36 @@ export default function EditEventForm({ event, onClose }: Props) {
               {EVENT_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
           </div>
+
+          <div className="md:col-span-2">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.is_paid}
+                onChange={handlePaidToggle}
+                className="accent-gold w-4 h-4"
+              />
+              <span className="text-gray-300 text-sm font-medium">This is a paid event</span>
+            </label>
+          </div>
+
+          {form.is_paid && (
+            <div>
+              <label className="block text-gray-300 text-sm font-medium mb-2">
+                Price (₹) <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="number"
+                name="price_inr"
+                value={form.price_inr}
+                onChange={handleChange}
+                required
+                min="1"
+                placeholder="e.g. 299"
+                className="input-field"
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-gray-300 text-sm font-medium mb-2">
