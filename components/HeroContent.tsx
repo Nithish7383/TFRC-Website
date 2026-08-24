@@ -29,7 +29,7 @@ export default function HeroContent() {
         variants={item}
         className="eyebrow mb-5 bg-black/40 backdrop-blur-md border border-gold/20 rounded-full px-4 py-1.5"
       >
-        Madurai&apos;s running movement
+        Madurai&apos;s fitness movement
       </motion.span>
 
       <motion.h1

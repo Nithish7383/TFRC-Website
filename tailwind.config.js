@@ -42,6 +42,9 @@ module.exports = {
         'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
         'spring': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
       },
+      transitionDuration: {
+        '400': '400ms',
+      },
       keyframes: {
         'fade-up': {
           '0%': { opacity: '0', transform: 'translateY(16px)' },

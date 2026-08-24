@@ -10,8 +10,11 @@ function Row({ photos, direction }: { photos: GalleryPhoto[]; direction: 'left' 
 
   return (
     <div
-      className="group/row flex gap-4 w-max"
-      style={{ animation: `marquee-${direction} 40s linear infinite` }}
+      className="marquee-row group/row flex gap-4 w-max"
+      style={{
+        '--marquee-name': `marquee-${direction}`,
+        '--marquee-duration': '40s',
+      } as React.CSSProperties}
     >
       {doubled.map((photo, i) => (
         <div
@@ -19,7 +22,6 @@ function Row({ photos, direction }: { photos: GalleryPhoto[]; direction: 'left' 
           className="flex-shrink-0 w-[220px] sm:w-[300px] md:w-[380px] h-[150px] sm:h-[190px] md:h-[240px]
                      rounded-xl overflow-hidden border border-white/10 relative
                      transition-all duration-500 ease-out-expo
-                     [animation-play-state:running] group-hover/row:[animation-play-state:paused]
                      hover:!scale-[1.03] hover:z-10 hover:border-gold/40 hover:shadow-gold-glow"
         >
           <img

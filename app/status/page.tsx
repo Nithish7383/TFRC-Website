@@ -2,10 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { AnimatePresence, motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
 import { RegistrationStatus } from '@/lib/types'
 import StatusBadge from '@/components/ui/StatusBadge'
 import SiteHeader from '@/components/ui/SiteHeader'
+import Reveal from '@/components/ui/Reveal'
+import StaggerReveal, { StaggerItem } from '@/components/ui/StaggerReveal'
 
 interface RegResult {
   id: string
@@ -47,40 +50,55 @@ export default function StatusPage() {
       <SiteHeader />
       <div className="py-12 px-4">
       <div className="max-w-xl mx-auto">
-        <div className="text-center mb-10">
-          <p className="eyebrow mb-2 justify-center w-full">Track your run</p>
-          <h1 className="heading-display text-white text-4xl mb-2">Check Registration Status</h1>
-          <p className="text-gray-400">Enter your WhatsApp number to see your registration status.</p>
-        </div>
+        <Reveal>
+          <div className="text-center mb-10">
+            <p className="eyebrow mb-2 justify-center w-full">Track your run</p>
+            <h1 className="heading-display text-white text-4xl mb-2">Check Registration Status</h1>
+            <p className="text-gray-400">Enter your WhatsApp number to see your registration status.</p>
+          </div>
+        </Reveal>
 
-        <form onSubmit={handleCheck} className="card flex flex-col sm:flex-row gap-3 mb-8">
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => { setPhone(e.target.value); setSearched(false) }}
-            placeholder="e.g. 9876543210"
-            required
-            className="input-field flex-1"
-          />
-          <button type="submit" disabled={loading} className="btn-primary whitespace-nowrap">
-            {loading ? 'Checking...' : 'Check Status'}
-          </button>
-        </form>
+        <Reveal delay={80}>
+          <form onSubmit={handleCheck} className="card flex flex-col sm:flex-row gap-3 mb-8">
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => { setPhone(e.target.value); setSearched(false) }}
+              placeholder="e.g. 9876543210"
+              required
+              className="input-field flex-1"
+            />
+            <button type="submit" disabled={loading} className="btn-primary whitespace-nowrap">
+              {loading ? 'Checking...' : 'Check Status'}
+            </button>
+          </form>
+        </Reveal>
 
-        {searched && results !== null && (
-          results.length === 0 ? (
-            <div className="card text-center py-10">
-              <p className="text-gray-400">No registration found for this number.</p>
-              <p className="text-gray-600 text-sm mt-2">Double-check the number you used when registering.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {results.map((reg) => (
-                <StatusCard key={reg.id} reg={reg} />
-              ))}
-            </div>
-          )
-        )}
+        <AnimatePresence mode="wait">
+          {searched && results !== null && (
+            results.length === 0 ? (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="card text-center py-10"
+              >
+                <p className="text-gray-400">No registration found for this number.</p>
+                <p className="text-gray-600 text-sm mt-2">Double-check the number you used when registering.</p>
+              </motion.div>
+            ) : (
+              <StaggerReveal key="results" className="space-y-4" stagger={0.08}>
+                {results.map((reg) => (
+                  <StaggerItem key={reg.id}>
+                    <StatusCard reg={reg} />
+                  </StaggerItem>
+                ))}
+              </StaggerReveal>
+            )
+          )}
+        </AnimatePresence>
       </div>
       </div>
     </main>
@@ -114,7 +132,7 @@ function StatusCard({ reg }: { reg: RegResult }) {
   const cfg = messageConfig[reg.status]
 
   return (
-    <div className="card space-y-3">
+    <div className="card-interactive space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-white font-semibold">{reg.events.title}</p>
@@ -139,9 +157,10 @@ function StatusCard({ reg }: { reg: RegResult }) {
       {reg.status === 'rejected' && (
         <Link
           href="/register"
-          className="flex items-center justify-center btn-primary text-sm py-2.5 mt-1"
+          className="group/link flex items-center justify-center gap-1.5 btn-primary text-sm py-2.5 mt-1"
         >
-          Register for our next event →
+          Register for our next event
+          <span className="transition-transform duration-300 ease-out-expo group-hover/link:translate-x-1">→</span>
         </Link>
       )}
 
@@ -151,9 +170,11 @@ function StatusCard({ reg }: { reg: RegResult }) {
             href={reg.events.group_link}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-green-700 hover:bg-green-600 text-white font-semibold px-5 py-3 rounded-lg transition-colors w-full justify-center mt-3"
+            className="group/link flex items-center gap-2 bg-green-700 hover:bg-green-600 text-white font-semibold px-5 py-3 rounded-lg
+                       transition-all duration-300 ease-out-expo hover:-translate-y-0.5 hover:shadow-lift w-full justify-center mt-3"
           >
-            Join WhatsApp Group →
+            Join WhatsApp Group
+            <span className="transition-transform duration-300 ease-out-expo group-hover/link:translate-x-1">→</span>
           </a>
         ) : (
           <div className="bg-white/[0.03] border border-white/10 rounded-lg px-4 py-3">

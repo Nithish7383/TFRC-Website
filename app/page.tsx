@@ -25,6 +25,10 @@ const FAQ_ITEMS = [
     answer: 'Not at all. We welcome every pace, from first-timers to competitive runners. No ego, just show up.',
   },
   {
+    question: 'Do I need experience in martial arts or fitness to join?',
+    answer: 'No experience needed — just show up. Our sessions welcome complete beginners alongside seasoned practitioners.',
+  },
+  {
     question: 'How do I register for an event?',
     answer: 'Become a member first (it takes a minute), then pick any upcoming event and register with your member phone number.',
   },
@@ -209,8 +213,8 @@ export default async function LandingPage() {
               </h2>
               <p className="text-gray-200 leading-relaxed text-base md:text-lg max-w-2xl mx-auto">
                 We&apos;re building a culture where movement feels less like a workout and more like
-                something you can&apos;t wait to show up for — sunrise runs, weekend adventures, and a
-                place you&apos;ll always find your people.
+                something you can&apos;t wait to show up for — sunrise runs, weekend treks, martial arts
+                sessions, and a place to meet new people, network, and always find your community.
               </p>
             </div>
           </section>
@@ -238,9 +242,10 @@ export default async function LandingPage() {
           </StaggerItem>
           <StaggerItem>
             <p className="text-gray-400 leading-relaxed mt-4">
-              The First Rule Club exists to bring people into a healthier lifestyle through workouts,
-              treks, sports, adventures, and meaningful connections. Because fitness is easier, more
-              exciting, and far more rewarding when you do it together.
+              The First Rule Club exists to bring people into a healthier lifestyle through runs,
+              treks, martial arts, and adventures — while building a network of people who push each
+              other to grow. Because fitness is easier, more exciting, and far more rewarding when you
+              do it together.
             </p>
           </StaggerItem>
         </StaggerReveal>
@@ -253,7 +258,7 @@ export default async function LandingPage() {
           <div className="relative max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
             <div>
               <p className="text-white font-semibold text-lg">
-                <span className="stat-number text-gold">{communityStatValue}</span> runners strong, and counting.
+                <span className="stat-number text-gold">{communityStatValue}</span> strong, and counting.
               </p>
               <p className="text-gray-500 text-sm mt-1">No entry fee, no ego — just show up.</p>
             </div>

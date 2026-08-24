@@ -77,6 +77,45 @@
   }
 }
 
+/* ---------------------------------------------------------------------
+   Keyframes for animations driven from inline styles (marquee rows need a
+   per-row duration, so they can't use a static Tailwind utility class).
+   Defined as plain CSS — outside any @layer / @apply — so they always
+   compile: Tailwind's JIT only emits @keyframes for entries under
+   theme.keyframes when it sees the matching `animate-*` class literally in
+   a scanned file, which an inline style never provides.
+   --------------------------------------------------------------------- */
+@keyframes marquee-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Infinite-scroll photo row. Direction/duration come in via custom
+   properties set inline (--marquee-name / --marquee-duration), so the
+   `animation` shorthand itself lives here in the stylesheet — that's what
+   lets the :hover pause rule actually win. An inline `style={{ animation }}`
+   sets the shorthand at max specificity and silently resets
+   animation-play-state back to "running" on every render, so a Tailwind
+   `hover:[animation-play-state:paused]` class can never override it. */
+.marquee-row {
+  animation-name: var(--marquee-name);
+  animation-duration: var(--marquee-duration);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
+}
+.marquee-row:hover {
+  animation-play-state: paused;
+}
+
 @layer components {
   /* ---------------------------------------------------------------------
      Buttons — shared plate: press-down feedback, glow lift, sheen sweep.
