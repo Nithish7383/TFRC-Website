@@ -280,7 +280,9 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
       .single()
 
     if (insertError) {
-      if (
+      if (insertError.message?.toLowerCase().includes('payment screenshot is required')) {
+        setError('Please upload your payment screenshot to continue.')
+      } else if (
         insertError.message?.toLowerCase().includes('slots are full') ||
         insertError.message?.toLowerCase().includes('male slots') ||
         insertError.message?.toLowerCase().includes('female slots') ||
