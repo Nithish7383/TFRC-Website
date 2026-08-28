@@ -140,58 +140,88 @@ export default async function AdminDashboard() {
         ]}
       />
 
-      <div className="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8">
+      <div className="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-10">
 
         {/* QUICK SEARCH */}
         <AdminQuickSearch />
 
-        {/* BLOCK 1 — Next Event Panel */}
-        <section>
-          <h2 className="heading-display text-white text-lg mb-3">Next Event</h2>
+        {/* ACTION BAR — the two things worth acting on today */}
+        <section className="grid gap-4 md:grid-cols-2">
           {nextEvent ? (
-            <div className="card border border-gold/30 space-y-4">
-              <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div className="card border border-gold/30">
+              <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
                 <div>
-                  <h3 className="text-white font-semibold text-lg">{nextEvent.title}</h3>
-                  <p className="text-gray-400 text-sm">
-                    {new Date(nextEvent.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
+                  <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Next Event</p>
+                  <h3 className="text-white font-semibold">{nextEvent.title}</h3>
+                  <p className="text-gray-400 text-xs mt-0.5">
+                    {new Date(nextEvent.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                     {' · '}
-                    <span className="text-gold">{daysUntil(nextEvent.date)} days away</span>
+                    <span className="text-gold">{daysUntil(nextEvent.date)}d away</span>
                   </p>
                 </div>
-                <Link
-                  href={`/admin/event/${nextEvent.id}`}
-                  className="btn-primary text-sm py-2 px-4 whitespace-nowrap"
-                >
-                  Go to Event →
+                <Link href={`/admin/event/${nextEvent.id}`} className="btn-primary text-xs py-1.5 px-3 whitespace-nowrap">
+                  View →
                 </Link>
               </div>
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div className="text-center">
-                  <p className="text-blue-400 font-bold text-xl">{nextEventMaleCount}/{nextEvent.max_male}</p>
-                  <p className="text-gray-500 text-xs">Male slots</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-pink-400 font-bold text-xl">{nextEventFemaleCount}/{nextEvent.max_female}</p>
-                  <p className="text-gray-500 text-xs">Female slots</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-yellow-400 font-bold text-xl">{nextEventPendingCount}</p>
-                  <p className="text-gray-500 text-xs">Pending</p>
-                </div>
+              <div className="flex gap-4 text-xs border-t border-white/10 pt-3">
+                <span className="text-blue-400">{nextEventMaleCount}/{nextEvent.max_male} <span className="text-gray-500">male</span></span>
+                <span className="text-pink-400">{nextEventFemaleCount}/{nextEvent.max_female} <span className="text-gray-500">female</span></span>
+                <span className="text-yellow-400">{nextEventPendingCount} <span className="text-gray-500">pending</span></span>
               </div>
             </div>
           ) : (
-            <div className="card text-center py-8">
-              <p className="text-gray-500">No upcoming events. Create one below.</p>
+            <div className="card flex items-center justify-center text-center py-6">
+              <p className="text-gray-500 text-sm">No upcoming events. Create one below.</p>
             </div>
           )}
+
+          <div className="card">
+            <p className="text-gray-500 text-xs uppercase tracking-wide mb-3">Needs Action</p>
+            <div className="space-y-2">
+              {paymentsToVerify > 0 && firstUnverifiedEventId && (
+                <Link
+                  href={`/admin/event/${firstUnverifiedEventId}`}
+                  className="flex items-center justify-between bg-yellow-900/20 border border-yellow-800/30 rounded-lg px-3 py-2 hover:bg-yellow-900/30 transition-colors"
+                >
+                  <span className="text-yellow-300 text-sm">{paymentsToVerify} payment{paymentsToVerify !== 1 ? 's' : ''} to verify</span>
+                  <span className="text-gray-500 text-xs">→</span>
+                </Link>
+              )}
+              {eventsPendingList.map(([eventId, count]) => (
+                <Link
+                  key={eventId}
+                  href={`/admin/event/${eventId}`}
+                  className="flex items-center justify-between bg-white/[0.03] border border-white/10 rounded-lg px-3 py-2 hover:bg-white/5 transition-colors"
+                >
+                  <span className="text-gray-300 text-sm">{count} pending registration{count !== 1 ? 's' : ''}</span>
+                  <span className="text-gray-500 text-xs truncate ml-2 max-w-[100px]">{eventMap[eventId] ?? 'Event'}</span>
+                </Link>
+              ))}
+              {duplicateCount > 0 && (
+                <Link
+                  href="/admin/members"
+                  className="flex items-center justify-between bg-orange-900/20 border border-orange-800/30 rounded-lg px-3 py-2 hover:bg-orange-900/30 transition-colors"
+                >
+                  <span className="text-orange-300 text-sm">{duplicateCount} duplicate member{duplicateCount !== 1 ? 's' : ''}</span>
+                  <span className="text-gray-500 text-xs">→</span>
+                </Link>
+              )}
+              {eventsMissingImage > 0 && (
+                <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 rounded-lg px-3 py-2">
+                  <span className="text-gray-400 text-sm">{eventsMissingImage} event{eventsMissingImage !== 1 ? 's' : ''} missing cover image</span>
+                </div>
+              )}
+              {paymentsToVerify === 0 && eventsPendingList.length === 0 && duplicateCount === 0 && eventsMissingImage === 0 && (
+                <p className="text-gray-600 text-sm py-1">All clear!</p>
+              )}
+            </div>
+          </div>
         </section>
 
-        {/* BLOCK 2 — Overview */}
+        {/* OVERVIEW STATS */}
         <section>
           <h2 className="heading-display text-white text-lg mb-3">Overview</h2>
-          <div className="card grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 divide-x divide-y sm:divide-y-0 divide-white/10">
+          <div className="card grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 divide-x divide-y sm:divide-y-0 divide-white/10">
             {[
               { label: 'Total Members', value: totalMembers ?? 0, color: 'text-white' },
               { label: 'Joined This Week', value: membersThisWeek, color: 'text-gold' },
@@ -204,103 +234,44 @@ export default async function AdminDashboard() {
                 <p className="text-gray-500 text-xs">{label}</p>
               </div>
             ))}
-            {paymentsToVerify > 0 && firstUnverifiedEventId ? (
-              <Link
-                href={`/admin/event/${firstUnverifiedEventId}`}
-                className="text-center px-2 py-3 first:pl-0 last:pr-0 hover:bg-white/5 transition-colors rounded-lg"
-              >
-                <p className="text-2xl font-bold mb-1 text-yellow-400">{paymentsToVerify}</p>
-                <p className="text-gray-500 text-xs">Payments to Verify</p>
-              </Link>
-            ) : (
-              <div className="text-center px-2 py-3 first:pl-0 last:pr-0">
-                <p className="text-2xl font-bold mb-1 text-gray-600">0</p>
-                <p className="text-gray-500 text-xs">Payments to Verify</p>
+          </div>
+        </section>
+
+        {/* RECENT JOINS */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="heading-display text-white text-lg">Recent Joins</h2>
+            <Link href="/admin/members" className="text-gold hover:underline text-xs">
+              View all →
+            </Link>
+          </div>
+          <div className="card grid gap-3 sm:grid-cols-2 md:grid-cols-5">
+            {(last5Members || []).map((m: { member_id: string; name: string; place: string; created_at: string }) => (
+              <div key={m.member_id} className="min-w-0">
+                <span className="stat-number text-gold text-xs tracking-wider bg-gold/10 border border-gold/30 px-2 py-1 rounded-lg whitespace-nowrap inline-block mb-1.5">
+                  {m.member_id}
+                </span>
+                <p className="text-white text-sm font-medium truncate">{m.name}</p>
+                <p className="text-gray-500 text-xs truncate">{m.place} · {timeAgo(m.created_at)}</p>
               </div>
+            ))}
+            {(last5Members || []).length === 0 && (
+              <p className="text-gray-600 text-sm">No members yet.</p>
             )}
           </div>
         </section>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* BLOCK 4 — Recent Joins */}
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="heading-display text-white text-lg">Recent Joins</h2>
-              <Link href="/admin/members" className="text-gold hover:underline text-xs">
-                View all →
-              </Link>
-            </div>
-            <div className="card space-y-3">
-              {(last5Members || []).map((m: { member_id: string; name: string; place: string; created_at: string }) => (
-                <div key={m.member_id} className="flex items-center gap-3">
-                  <span className="stat-number text-gold text-xs tracking-wider bg-gold/10 border border-gold/30 px-2 py-1 rounded-lg whitespace-nowrap">
-                    {m.member_id}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium truncate">{m.name}</p>
-                    <p className="text-gray-500 text-xs">{m.place}</p>
-                  </div>
-                  <span className="text-gray-600 text-xs whitespace-nowrap">{timeAgo(m.created_at)}</span>
-                </div>
-              ))}
-              {(last5Members || []).length === 0 && (
-                <p className="text-gray-600 text-sm">No members yet.</p>
-              )}
-            </div>
-          </section>
-
-          {/* BLOCK 5 — Needs Attention */}
-          <section>
-            <h2 className="heading-display text-white text-lg mb-3">Needs Attention</h2>
-            <div className="card space-y-3">
-              {eventsPendingList.map(([eventId, count]) => (
-                <Link
-                  key={eventId}
-                  href={`/admin/event/${eventId}`}
-                  className="flex items-center justify-between bg-yellow-900/20 border border-yellow-800/30 rounded-lg px-4 py-3 hover:bg-yellow-900/30 transition-colors"
-                >
-                  <span className="text-yellow-300 text-sm">
-                    {count} pending registration{count !== 1 ? 's' : ''}
-                  </span>
-                  <span className="text-gray-500 text-xs truncate ml-2 max-w-[120px]">
-                    {eventMap[eventId] ?? 'Event'}
-                  </span>
-                </Link>
-              ))}
-              {duplicateCount > 0 && (
-                <Link
-                  href="/admin/members"
-                  className="flex items-center justify-between bg-orange-900/20 border border-orange-800/30 rounded-lg px-4 py-3 hover:bg-orange-900/30 transition-colors"
-                >
-                  <span className="text-orange-300 text-sm">
-                    {duplicateCount} duplicate member{duplicateCount !== 1 ? 's' : ''} detected
-                  </span>
-                </Link>
-              )}
-              {eventsMissingImage > 0 && (
-                <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-4 py-3">
-                  <span className="text-gray-400 text-sm">
-                    {eventsMissingImage} event{eventsMissingImage !== 1 ? 's' : ''} missing cover image
-                  </span>
-                </div>
-              )}
-              {eventsPendingList.length === 0 && duplicateCount === 0 && eventsMissingImage === 0 && (
-                <p className="text-gray-600 text-sm">All clear!</p>
-              )}
-            </div>
-          </section>
-        </div>
-
-        {/* Create Event */}
-        <section>
-          <h2 className="heading-display text-white text-xl mb-4">Create New Event</h2>
-          <CreateEventForm />
-        </section>
-
-        {/* Events List */}
-        <section>
-          <h2 className="heading-display text-white text-xl mb-4">All Events</h2>
-          <AdminEventList events={eventsWithStats} />
+        {/* MANAGE EVENTS */}
+        <section className="border-t border-white/10 pt-8 space-y-8">
+          <h2 className="heading-display text-white text-xl">Manage Events</h2>
+          <div>
+            <h3 className="text-white font-semibold mb-4">Create New Event</h3>
+            <CreateEventForm />
+          </div>
+          <div>
+            <h3 className="text-white font-semibold mb-4">All Events</h3>
+            <AdminEventList events={eventsWithStats} />
+          </div>
         </section>
       </div>
     </main>

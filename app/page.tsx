@@ -166,36 +166,6 @@ export default async function LandingPage() {
 
       <HomepageEventsSection events={eventsWithSlotsLeft} whatsappLink={whatsappLink} />
 
-      {/* GALLERY — infinite-scroll photo marquee */}
-      {showGallery && (
-        <Reveal>
-          <section id="gallery" className="border-t border-white/10 py-20 md:py-28 scroll-mt-24">
-            <div className="max-w-4xl mx-auto px-4 flex items-center justify-between mb-10">
-              <div>
-                <p className="eyebrow eyebrow-line mb-2">Race day</p>
-                <h2 className="heading-display text-white text-3xl md:text-4xl">Our Community</h2>
-              </div>
-              {hasMorePhotos && (
-                <Link href="/gallery" className="link-underline text-gold text-sm whitespace-nowrap">
-                  See more →
-                </Link>
-              )}
-            </div>
-            <PhotoMarquee photos={displayPhotos} />
-          </section>
-        </Reveal>
-      )}
-
-      {/* SOCIAL LINKS — early touchpoint right after the hero */}
-      <Reveal>
-        <section className="border-t border-white/10 py-8 px-4">
-          <div className="max-w-4xl mx-auto flex flex-col items-center gap-3">
-            <p className="text-gray-600 text-xs font-mono uppercase tracking-[0.2em]">Follow along</p>
-            <SocialLinks whatsappLink={whatsappLink} instagramUrl={instagramUrl} youtubeUrl={youtubeUrl} variant="pill" />
-          </div>
-        </section>
-      </Reveal>
-
       {/* WHO WE ARE */}
       {photos[0] && (
         <Reveal scale>
@@ -254,18 +224,47 @@ export default async function LandingPage() {
         </StaggerReveal>
       </section>
 
-      {/* JOIN CTA STRIP */}
-      <Reveal>
-        <section className="relative border-y border-white/10 bg-gold/[0.03] py-10 px-4 overflow-hidden">
-          <div className="absolute inset-0 bg-gold-sheen opacity-[0.03]" />
-          <div className="relative max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-            <div>
-              <p className="text-white font-semibold text-lg">
-                <span className="stat-number text-gold">{communityStatValue}</span> strong, and counting.
-              </p>
-              <p className="text-gray-500 text-sm mt-1">No entry fee, no ego — just show up.</p>
+      {/* GALLERY — infinite-scroll photo marquee */}
+      {showGallery && (
+        <Reveal>
+          <section id="gallery" className="border-t border-white/10 py-20 md:py-28 scroll-mt-24">
+            <div className="max-w-4xl mx-auto px-4 flex items-center justify-between mb-10">
+              <div>
+                <h2 className="heading-display text-white text-3xl md:text-4xl">Our Community</h2>
+              </div>
+              {hasMorePhotos && (
+                <Link href="/gallery" className="link-underline text-gold text-sm whitespace-nowrap">
+                  See more →
+                </Link>
+              )}
             </div>
-            <Link href="/join" className="btn-primary whitespace-nowrap">
+            <PhotoMarquee photos={displayPhotos} />
+          </section>
+        </Reveal>
+      )}
+
+      {/* SOCIAL LINKS — soft ask, right before the main conversion CTA */}
+      <Reveal>
+        <section className="border-t border-white/10 py-8 px-4">
+          <div className="max-w-4xl mx-auto flex flex-col items-center gap-3">
+            <p className="text-gray-600 text-xs font-mono uppercase tracking-[0.2em]">Follow along</p>
+            <SocialLinks whatsappLink={whatsappLink} instagramUrl={instagramUrl} youtubeUrl={youtubeUrl} variant="pill" />
+          </div>
+        </section>
+      </Reveal>
+
+      {/* JOIN CTA — the one primary conversion action, given room to breathe */}
+      <Reveal scale>
+        <section className="relative border-y border-white/10 bg-gold/[0.04] py-20 md:py-28 px-4 overflow-hidden text-center">
+          <div className="absolute inset-0 bg-gold-sheen opacity-[0.04]" />
+          <div className="glow-orb w-[420px] h-[420px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30" />
+          <div className="relative max-w-2xl mx-auto">
+            <p className="stat-number text-gold text-2xl md:text-3xl mb-3">{communityStatValue} strong, and counting.</p>
+            <h2 className="heading-display text-white text-3xl md:text-5xl mb-4">
+              Ready to <span className="text-gold-sheen">show up?</span>
+            </h2>
+            <p className="text-gray-400 text-base md:text-lg mb-8">No entry fee, no ego — just show up.</p>
+            <Link href="/join" className="btn-primary inline-block text-base py-3.5 px-8">
               Join as Member →
             </Link>
           </div>
