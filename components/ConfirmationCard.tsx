@@ -50,8 +50,7 @@ export default function ConfirmationCard({ name, event, date, whatsappShareText 
           {date && <>on <span className="text-white">{date}</span></>} has been received.
         </p>
         <p className="heading-display text-base mt-3">
-          <span className="text-white">Luck is optional.</span>{' '}
-          <span className="text-gold-sheen">Effort isn&apos;t.</span>
+          <span className="text-gold-sheen">We don&apos;t talk about it.</span>
         </p>
       </motion.div>
 

@@ -62,8 +62,7 @@ export default function WelcomeCard({ name, memberId, whatsappLink, instagramUrl
         <h1 className="heading-display text-white text-3xl mb-2">Welcome, {name}!</h1>
         <p className="text-gray-400">You&apos;re officially a member of The First Rule Club.</p>
         <p className="heading-display text-lg mt-2">
-          <span className="text-white">Luck is optional.</span>{' '}
-          <span className="text-gold-sheen">Effort isn&apos;t.</span>
+          <span className="text-gold-sheen">We don&apos;t talk about it.</span>
         </p>
       </motion.div>
 

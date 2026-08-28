@@ -30,11 +30,8 @@ export default function SiteFooter({ whatsappLink, instagramUrl, youtubeUrl }: P
             />
           </span>
 
-          <p className="heading-display text-white text-2xl md:text-3xl mb-1">
-            Luck is optional.
-          </p>
           <p className="heading-display text-gold-sheen text-2xl md:text-3xl mb-7">
-            Effort isn&apos;t.
+            We don&apos;t talk about it.
           </p>
 
           <div className="mb-6">

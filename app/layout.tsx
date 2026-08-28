@@ -20,7 +20,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'The First Rule Club — Luck Is Optional. Effort Isn\'t.',
+  title: 'The First Rule Club — We Don\'t Talk About It.',
   description: 'The First Rule Club — Madurai\'s fitness community for runs, treks, and martial arts. Meet new people, build discipline, and grow — together. Join for free.',
 }
 
