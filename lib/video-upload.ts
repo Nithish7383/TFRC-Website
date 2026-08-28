@@ -28,7 +28,7 @@ export async function uploadVideo(
 
   const { error: uploadError } = await supabase.storage
     .from(VIDEOS_BUCKET)
-    .upload(path, file, { contentType: file.type })
+    .upload(path, file, { contentType: file.type, cacheControl: '31536000' })
 
   if (uploadError) {
     return { error: 'Upload failed. Please try again.' }
@@ -36,4 +36,10 @@ export async function uploadVideo(
 
   const { data } = supabase.storage.from(VIDEOS_BUCKET).getPublicUrl(path)
   return { url: data.publicUrl }
+}
+
+/** Best-effort — skips silently if there's no path or the file is already gone. */
+export async function deleteVideoFile(supabase: SupabaseClient, path: string | null | undefined) {
+  if (!path) return
+  await supabase.storage.from(VIDEOS_BUCKET).remove([path])
 }

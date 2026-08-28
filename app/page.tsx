@@ -86,8 +86,11 @@ export default async function LandingPage() {
   const featuredUrl = s['featured_event_url'] || ''
   const featuredBtn = s['featured_event_btn'] || 'Register Now'
   const featuredImageUrl = s['featured_event_image_url'] || ''
-  const heroVideoMobileUrl = s['hero_video_mobile_url'] || ''
-  const heroVideoDesktopUrl = s['hero_video_desktop_url'] || ''
+  // Hero video temporarily disabled — it was re-downloading from Supabase
+  // Storage on every visit and blew through the free-tier egress cap,
+  // taking the whole site down. Falls back to the photo background below.
+  const heroVideoMobileUrl = ''
+  const heroVideoDesktopUrl = ''
 
   const showGallery = photos.length > 0
   const displayPhotos = photos.slice(0, 9)

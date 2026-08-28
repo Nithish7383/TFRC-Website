@@ -4,8 +4,16 @@ import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { SiteSetting } from '@/lib/types'
 import HomepageGalleryManager from '@/components/HomepageGalleryManager'
-import { uploadVideo } from '@/lib/video-upload'
-import { uploadPhoto } from '@/lib/photo-upload'
+import { uploadVideo, deleteVideoFile } from '@/lib/video-upload'
+import { uploadPhoto, deletePhotoFile } from '@/lib/photo-upload'
+
+function pathFromPublicUrl(url: string): string | null {
+  const marker = '/object/public/'
+  const i = url.indexOf(marker)
+  if (i === -1) return null
+  const rest = url.slice(i + marker.length)
+  return rest.split('/').slice(1).join('/') || null
+}
 
 interface Props {
   settings: SiteSetting[]
@@ -83,6 +91,20 @@ export default function SiteSettingsForm({ settings }: Props) {
     setTimeout(() => setSaved(null), 2000)
   }
 
+  const handleVideoRemove = async (slot: 'mobile' | 'desktop') => {
+    const url = slot === 'mobile' ? heroVideoMobile : heroVideoDesktop
+    const key = slot === 'mobile' ? 'hero_video_mobile_url' : 'hero_video_desktop_url'
+
+    if (slot === 'mobile') setHeroVideoMobile('')
+    else setHeroVideoDesktop('')
+
+    await upsert(supabase, { [key]: '' })
+    await deleteVideoFile(supabase, pathFromPublicUrl(url))
+
+    setSaved('hero-video')
+    setTimeout(() => setSaved(null), 2000)
+  }
+
   const handleFeatImageUpload = async (file: File) => {
     setUploadingFeatImage(true)
     setFeatImageError('')
@@ -98,6 +120,15 @@ export default function SiteSettingsForm({ settings }: Props) {
 
     setFeatImage(result.url)
     await upsert(supabase, { featured_event_image_url: result.url })
+    setSaved('featured-image')
+    setTimeout(() => setSaved(null), 2000)
+  }
+
+  const handleFeatImageRemove = async () => {
+    const url = featImage
+    setFeatImage('')
+    await upsert(supabase, { featured_event_image_url: '' })
+    await deletePhotoFile(supabase, pathFromPublicUrl(url))
     setSaved('featured-image')
     setTimeout(() => setSaved(null), 2000)
   }
@@ -225,7 +256,12 @@ export default function SiteSettingsForm({ settings }: Props) {
         <div>
           <label className="block text-gray-400 text-xs mb-1">Banner Image (optional)</label>
           {featImage && (
-            <img src={featImage} alt="Featured event" className="w-full h-40 object-cover rounded-lg border border-white/10 mb-2" />
+            <div className="mb-2">
+              <img src={featImage} alt="Featured event" className="w-full h-40 object-cover rounded-lg border border-white/10 mb-2" />
+              <button type="button" onClick={handleFeatImageRemove} className="text-red-400 hover:text-red-300 text-xs">
+                Remove image
+              </button>
+            </div>
           )}
           <input
             type="file"
@@ -336,7 +372,12 @@ export default function SiteSettingsForm({ settings }: Props) {
           <div className="space-y-2">
             <label className="block text-gray-400 text-xs mb-1">Mobile (portrait) video</label>
             {heroVideoMobile && (
-              <video src={heroVideoMobile} className="w-full rounded-lg border border-white/10" muted controls />
+              <div className="space-y-1">
+                <video src={heroVideoMobile} className="w-full rounded-lg border border-white/10" muted controls />
+                <button type="button" onClick={() => handleVideoRemove('mobile')} className="text-red-400 hover:text-red-300 text-xs">
+                  Remove video
+                </button>
+              </div>
             )}
             <input
               type="file"
@@ -354,7 +395,12 @@ export default function SiteSettingsForm({ settings }: Props) {
           <div className="space-y-2">
             <label className="block text-gray-400 text-xs mb-1">Desktop (landscape) video</label>
             {heroVideoDesktop && (
-              <video src={heroVideoDesktop} className="w-full rounded-lg border border-white/10" muted controls />
+              <div className="space-y-1">
+                <video src={heroVideoDesktop} className="w-full rounded-lg border border-white/10" muted controls />
+                <button type="button" onClick={() => handleVideoRemove('desktop')} className="text-red-400 hover:text-red-300 text-xs">
+                  Remove video
+                </button>
+              </div>
             )}
             <input
               type="file"

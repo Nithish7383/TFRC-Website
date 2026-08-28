@@ -19,7 +19,7 @@ export async function uploadPaymentScreenshot(
 
   const { error: uploadError } = await supabase.storage
     .from(PAYMENT_SCREENSHOTS_BUCKET)
-    .upload(path, file, { contentType: file.type })
+    .upload(path, file, { contentType: file.type, cacheControl: '31536000' })
 
   if (uploadError) {
     return { error: 'Upload failed. Please try again.' }
