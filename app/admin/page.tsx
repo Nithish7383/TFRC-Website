@@ -39,7 +39,7 @@ export default async function AdminDashboard() {
     supabase.from('events').select('*').order('created_at', { ascending: false }),
     supabase.from('members').select('*', { count: 'exact', head: true }),
     supabase.from('members').select('attended_count, created_at'),
-    supabase.from('registrations').select('id, event_id, gender, status, attended, phone, created_at'),
+    supabase.from('registrations').select('id, event_id, gender, status, attended, phone, created_at, payment_status'),
     supabase
       .from('events')
       .select('*')
@@ -89,7 +89,7 @@ export default async function AdminDashboard() {
   ).length
 
   // Engagement
-  type RegRow = { id: string; event_id: string; gender: string; status: string; attended: boolean | null; phone: string; created_at: string }
+  type RegRow = { id: string; event_id: string; gender: string; status: string; attended: boolean | null; phone: string; created_at: string; payment_status: string }
   const allRegs: RegRow[] = (allRegsRaw || []) as RegRow[]
 
   const phonesRegistered = new Set(allRegs.map((r) => r.phone))
@@ -120,7 +120,9 @@ export default async function AdminDashboard() {
   // Events missing cover image
   const eventsMissingImage = (events || []).filter((e: Event) => !e.cover_image_url).length
 
-  const needsAttentionCount = eventsPendingList.length + (duplicateCount > 0 ? 1 : 0) + (eventsMissingImage > 0 ? 1 : 0)
+  // Payments awaiting verification
+  const paymentsToVerify = allRegs.filter((r) => r.payment_status === 'pending').length
+  const firstUnverifiedEventId = allRegs.find((r) => r.payment_status === 'pending')?.event_id ?? null
 
   // Map event id to title for display
   const eventMap: Record<string, string> = {}
@@ -186,37 +188,36 @@ export default async function AdminDashboard() {
           )}
         </section>
 
-        {/* BLOCK 2 — Member Stats */}
+        {/* BLOCK 2 — Overview */}
         <section>
-          <h2 className="heading-display text-white text-lg mb-3">Member Stats</h2>
-          <div className="grid grid-cols-3 gap-4">
+          <h2 className="heading-display text-white text-lg mb-3">Overview</h2>
+          <div className="card grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 divide-x divide-y sm:divide-y-0 divide-white/10">
             {[
               { label: 'Total Members', value: totalMembers ?? 0, color: 'text-white' },
               { label: 'Joined This Week', value: membersThisWeek, color: 'text-gold' },
               { label: 'Never Showed Up', value: neverShowedUp, color: 'text-gray-400' },
+              { label: 'Registered', value: membersRegistered, color: 'text-green-400' },
+              { label: 'Attended', value: totalAttended, color: 'text-blue-400' },
             ].map(({ label, value, color }) => (
-              <div key={label} className="card text-center">
+              <div key={label} className="text-center px-2 py-3 first:pl-0 last:pr-0">
                 <p className={`text-2xl font-bold mb-1 ${color}`}>{value}</p>
                 <p className="text-gray-500 text-xs">{label}</p>
               </div>
             ))}
-          </div>
-        </section>
-
-        {/* BLOCK 3 — Engagement */}
-        <section>
-          <h2 className="heading-display text-white text-lg mb-3">Engagement</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { label: 'Members Registered', value: membersRegistered, color: 'text-green-400' },
-              { label: 'Total Attended', value: totalAttended, color: 'text-blue-400' },
-              { label: 'Needs Attention', value: needsAttentionCount, color: 'text-yellow-400' },
-            ].map(({ label, value, color }) => (
-              <div key={label} className="card text-center">
-                <p className={`text-2xl font-bold mb-1 ${color}`}>{value}</p>
-                <p className="text-gray-500 text-xs">{label}</p>
+            {paymentsToVerify > 0 && firstUnverifiedEventId ? (
+              <Link
+                href={`/admin/event/${firstUnverifiedEventId}`}
+                className="text-center px-2 py-3 first:pl-0 last:pr-0 hover:bg-white/5 transition-colors rounded-lg"
+              >
+                <p className="text-2xl font-bold mb-1 text-yellow-400">{paymentsToVerify}</p>
+                <p className="text-gray-500 text-xs">Payments to Verify</p>
+              </Link>
+            ) : (
+              <div className="text-center px-2 py-3 first:pl-0 last:pr-0">
+                <p className="text-2xl font-bold mb-1 text-gray-600">0</p>
+                <p className="text-gray-500 text-xs">Payments to Verify</p>
               </div>
-            ))}
+            )}
           </div>
         </section>
 
@@ -283,7 +284,7 @@ export default async function AdminDashboard() {
                   </span>
                 </div>
               )}
-              {needsAttentionCount === 0 && (
+              {eventsPendingList.length === 0 && duplicateCount === 0 && eventsMissingImage === 0 && (
                 <p className="text-gray-600 text-sm">All clear!</p>
               )}
             </div>
