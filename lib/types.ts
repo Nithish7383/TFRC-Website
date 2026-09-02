@@ -127,3 +127,14 @@ export interface GalleryPhoto {
   created_at: string
   storage_path?: string | null
 }
+
+export interface CommunityGroup {
+  id: string
+  name: string
+  description?: string | null
+  image_url?: string | null
+  storage_path?: string | null
+  group_link?: string | null
+  display_order: number
+  created_at: string
+}

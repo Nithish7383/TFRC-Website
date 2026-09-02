@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-server'
-import { GalleryPhoto, Event } from '@/lib/types'
+import { GalleryPhoto, Event, CommunityGroup } from '@/lib/types'
 import SiteFooter from '@/components/ui/SiteFooter'
 import SocialLinks from '@/components/ui/SocialLinks'
 import Reveal from '@/components/ui/Reveal'
@@ -50,11 +50,13 @@ export default async function LandingPage() {
     { count: memberCount },
     { data: galleryPhotos },
     { data: activeEvents },
+    { data: communityGroups },
   ] = await Promise.all([
     supabase.from('site_settings').select('key, value'),
     supabase.from('members').select('*', { count: 'exact', head: true }),
     supabase.from('gallery_photos').select('*').order('display_order', { ascending: true }),
     supabase.from('events').select('*').eq('is_active', true).order('date', { ascending: true }),
+    supabase.from('community_groups').select('*').order('display_order', { ascending: true }),
   ])
 
   // Slots-left per event, for the poster cards' "closing_soon" CTA label.
@@ -75,6 +77,8 @@ export default async function LandingPage() {
   })
 
   const photos: GalleryPhoto[] = (galleryPhotos || []) as GalleryPhoto[]
+  const groups: CommunityGroup[] = (communityGroups || []) as CommunityGroup[]
+  const founderStory = s['founder_story'] || ''
   const communityStatValue = s['community_stat_value'] || String(memberCount ?? '0')
   const whatsappLink = s['whatsapp_link'] || ''
   const instagramUrl = s['instagram_url'] || ''
@@ -194,7 +198,7 @@ export default async function LandingPage() {
         </Reveal>
       )}
 
-      {/* WHY WE STARTED */}
+      {/* WHY WE STARTED — founder story */}
       <section className="relative border-t border-white/10 py-20 md:py-28 px-4 overflow-hidden">
         <div className="glow-orb w-[380px] h-[380px] top-0 right-0 opacity-40" />
         <StaggerReveal className="relative max-w-2xl mx-auto text-center" stagger={0.12}>
@@ -206,23 +210,79 @@ export default async function LandingPage() {
               Why we started
             </h2>
           </StaggerItem>
-          <StaggerItem>
-            <p className="text-gray-300 leading-relaxed text-base md:text-lg">
-              We believe fitness isn&apos;t just about lifting weights or running miles. It&apos;s about
-              building habits, creating memories, and surrounding yourself with people who inspire you
-              to keep showing up.
-            </p>
-          </StaggerItem>
-          <StaggerItem>
-            <p className="text-gray-400 leading-relaxed mt-4">
-              The First Rule Club exists to bring people into a healthier lifestyle through runs,
-              treks, martial arts, and adventures — while building a network of people who push each
-              other to grow. Because fitness is easier, more exciting, and far more rewarding when you
-              do it together.
-            </p>
-          </StaggerItem>
+          {founderStory ? (
+            founderStory.split('\n').filter((p) => p.trim()).map((para, i) => (
+              <StaggerItem key={i}>
+                <p className={`leading-relaxed text-base md:text-lg ${i === 0 ? 'text-gray-300' : 'text-gray-400 mt-4'}`}>
+                  {para}
+                </p>
+              </StaggerItem>
+            ))
+          ) : (
+            <StaggerItem>
+              <p className="text-gray-300 leading-relaxed text-base md:text-lg">
+                We believe fitness isn&apos;t just about lifting weights or running miles. It&apos;s about
+                building habits, creating memories, and surrounding yourself with people who inspire you
+                to keep showing up.
+              </p>
+            </StaggerItem>
+          )}
         </StaggerReveal>
       </section>
+
+      {/* COMMUNITY GROUPS — sub-groups people can join directly */}
+      {groups.length > 0 && (
+        <Reveal>
+          <section className="border-t border-white/10 py-20 md:py-28 px-4">
+            <div className="max-w-5xl mx-auto">
+              <div className="text-center mb-12">
+                <p className="eyebrow mb-3 justify-center w-full">Beyond the run</p>
+                <h2 className="heading-display text-white text-3xl md:text-4xl">
+                  Find your <span className="text-gold-sheen">circle</span>
+                </h2>
+                <p className="text-gray-400 mt-3 max-w-lg mx-auto">
+                  TFRC is more than running — pick a group that matches what you&apos;re into.
+                </p>
+              </div>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {groups.map((group) => (
+                  <div
+                    key={group.id}
+                    className="group relative rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02]
+                               shadow-lift transition-all duration-500 ease-out-expo
+                               hover:border-gold/40 hover:shadow-gold-glow-lg"
+                  >
+                    <div className="aspect-[4/3] relative">
+                      <img
+                        src={group.image_url || '/firstruleclublogo.jpg'}
+                        alt={group.name}
+                        className="w-full h-full object-cover transition-transform duration-[900ms] ease-out-expo group-hover:scale-[1.06]"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                    </div>
+                    <div className="p-5">
+                      <h3 className="text-white font-semibold text-lg mb-1">{group.name}</h3>
+                      {group.description && (
+                        <p className="text-gray-400 text-sm mb-4">{group.description}</p>
+                      )}
+                      {group.group_link && (
+                        <a
+                          href={group.group_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="link-underline text-gold text-sm font-medium"
+                        >
+                          Join this group →
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </Reveal>
+      )}
 
       {/* GALLERY — infinite-scroll photo marquee */}
       {showGallery && (

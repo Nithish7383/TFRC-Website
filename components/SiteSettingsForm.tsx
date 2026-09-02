@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { SiteSetting } from '@/lib/types'
 import HomepageGalleryManager from '@/components/HomepageGalleryManager'
+import CommunityGroupsManager from '@/components/CommunityGroupsManager'
 import { uploadVideo, deleteVideoFile } from '@/lib/video-upload'
 import { uploadPhoto, deletePhotoFile } from '@/lib/photo-upload'
 
@@ -53,6 +54,7 @@ export default function SiteSettingsForm({ settings }: Props) {
   const [q2name, setQ2name] = useState(init['quote_2_name'] ?? '')
   const [q3text, setQ3text] = useState(init['quote_3_text'] ?? '')
   const [q3name, setQ3name] = useState(init['quote_3_name'] ?? '')
+  const [founderStory, setFounderStory] = useState(init['founder_story'] ?? '')
 
   const [paymentQr, setPaymentQr] = useState(init['payment_qr_code_url'] ?? '')
   const [uploadingQr, setUploadingQr] = useState(false)
@@ -179,6 +181,7 @@ export default function SiteSettingsForm({ settings }: Props) {
           quote_2_text: q2text, quote_2_name: q2name,
           quote_3_text: q3text, quote_3_name: q3name,
         })
+        else if (section === 'founder-story') save('founder-story', { founder_story: founderStory })
       }}
       disabled={saving === section}
       className="btn-primary text-sm py-2 px-5"
@@ -330,6 +333,23 @@ export default function SiteSettingsForm({ settings }: Props) {
         <SaveBtn section="quotes" />
       </div>
 
+      {/* Section 4.4 — Founder Story */}
+      <div className="card space-y-4">
+        <h3 className="text-white font-semibold">Founder Story</h3>
+        <p className="text-gray-500 text-xs">
+          Shown on the homepage in place of generic club copy — write it first-person,
+          the real story of why you started TFRC.
+        </p>
+        <textarea
+          value={founderStory}
+          onChange={(e) => setFounderStory(e.target.value)}
+          rows={8}
+          placeholder="I started TFRC because..."
+          className="input-field resize-none"
+        />
+        <SaveBtn section="founder-story" />
+      </div>
+
       {/* Section 3.5 — Payments */}
       <div className="card space-y-4">
         <h3 className="text-white font-semibold">Payments</h3>
@@ -424,6 +444,16 @@ export default function SiteSettingsForm({ settings }: Props) {
       <div className="card space-y-4">
         <h3 className="text-white font-semibold">Homepage Gallery</h3>
         <HomepageGalleryManager />
+      </div>
+
+      {/* Section 6 — Community Groups */}
+      <div className="card space-y-4">
+        <h3 className="text-white font-semibold">Community Groups</h3>
+        <p className="text-gray-500 text-xs">
+          Sub-groups shown on the homepage (Readers, Blood Donors, IT-Techies, etc.)
+          — each with a photo and a link people can join directly.
+        </p>
+        <CommunityGroupsManager />
       </div>
     </div>
   )

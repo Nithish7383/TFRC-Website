@@ -95,7 +95,7 @@ export default function EventCard({ event, slotsLeft, onRegisterClick, disabled 
       {/* Content */}
       <div className="relative z-[1] mt-auto p-5 space-y-2.5">
         <h3
-          className="heading-display text-white text-2xl leading-tight
+          className="heading-display text-white text-2xl leading-tight line-clamp-2
                      transition-transform duration-500 ease-out-expo group-hover:-translate-y-0.5"
         >
           {event.title}

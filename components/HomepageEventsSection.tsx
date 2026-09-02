@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
+import { normalizePhone } from '@/lib/constants'
 import { Event, Gender } from '@/lib/types'
 import EventsCarousel from '@/components/EventsCarousel'
 import Reveal from '@/components/ui/Reveal'
@@ -71,7 +72,7 @@ export default function HomepageEventsSection({ events }: Props) {
     setError('')
 
     const { data } = await supabase
-      .rpc('get_member_for_registration', { lookup_phone: phoneInput.trim() })
+      .rpc('get_member_for_registration', { lookup_phone: normalizePhone(phoneInput) })
       .maybeSingle()
 
     setLooking(false)
@@ -93,11 +94,13 @@ export default function HomepageEventsSection({ events }: Props) {
     setSubmitting(true)
     setError('')
 
+    const normalizedPhone = normalizePhone(phoneInput)
+
     const { data: existing } = await supabase
       .from('registrations')
       .select('id')
       .eq('event_id', registerOpenFor.id)
-      .eq('phone', phoneInput.trim())
+      .eq('phone', normalizedPhone)
       .maybeSingle()
 
     if (existing) {
@@ -111,7 +114,7 @@ export default function HomepageEventsSection({ events }: Props) {
       name: member.name,
       age: member.age,
       place: member.place,
-      phone: phoneInput.trim(),
+      phone: normalizedPhone,
       gender: member.gender,
       occupation: member.occupation,
       reason: 'Registered via homepage',
