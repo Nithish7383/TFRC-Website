@@ -25,19 +25,30 @@ export default function AdminEventList({ events }: Props) {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [toggling, setToggling] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   const handleToggle = async (eventId: string, currentIsActive: boolean) => {
     setToggling(eventId)
-    await supabase.from('events').update({ is_active: !currentIsActive }).eq('id', eventId)
+    setActionError(null)
+    const { error } = await supabase.from('events').update({ is_active: !currentIsActive }).eq('id', eventId)
     setToggling(null)
+    if (error) {
+      setActionError('Failed to update event status. Please try again.')
+      return
+    }
     router.refresh()
   }
 
   const handleDelete = async (eventId: string) => {
     setDeleting(eventId)
-    await supabase.from('events').delete().eq('id', eventId)
+    setActionError(null)
+    const { error } = await supabase.from('events').delete().eq('id', eventId)
     setDeleting(null)
     setConfirmDeleteId(null)
+    if (error) {
+      setActionError('Failed to delete event. Please try again.')
+      return
+    }
     router.refresh()
   }
 
@@ -51,6 +62,11 @@ export default function AdminEventList({ events }: Props) {
 
   return (
     <div className="space-y-3">
+      {actionError && (
+        <div className="bg-red-900/20 border border-red-800/40 text-red-400 text-sm rounded-lg px-4 py-2.5">
+          {actionError}
+        </div>
+      )}
       {events.map((event) => (
         <div key={event.id}>
           <div className="card flex flex-col gap-4">
@@ -132,20 +148,27 @@ export default function AdminEventList({ events }: Props) {
                 Edit
               </button>
               {confirmDeleteId === event.id ? (
-                <div className="flex gap-2 items-center">
-                  <button
-                    onClick={() => handleDelete(event.id)}
-                    disabled={deleting === event.id}
-                    className="text-sm py-2 px-3 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold transition-colors"
-                  >
-                    {deleting === event.id ? 'Deleting...' : 'Confirm Delete'}
-                  </button>
-                  <button
-                    onClick={() => setConfirmDeleteId(null)}
-                    className="text-sm py-2 px-2 rounded-lg border border-white/15 text-gray-400 hover:text-gray-200 transition-colors"
-                  >
-                    ×
-                  </button>
+                <div className="flex flex-col gap-2">
+                  {event.total > 0 && (
+                    <p className="text-yellow-400 text-xs">
+                      This event has {event.total} registration{event.total !== 1 ? 's' : ''} — they&apos;ll be deleted too.
+                    </p>
+                  )}
+                  <div className="flex gap-2 items-center">
+                    <button
+                      onClick={() => handleDelete(event.id)}
+                      disabled={deleting === event.id}
+                      className="text-sm py-2 px-3 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold transition-colors"
+                    >
+                      {deleting === event.id ? 'Deleting...' : 'Confirm Delete'}
+                    </button>
+                    <button
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="text-sm py-2 px-2 rounded-lg border border-white/15 text-gray-400 hover:text-gray-200 transition-colors"
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <button

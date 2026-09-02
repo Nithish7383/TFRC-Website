@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 
 interface Props {
   groupLink: string
+  eventTitle?: string
+  inviteMessage?: string | null
   selectedUsers: { name: string; phone: string }[]
 }
 
@@ -11,18 +13,22 @@ type CycleState = 'idle' | 'running' | 'paused' | 'done'
 
 const COUNTDOWN_SECONDS = 6
 
-export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) {
+export default function CopyWhatsAppButton({ groupLink, eventTitle, inviteMessage, selectedUsers }: Props) {
   const [cycleState, setCycleState] = useState<CycleState>('idle')
   const [currentIndex, setCurrentIndex] = useState(0)
   const [sentSet, setSentSet] = useState<Set<string>>(new Set())
   const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS)
   const [showContacts, setShowContacts] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [copyError, setCopyError] = useState(false)
+
+  const defaultMessage =
+    inviteMessage?.trim() ||
+    `Congrats! You are selected for ${eventTitle || 'this weekend’s run'} 🎉 Join here: ${groupLink}`
+  const [messageTemplate, setMessageTemplate] = useState(defaultMessage)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const isPausedRef = useRef(false)
-
-  const messageTemplate = `Congrats! You are selected for this weekend run 🎉 Join here: ${groupLink}`
 
   const openWhatsApp = useCallback(
     (user: { name: string; phone: string }) => {
@@ -112,9 +118,14 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
   useEffect(() => () => clearTimer(), [])
 
   const copyMessage = async () => {
-    await navigator.clipboard.writeText(messageTemplate)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2500)
+    try {
+      await navigator.clipboard.writeText(messageTemplate)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    } catch {
+      setCopyError(true)
+      setTimeout(() => setCopyError(false), 2500)
+    }
   }
 
   const currentUser = selectedUsers[currentIndex]
@@ -129,12 +140,23 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
         <p className="text-gray-400 text-xs font-medium uppercase tracking-wide">
           Message template
         </p>
-        <p className="text-gray-200 text-sm">{messageTemplate}</p>
+        <textarea
+          value={messageTemplate}
+          onChange={(e) => setMessageTemplate(e.target.value)}
+          disabled={cycleState !== 'idle'}
+          rows={3}
+          className="w-full bg-black/30 border border-white/15 rounded-lg px-3 py-2 text-gray-200 text-sm resize-none disabled:opacity-60"
+        />
+        {cycleState !== 'idle' && (
+          <p className="text-gray-500 text-xs">Message is locked while sending — cancel to edit.</p>
+        )}
         <button
           onClick={copyMessage}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
             copied
               ? 'bg-green-800/60 text-green-300 border border-green-700/50'
+              : copyError
+              ? 'bg-red-900/40 text-red-300 border border-red-800/50'
               : 'bg-white/10 hover:bg-white/15 text-gray-200 border border-white/15'
           }`}
         >
@@ -143,6 +165,8 @@ export default function CopyWhatsAppButton({ groupLink, selectedUsers }: Props) 
               <CheckIcon className="w-3.5 h-3.5" />
               Copied!
             </>
+          ) : copyError ? (
+            'Copy failed — select manually'
           ) : (
             <>
               <ClipboardIcon className="w-3.5 h-3.5" />

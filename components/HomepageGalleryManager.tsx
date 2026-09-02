@@ -73,7 +73,12 @@ export default function HomepageGalleryManager() {
       setDeleteConfirm(photo.id)
       return
     }
-    await supabase.from('gallery_photos').delete().eq('id', photo.id)
+    const { error: deleteError } = await supabase.from('gallery_photos').delete().eq('id', photo.id)
+    if (deleteError) {
+      setError('Failed to delete photo. Please try again.')
+      setDeleteConfirm(null)
+      return
+    }
     await deletePhotoFile(supabase, photo.storage_path)
     setDeleteConfirm(null)
     fetchPhotos()

@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Registration, RegistrationStatus, PaymentStatus } from '@/lib/types'
+import { deletePaymentScreenshot } from '@/lib/payment-upload'
 import { useRouter } from 'next/navigation'
 
 interface Props {
@@ -37,6 +38,8 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
   const [autoSelectMode, setAutoSelectMode] = useState<'first' | 'gender' | 'experience'>('first')
   const [autoSelecting, setAutoSelecting] = useState(false)
   const [localRegs, setLocalRegs] = useState<Registration[]>(registrations)
+  const [actionError, setActionError] = useState('')
+  const [confirmDeleteScreenshotId, setConfirmDeleteScreenshotId] = useState<string | null>(null)
 
   // Keep local state in sync with server props on refresh
   useMemo(() => { setLocalRegs(registrations) }, [registrations])
@@ -65,29 +68,66 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
 
   const updateStatus = async (id: string, status: RegistrationStatus) => {
     setUpdating(id)
-    await supabase.from('registrations').update({ status }).eq('id', id)
-    setLocalRegs((prev) => prev.map((r) => r.id === id ? { ...r, status } : r))
+    setActionError('')
+    const { error } = await supabase.from('registrations').update({ status }).eq('id', id)
+    if (error) {
+      setActionError('Failed to update status. Please try again.')
+    } else {
+      setLocalRegs((prev) => prev.map((r) => r.id === id ? { ...r, status } : r))
+    }
     setUpdating(null)
   }
 
   const updatePaymentStatus = async (id: string, payment_status: PaymentStatus) => {
     setUpdating(id)
-    await supabase.from('registrations').update({ payment_status }).eq('id', id)
-    setLocalRegs((prev) => prev.map((r) => r.id === id ? { ...r, payment_status } : r))
+    setActionError('')
+    const { error } = await supabase.from('registrations').update({ payment_status }).eq('id', id)
+    if (error) {
+      setActionError('Failed to update payment status. Please try again.')
+    } else {
+      setLocalRegs((prev) => prev.map((r) => r.id === id ? { ...r, payment_status } : r))
+    }
+    setUpdating(null)
+  }
+
+  const deleteScreenshot = async (id: string, path: string | null | undefined) => {
+    setUpdating(id)
+    setActionError('')
+    const { error } = await supabase
+      .from('registrations')
+      .update({ payment_screenshot_url: null, payment_screenshot_path: null })
+      .eq('id', id)
+    if (error) {
+      setActionError('Failed to remove screenshot. Please try again.')
+      setUpdating(null)
+      return
+    }
+    setLocalRegs((prev) => prev.map((r) => r.id === id ? { ...r, payment_screenshot_url: null, payment_screenshot_path: null } : r))
+    await deletePaymentScreenshot(supabase, path)
     setUpdating(null)
   }
 
   const bulkUpdateStatus = async (status: RegistrationStatus) => {
     setBulkUpdating(true)
+    setActionError('')
     const ids = Array.from(checked)
-    await supabase.from('registrations').update({ status }).in('id', ids)
-    setLocalRegs((prev) => prev.map((r) => checked.has(r.id) ? { ...r, status } : r))
-    setChecked(new Set())
+    const { error } = await supabase.from('registrations').update({ status }).in('id', ids)
+    if (error) {
+      setActionError('Failed to update selected registrations. Please try again.')
+    } else {
+      setLocalRegs((prev) => prev.map((r) => checked.has(r.id) ? { ...r, status } : r))
+      setChecked(new Set())
+    }
     setBulkUpdating(false)
   }
 
   const toggleAttended = async (id: string, current: boolean) => {
-    await supabase.from('registrations').update({ attended: !current }).eq('id', id)
+    setActionError('')
+    const { error: regError } = await supabase.from('registrations').update({ attended: !current }).eq('id', id)
+    if (regError) {
+      setActionError('Failed to update attendance. Please try again.')
+      return
+    }
     setLocalRegs((prev) => prev.map((r) => r.id === id ? { ...r, attended: !current } : r))
 
     const reg = localRegs.find((r) => r.id === id)
@@ -102,12 +142,13 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
     if (!current) {
       // toggling to TRUE — increment or create member
       if (existingMember) {
-        await supabase
+        const { error } = await supabase
           .from('members')
           .update({ attended_count: existingMember.attended_count + 1 })
           .eq('id', existingMember.id)
+        if (error) setActionError('Attendance saved, but member count could not be updated.')
       } else {
-        await supabase.from('members').insert({
+        const { error } = await supabase.from('members').insert({
           name: reg.name,
           phone: reg.phone,
           age: reg.age,
@@ -117,25 +158,31 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
           running_experience: reg.running_experience || 'First timer',
           goals: [],
           attended_count: 1,
-          level: 1,
         })
+        if (error) setActionError('Attendance saved, but member record could not be created.')
       }
     } else {
       // toggling to FALSE — decrement
       if (existingMember && existingMember.attended_count > 0) {
-        await supabase
+        const { error } = await supabase
           .from('members')
           .update({ attended_count: existingMember.attended_count - 1 })
           .eq('id', existingMember.id)
+        if (error) setActionError('Attendance saved, but member count could not be updated.')
       }
     }
   }
 
   const saveNote = async (id: string) => {
     setSavingNote(id)
+    setActionError('')
     const note = noteValues[id] ?? ''
-    await supabase.from('registrations').update({ admin_notes: note || null }).eq('id', id)
-    setLocalRegs((prev) => prev.map((r) => r.id === id ? { ...r, admin_notes: note || null } : r))
+    const { error } = await supabase.from('registrations').update({ admin_notes: note || null }).eq('id', id)
+    if (error) {
+      setActionError('Failed to save note. Please try again.')
+    } else {
+      setLocalRegs((prev) => prev.map((r) => r.id === id ? { ...r, admin_notes: note || null } : r))
+    }
     setSavingNote(null)
     setEditingNoteId(null)
   }
@@ -278,6 +325,12 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
         </div>
       )}
 
+      {actionError && (
+        <div className="bg-red-900/20 border border-red-800/40 text-red-400 text-sm rounded-lg px-4 py-2.5">
+          {actionError}
+        </div>
+      )}
+
       {/* Bulk action bar */}
       {checked.size > 0 && (
         <div className="flex flex-wrap items-center gap-3 bg-white/[0.03] border border-white/15 rounded-xl px-4 py-3">
@@ -393,6 +446,32 @@ export default function RegistrationTable({ registrations, eventId, eventTitle =
                         </div>
                         {!reg.payment_screenshot_url && (
                           <span className="text-gray-600 text-xs">No screenshot</span>
+                        )}
+                        {reg.payment_screenshot_url && reg.payment_status !== 'pending' && (
+                          confirmDeleteScreenshotId === reg.id ? (
+                            <div className="flex gap-1.5 items-center">
+                              <button
+                                onClick={() => { deleteScreenshot(reg.id, reg.payment_screenshot_path); setConfirmDeleteScreenshotId(null) }}
+                                disabled={updating === reg.id}
+                                className="text-red-400 hover:text-red-300 text-xs"
+                              >
+                                Confirm remove
+                              </button>
+                              <button
+                                onClick={() => setConfirmDeleteScreenshotId(null)}
+                                className="text-gray-500 hover:text-gray-300 text-xs"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmDeleteScreenshotId(reg.id)}
+                              className="text-gray-500 hover:text-red-400 text-xs text-left"
+                            >
+                              Remove screenshot
+                            </button>
+                          )
                         )}
                         {reg.payment_status === 'pending' && (
                           <div className="flex gap-1.5">

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Event, Gender, Question } from '@/lib/types'
-import { REASON_OPTIONS } from '@/lib/constants'
+import { REASON_OPTIONS, normalizePhone } from '@/lib/constants'
 import EventPreviewCard from '@/components/EventPreviewCard'
 import { createRegistrationResponses } from '@/app/register/actions'
 import { validatePhotoFile } from '@/lib/photo-upload'
@@ -126,8 +126,10 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
     setMemberNotFound(false)
     setMemberChecked(false)
 
+    const normalizedPhone = normalizePhone(phoneInput)
+
     const { data } = await supabase
-      .rpc('get_member_for_registration', { lookup_phone: phoneInput.trim() })
+      .rpc('get_member_for_registration', { lookup_phone: normalizedPhone })
       .maybeSingle()
 
     setMemberLooking(false)
@@ -144,7 +146,7 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
     setMemberNotFound(false)
     setForm((prev) => ({
       ...prev,
-      phone: phoneInput.trim(),
+      phone: normalizedPhone,
       name: m.name,
       age: String(m.age),
       gender: m.gender,
@@ -218,6 +220,12 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
       }
     }
 
+    const ageNum = parseInt(form.age)
+    if (!form.age || Number.isNaN(ageNum)) {
+      setError('Please enter a valid age.')
+      return
+    }
+
     setLoading(true)
     setError('')
 
@@ -263,7 +271,7 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
       .insert({
         event_id: form.event_id,
         name: form.name.trim(),
-        age: parseInt(form.age),
+        age: ageNum,
         place: form.place.trim(),
         phone: form.phone.trim(),
         gender: form.gender,

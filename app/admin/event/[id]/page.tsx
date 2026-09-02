@@ -224,6 +224,8 @@ export default async function EventDetailPage({
             </p>
             <CopyWhatsAppButton
               groupLink={event.group_link || '#'}
+              eventTitle={event.title}
+              inviteMessage={event.invite_message}
               selectedUsers={selectedUsers.map((u: Registration) => ({
                 name: u.name,
                 phone: u.phone,

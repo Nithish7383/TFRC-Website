@@ -53,7 +53,7 @@ export default async function AdminMembersPage() {
         </div>
 
         {/* Stats bar */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             { label: 'Total Members', value: totalMembers, color: 'text-white' },
             { label: 'Avg Runs Attended', value: avgAttended, color: 'text-green-400' },

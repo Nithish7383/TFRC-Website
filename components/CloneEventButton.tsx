@@ -14,10 +14,12 @@ export default function CloneEventButton({ event }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+  const [error, setError] = useState(false)
 
   const handleClone = async () => {
     setLoading(true)
-    await supabase.from('events').insert({
+    setError(false)
+    const { error: insertError } = await supabase.from('events').insert({
       title: event.title,
       date: null,
       max_male: event.max_male,
@@ -32,6 +34,11 @@ export default function CloneEventButton({ event }: Props) {
       price_inr: event.price_inr,
     })
     setLoading(false)
+    if (insertError) {
+      setError(true)
+      setTimeout(() => setError(false), 2500)
+      return
+    }
     setDone(true)
     setTimeout(() => { setDone(false); router.refresh() }, 1500)
   }
@@ -40,13 +47,16 @@ export default function CloneEventButton({ event }: Props) {
     <button
       onClick={handleClone}
       disabled={loading || done}
+      title={error ? 'Clone failed — please try again.' : undefined}
       className={`text-sm py-2 px-3 rounded-lg border transition-colors ${
         done
           ? 'border-green-800/40 text-green-400'
+          : error
+          ? 'border-red-800/40 text-red-400'
           : 'border-white/15 text-gray-400 hover:text-gold hover:border-gold/40'
       }`}
     >
-      {done ? '✓ Cloned' : loading ? '...' : 'Clone'}
+      {done ? '✓ Cloned' : error ? '✕ Failed' : loading ? '...' : 'Clone'}
     </button>
   )
 }

@@ -18,6 +18,7 @@ export interface NewEventInput {
   cover_image_url: string | null
   is_paid: boolean
   price_inr: number | null
+  invite_message: string | null
 }
 
 export interface NewQuestionInput {
@@ -65,6 +66,7 @@ export async function createEventWithQuestions(
       cover_image_url: eventData.cover_image_url,
       is_paid: eventData.is_paid,
       price_inr: eventData.price_inr,
+      invite_message: eventData.invite_message,
     })
     .select('id')
     .single()
@@ -115,15 +117,23 @@ export async function updateEventQuestions(
 ): Promise<ActionResult> {
   const supabase = createClient()
 
-  for (const q of questions) {
-    const { error } = await supabase
-      .from('questions')
-      .update({ text: q.text, order_index: q.order_index, required: q.required })
-      .eq('id', q.id)
-      .eq('event_id', eventId)
+  const results = await Promise.all(
+    questions.map((q) =>
+      supabase
+        .from('questions')
+        .update({ text: q.text, order_index: q.order_index, required: q.required })
+        .eq('id', q.id)
+        .eq('event_id', eventId)
+    )
+  )
 
-    if (error) {
-      return { ok: false, error: 'Failed to save one or more questions.' }
+  const failedCount = results.filter((r) => r.error).length
+  if (failedCount > 0) {
+    return {
+      ok: false,
+      error: failedCount === questions.length
+        ? 'Failed to save the questions. Please try again.'
+        : `${failedCount} of ${questions.length} questions failed to save. Please retry.`,
     }
   }
 

@@ -56,7 +56,7 @@ export default function EventPhotoManager({ eventId }: Props) {
       return
     }
 
-    await supabase.from('event_photos').insert({
+    const { error: insertError } = await supabase.from('event_photos').insert({
       event_id: eventId,
       image_url: uploaded.url,
       storage_path: uploaded.path,
@@ -65,9 +65,14 @@ export default function EventPhotoManager({ eventId }: Props) {
       display_order: parseInt(form.display_order) || 0,
     })
 
+    setSaving(false)
+    if (insertError) {
+      setUploadError('Photo uploaded, but could not be saved. Please try again.')
+      return
+    }
+
     if (fileInputRef.current) fileInputRef.current.value = ''
     setForm({ caption: '', instagram_post_url: '', display_order: '0' })
-    setSaving(false)
     setAddOpen(false)
     fetchPhotos()
   }
@@ -77,7 +82,12 @@ export default function EventPhotoManager({ eventId }: Props) {
       setConfirmDelete(photo.id)
       return
     }
-    await supabase.from('event_photos').delete().eq('id', photo.id)
+    const { error } = await supabase.from('event_photos').delete().eq('id', photo.id)
+    if (error) {
+      setUploadError('Failed to delete photo. Please try again.')
+      setConfirmDelete(null)
+      return
+    }
     await deletePhotoFile(supabase, photo.storage_path)
     setConfirmDelete(null)
     fetchPhotos()
@@ -99,6 +109,10 @@ export default function EventPhotoManager({ eventId }: Props) {
           {addOpen ? '× Cancel' : '+ Add Photo'}
         </button>
       </div>
+
+      {uploadError && !addOpen && (
+        <p className="text-red-400 text-sm">{uploadError}</p>
+      )}
 
       {addOpen && (
         <form onSubmit={handleSave} className="card border-gold/20 bg-gold/5 space-y-3">

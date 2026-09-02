@@ -28,3 +28,9 @@ export async function uploadPaymentScreenshot(
   const { data } = supabase.storage.from(PAYMENT_SCREENSHOTS_BUCKET).getPublicUrl(path)
   return { url: data.publicUrl, path }
 }
+
+/** Best-effort — skips silently if there's no path or the file is already gone. */
+export async function deletePaymentScreenshot(supabase: SupabaseClient, path: string | null | undefined) {
+  if (!path) return
+  await supabase.storage.from(PAYMENT_SCREENSHOTS_BUCKET).remove([path])
+}

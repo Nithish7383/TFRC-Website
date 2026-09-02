@@ -41,8 +41,7 @@ export default async function GalleryPage() {
       {/* Header */}
       <Reveal>
         <section className="max-w-5xl mx-auto px-4 pt-12 pb-4">
-          <p className="eyebrow mb-2">Race day</p>
-          <h1 className="heading-display text-white text-5xl mb-2">Run Gallery</h1>
+          <h1 className="heading-display text-white text-4xl md:text-5xl mb-2">Run Gallery</h1>
           <p className="text-gray-400 text-lg">Every run, remembered.</p>
         </section>
       </Reveal>

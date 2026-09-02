@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
+import { normalizePhone } from '@/lib/constants'
 import { RegistrationStatus, PaymentStatus } from '@/lib/types'
 import StatusBadge from '@/components/ui/StatusBadge'
 import SiteHeader from '@/components/ui/SiteHeader'
@@ -40,7 +41,7 @@ export default function StatusPage() {
     const { data } = await supabase
       .from('registrations')
       .select('id, status, payment_status, created_at, events(title, date, group_link, is_paid, price_inr)')
-      .eq('phone', phone.trim())
+      .eq('phone', normalizePhone(phone))
       .order('created_at', { ascending: false })
 
     setResults((data as unknown as RegResult[]) || [])

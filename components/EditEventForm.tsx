@@ -37,6 +37,7 @@ export default function EditEventForm({ event, onClose }: Props) {
     cover_image_url: event.cover_image_url || '',
     is_paid: event.is_paid || false,
     price_inr: event.price_inr ? String(event.price_inr) : '',
+    invite_message: event.invite_message || '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -44,7 +45,7 @@ export default function EditEventForm({ event, onClose }: Props) {
   const [coverUploadError, setCoverUploadError] = useState('')
   const coverFileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
     setError('')
   }
@@ -104,6 +105,7 @@ export default function EditEventForm({ event, onClose }: Props) {
         cover_image_url: form.cover_image_url.trim() || null,
         is_paid: form.is_paid,
         price_inr: form.is_paid ? parseInt(form.price_inr) || null : null,
+        invite_message: form.invite_message.trim() || null,
       })
       .eq('id', event.id)
 
@@ -294,6 +296,23 @@ export default function EditEventForm({ event, onClose }: Props) {
               placeholder="https://chat.whatsapp.com/..."
               className="input-field"
             />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              WhatsApp Invite Message (optional)
+            </label>
+            <textarea
+              name="invite_message"
+              value={form.invite_message}
+              onChange={handleChange}
+              rows={3}
+              placeholder={`Congrats! You are selected for ${form.title || 'this event'} 🎉 Join here: ${form.group_link || '<group link>'}`}
+              className="input-field resize-none"
+            />
+            <p className="text-gray-600 text-xs mt-1">
+              Sent to each selected runner when you share the WhatsApp invite. Leave blank to use a default message built from the event title.
+            </p>
           </div>
 
           <div className="md:col-span-2">

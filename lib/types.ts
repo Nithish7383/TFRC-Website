@@ -23,6 +23,7 @@ export interface Event {
   status?: EventStatus
   is_paid: boolean
   price_inr?: number | null
+  invite_message?: string | null
   questions?: Question[]
 }
 
