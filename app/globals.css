@@ -18,6 +18,15 @@
     scroll-behavior: smooth;
   }
 
+  /* Every section/footer is a potential scroll/anchor target — this keeps
+     headings clear of PillNav's fixed pill (~64px tall, sitting 16px from
+     the top) regardless of which section it is, instead of hand-tuning a
+     scroll-mt-* utility per section. */
+  section,
+  footer {
+    scroll-margin-top: 6.5rem;
+  }
+
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

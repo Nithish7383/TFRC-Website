@@ -44,14 +44,16 @@ export default function HeroBackground({ photos }: Props) {
           } ${i === index ? 'opacity-100' : 'opacity-0'}`}
         />
       ))}
-      {/* Overlay: lighter at top/bottom, darkest through the middle 60% band where
-          the headline/tagline/buttons sit — text-shadow on the copy is the backstop
-          so this can stay light without risking legibility. */}
+      {/* Overlay: light at the top so faces/energy in the photo read through,
+          easing progressively darker toward the bottom third where the
+          content (headline, tagline, CTA) actually sits — text-shadow on
+          the copy is the backstop so this can stay light without risking
+          legibility. */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.72) 20%, rgba(0,0,0,0.78) 50%, rgba(0,0,0,0.72) 80%, rgba(0,0,0,0.35) 100%)',
+            'linear-gradient(to bottom, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.55) 65%, rgba(0,0,0,0.8) 100%)',
         }}
       />
     </div>

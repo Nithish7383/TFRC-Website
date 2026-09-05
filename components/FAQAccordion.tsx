@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function FAQAccordion({ items }: Props) {
-  const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   return (
     <div className="divide-y divide-white/[0.07] border border-white/10 rounded-2xl overflow-hidden

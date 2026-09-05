@@ -13,7 +13,7 @@ export default function SiteFooter({ whatsappLink, instagramUrl, youtubeUrl }: P
   return (
     <footer
       id="contact"
-      className="relative border-t border-white/10 pt-16 pb-6 px-4 text-center scroll-mt-24 overflow-hidden"
+      className="relative border-t border-white/10 pt-16 pb-6 px-4 text-center overflow-hidden"
     >
       {/* Ambient gold wash rising from the bottom edge */}
       <div className="glow-orb w-[520px] h-[300px] -bottom-40 left-1/2 -translate-x-1/2 opacity-70" />
@@ -49,7 +49,7 @@ export default function SiteFooter({ whatsappLink, instagramUrl, youtubeUrl }: P
 
           <Link
             href="/join"
-            className="btn-ghost-gold text-xs px-6 py-2.5 mb-6"
+            className="btn-primary text-xs px-6 py-2.5 mb-6"
           >
             Join Free →
           </Link>

@@ -147,7 +147,7 @@ export default function HomepageEventsSection({ events }: Props) {
   if (events.length === 0) return null
 
   return (
-    <section id="events" className="relative border-t border-white/10 py-20 md:py-28 px-4 scroll-mt-24 overflow-hidden">
+    <section id="events" className="relative border-t border-white/10 py-20 md:py-28 px-4 overflow-hidden">
       <div className="relative max-w-5xl mx-auto">
         <Reveal>
           <div className="text-center mb-12">

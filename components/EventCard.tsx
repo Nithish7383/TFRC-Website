@@ -48,16 +48,12 @@ export default function EventCard({ event, slotsLeft, onRegisterClick, disabled 
     >
       {/* Poster image */}
       <div className="absolute inset-0">
-        {event.cover_image_url ? (
-          <img
-            src={event.cover_image_url}
-            alt={event.title}
-            className="w-full h-full object-cover transition-transform duration-[900ms] ease-out-expo
-                       group-hover:scale-[1.07]"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-gold/10 via-white/5 to-black" />
-        )}
+        <img
+          src={event.cover_image_url || '/firstruleclublogo.jpg'}
+          alt={event.title}
+          className="w-full h-full object-cover transition-transform duration-[900ms] ease-out-expo
+                     group-hover:scale-[1.07]"
+        />
 
         {/* Legibility scrim — deepens slightly on hover so text stays crisp
             as the image brightens underneath. */}

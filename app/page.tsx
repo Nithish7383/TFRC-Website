@@ -120,6 +120,20 @@ export default async function LandingPage() {
         <ScrollCue />
       </section>
 
+      {/* TRUST STRIP — the community stat, moved right under the hero so this
+          proof-of-momentum lands before anything else instead of being
+          buried mid-page. */}
+      <Reveal>
+        <section className="border-y border-white/10 py-5 px-4 text-center">
+          <p className="stat-number text-gold text-xl md:text-2xl">
+            {communityStatValue}{' '}
+            <span className="text-gray-400 font-normal normal-case tracking-normal font-sans text-sm md:text-base">
+              strong, and counting
+            </span>
+          </p>
+        </section>
+      </Reveal>
+
       {/* FEATURED EVENT */}
       {featuredActive && featuredName && (
         <Reveal scale>
@@ -287,7 +301,7 @@ export default async function LandingPage() {
       {/* GALLERY — infinite-scroll photo marquee */}
       {showGallery && (
         <Reveal>
-          <section id="gallery" className="border-t border-white/10 py-20 md:py-28 scroll-mt-24">
+          <section id="gallery" className="border-t border-white/10 py-20 md:py-28">
             <div className="max-w-4xl mx-auto px-4 flex items-center justify-between mb-10">
               <div>
                 <h2 className="heading-display text-white text-3xl md:text-4xl">Our Community</h2>
@@ -307,7 +321,7 @@ export default async function LandingPage() {
       <Reveal>
         <section className="border-t border-white/10 py-8 px-4">
           <div className="max-w-4xl mx-auto flex flex-col items-center gap-3">
-            <p className="text-gray-600 text-xs font-mono uppercase tracking-[0.2em]">Follow along</p>
+            <p className="eyebrow">Follow along</p>
             <SocialLinks whatsappLink={whatsappLink} instagramUrl={instagramUrl} youtubeUrl={youtubeUrl} variant="pill" />
           </div>
         </section>
@@ -319,7 +333,6 @@ export default async function LandingPage() {
           <div className="absolute inset-0 bg-gold-sheen opacity-[0.04]" />
           <div className="glow-orb w-[420px] h-[420px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30" />
           <div className="relative max-w-2xl mx-auto">
-            <p className="stat-number text-gold text-2xl md:text-3xl mb-3">{communityStatValue} strong, and counting.</p>
             <h2 className="heading-display text-white text-3xl md:text-5xl mb-4">
               Ready to <span className="text-gold-sheen">show up?</span>
             </h2>
@@ -333,7 +346,7 @@ export default async function LandingPage() {
 
       {/* FAQ */}
       <Reveal>
-        <section id="faq" className="border-t border-white/10 py-20 md:py-28 px-4 scroll-mt-24">
+        <section id="faq" className="border-t border-white/10 py-20 md:py-28 px-4">
           <div className="max-w-2xl mx-auto">
             <p className="eyebrow mb-2 justify-center w-full">Questions</p>
             <h2 className="heading-display text-white text-3xl md:text-4xl mb-10 text-center">FAQ</h2>
