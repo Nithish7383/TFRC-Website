@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { AnimatePresence, motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
 import { Event, Gender, Question } from '@/lib/types'
 import { REASON_OPTIONS, normalizePhone } from '@/lib/constants'
@@ -68,7 +69,32 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, string | string[]>>({})
   const [uploadingPayment, setUploadingPayment] = useState(false)
   const [paymentUploadError, setPaymentUploadError] = useState('')
+  const [showConfirm, setShowConfirm] = useState(false)
   const paymentFileInputRef = useRef<HTMLInputElement>(null)
+
+  // Reasons and emergency contact rarely change between events, but there's
+  // nowhere server-side we can safely pre-fill them from — the phone-lookup
+  // RPC deliberately excludes emergency_contact fields since it's callable
+  // by anyone with just a phone number (see supabase-v7-member-auth.sql).
+  // Caching them in this browser's localStorage instead re-fills them for a
+  // repeat registration from the same device, without exposing anything to
+  // a stranger who happens to know someone's number.
+  useEffect(() => {
+    if (!member) return
+    try {
+      const savedReasons = localStorage.getItem('tfrc_last_reasons')
+      const savedEmergencyName = localStorage.getItem('tfrc_last_emergency_name')
+      const savedEmergencyPhone = localStorage.getItem('tfrc_last_emergency_phone')
+      setForm((prev) => ({
+        ...prev,
+        reasons: prev.reasons.length === 0 && savedReasons ? JSON.parse(savedReasons) : prev.reasons,
+        emergency_contact_name: prev.emergency_contact_name || savedEmergencyName || '',
+        emergency_contact_phone: prev.emergency_contact_phone || savedEmergencyPhone || '',
+      }))
+    } catch {
+      // Corrupt/blocked localStorage just means no pre-fill — not fatal.
+    }
+  }, [member])
 
   const selectedEvent = events.find((e) => e.id === form.event_id)
   const eventQuestions = selectedEvent?.questions || []
@@ -199,7 +225,11 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
     setError('')
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Validates the form and, if everything checks out, opens a review step
+  // instead of registering immediately — a stray tap on "Submit
+  // Registration" at the bottom of a long form now only opens a summary the
+  // person has to explicitly confirm, rather than registering them outright.
+  const handleReview = (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.event_id) { setError('Please select an event.'); return }
     if (!form.gender) { setError('Please select your gender.'); return }
@@ -225,6 +255,13 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
       setError('Please enter a valid age.')
       return
     }
+
+    setError('')
+    setShowConfirm(true)
+  }
+
+  const handleConfirmedSubmit = async () => {
+    const ageNum = parseInt(form.age)
 
     setLoading(true)
     setError('')
@@ -320,6 +357,14 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
       await createRegistrationResponses(inserted.id, answers)
     }
 
+    try {
+      localStorage.setItem('tfrc_last_reasons', JSON.stringify(form.reasons))
+      localStorage.setItem('tfrc_last_emergency_name', form.emergency_contact_name.trim())
+      localStorage.setItem('tfrc_last_emergency_phone', form.emergency_contact_phone.trim())
+    } catch {
+      // Best-effort convenience cache — a write failure shouldn't block registration.
+    }
+
     const params = new URLSearchParams({
       name: form.name,
       event: selectedEvent?.title || '',
@@ -409,7 +454,7 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
 
   // Member found — show full form
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleReview} className="space-y-6">
       {/* Member badge */}
       {member && (
         <div className="flex items-center gap-3 bg-green-900/20 border border-green-800/30 rounded-xl px-4 py-3">
@@ -747,7 +792,7 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
         </div>
       )}
 
-      {error && (
+      {error && !showConfirm && (
         <div className="bg-red-900/20 border border-red-800/50 rounded-lg px-4 py-3 text-red-400 text-sm">
           {error}
         </div>
@@ -755,11 +800,73 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
 
       <button
         type="submit"
-        disabled={loading || isPastDeadline || events.length === 0}
+        disabled={isPastDeadline || events.length === 0}
         className="btn-primary w-full text-center"
       >
-        {loading ? 'Submitting...' : 'Submit Registration'}
+        Review & Submit
       </button>
+
+      {/* Review step — a stray tap on the button above only opens this
+          summary; registering still needs a deliberate second tap. */}
+      <AnimatePresence>
+        {showConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center px-4"
+            onClick={() => !loading && setShowConfirm(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.97 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="card max-w-sm w-full space-y-5 border-gold/20 shadow-gold-glow-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div>
+                <p className="eyebrow mb-2 justify-center w-full">Confirm</p>
+                <h2 className="heading-display text-white text-xl text-center">
+                  Register for {selectedEvent?.title}?
+                </h2>
+              </div>
+
+              <div className="space-y-2 text-sm bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3">
+                <div className="flex justify-between"><span className="text-gray-500">Name</span><span className="text-gray-200">{form.name}</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Age / Gender</span><span className="text-gray-200">{form.age} / {form.gender}</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Event date</span><span className="text-gray-200">{selectedEvent && new Date(selectedEvent.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}</span></div>
+              </div>
+
+              {error && (
+                <div className="bg-red-900/20 border border-red-800/50 rounded-lg px-4 py-3 text-red-400 text-sm">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={handleConfirmedSubmit}
+                  disabled={loading}
+                  className="btn-primary w-full text-center"
+                >
+                  {loading ? 'Submitting...' : 'Confirm Registration →'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(false)}
+                  disabled={loading}
+                  className="btn-secondary w-full text-center"
+                >
+                  Go back and edit
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </form>
   )
 }

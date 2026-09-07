@@ -31,6 +31,12 @@ const HOVER: Record<keyof typeof ICONS, string> = {
   youtube: 'hover:text-[#FF0000] hover:border-[#FF0000]/50 hover:shadow-[0_8px_24px_-10px_rgba(255,0,0,0.5)]',
 }
 
+// WhatsApp is the actual join channel, not just another social link — it
+// stays green at rest instead of waiting for hover like Instagram/YouTube.
+const BASE: Partial<Record<keyof typeof ICONS, string>> = {
+  whatsapp: 'text-[#25D366] border-[#25D366]/30 bg-[#25D366]/[0.08]',
+}
+
 export default function SocialLinks({ whatsappLink, instagramUrl, youtubeUrl, variant = 'pill' }: Props) {
   const items = [
     whatsappLink && { key: 'whatsapp', href: whatsappLink, label: 'WhatsApp' },
@@ -66,10 +72,10 @@ export default function SocialLinks({ whatsappLink, instagramUrl, youtubeUrl, va
           href={item.href}
           target="_blank"
           rel="noopener noreferrer"
-          className={`group flex items-center gap-2 text-sm text-gray-400 border border-white/10
-                      bg-white/[0.02] rounded-full px-4 py-2
+          className={`group flex items-center gap-2 text-sm border rounded-full px-4 py-2
                       transition-all duration-300 ease-out-expo
-                      hover:-translate-y-0.5 hover:bg-white/[0.06] active:scale-95
+                      hover:-translate-y-0.5 active:scale-95
+                      ${BASE[item.key] || 'text-gray-400 border-white/10 bg-white/[0.02] hover:bg-white/[0.06]'}
                       ${HOVER[item.key]}`}
         >
           <span className="transition-transform duration-300 ease-spring group-hover:scale-110 group-hover:-rotate-6">

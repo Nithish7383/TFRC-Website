@@ -4,16 +4,24 @@ interface Props {
   photos: GalleryPhoto[]
 }
 
+// Seconds of travel per photo — fixed regardless of row length, so a row
+// with fewer photos doesn't linger just because the loop still has to
+// finish a full cycle; a row with more photos takes proportionally longer,
+// but each photo passes by at the same speed either way.
+const SECONDS_PER_PHOTO = 1.6
+const MIN_DURATION_S = 8
+
 function Row({ photos, direction }: { photos: GalleryPhoto[]; direction: 'left' | 'right' }) {
   // Duplicated so the strip can loop seamlessly at translateX(-50%).
   const doubled = [...photos, ...photos]
+  const duration = Math.max(MIN_DURATION_S, photos.length * SECONDS_PER_PHOTO)
 
   return (
     <div
       className="marquee-row group/row flex gap-4 w-max"
       style={{
         '--marquee-name': `marquee-${direction}`,
-        '--marquee-duration': '40s',
+        '--marquee-duration': `${duration}s`,
       } as React.CSSProperties}
     >
       {doubled.map((photo, i) => (

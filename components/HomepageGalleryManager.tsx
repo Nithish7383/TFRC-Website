@@ -18,6 +18,13 @@ export default function HomepageGalleryManager() {
   const [success, setSuccess] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Which single photo is pinned as the hero background / "Who we are"
+  // background on the homepage — stored as plain image URLs in
+  // site_settings so app/page.tsx can look them up without a join.
+  const [heroPhotoUrl, setHeroPhotoUrl] = useState('')
+  const [aboutPhotoUrl, setAboutPhotoUrl] = useState('')
+  const [pinning, setPinning] = useState<string | null>(null)
+
   const fetchPhotos = async () => {
     setLoading(true)
     const { data } = await supabase
@@ -28,7 +35,28 @@ export default function HomepageGalleryManager() {
     setLoading(false)
   }
 
-  useEffect(() => { fetchPhotos() }, [])
+  const fetchPinnedPhotos = async () => {
+    const { data } = await supabase
+      .from('site_settings')
+      .select('key, value')
+      .in('key', ['hero_photo_url', 'about_photo_url'])
+    const s: Record<string, string> = {}
+    ;(data || []).forEach((r: { key: string; value: string }) => { s[r.key] = r.value })
+    setHeroPhotoUrl(s['hero_photo_url'] || '')
+    setAboutPhotoUrl(s['about_photo_url'] || '')
+  }
+
+  useEffect(() => { fetchPhotos(); fetchPinnedPhotos() }, [])
+
+  const handlePin = async (role: 'hero_photo_url' | 'about_photo_url', photo: GalleryPhoto) => {
+    setPinning(`${role}-${photo.id}`)
+    const currentlyPinned = role === 'hero_photo_url' ? heroPhotoUrl : aboutPhotoUrl
+    const nextValue = currentlyPinned === photo.image_url ? '' : photo.image_url
+    await supabase.from('site_settings').upsert({ key: role, value: nextValue, updated_at: new Date().toISOString() })
+    if (role === 'hero_photo_url') setHeroPhotoUrl(nextValue)
+    else setAboutPhotoUrl(nextValue)
+    setPinning(null)
+  }
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -133,37 +161,72 @@ export default function HomepageGalleryManager() {
         <p className="text-gray-600 text-sm">No gallery photos yet.</p>
       ) : (
         <div className="space-y-3">
-          {photos.map((photo) => (
-            <div key={photo.id} className="flex items-center gap-4 border border-white/15 rounded-lg p-3">
-              <img
-                src={photo.image_url}
-                alt={photo.caption ?? 'Gallery'}
-                className="w-16 h-16 object-cover rounded-lg flex-shrink-0 bg-white/10"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-gray-300 text-sm truncate">{photo.caption || '—'}</p>
-                <p className="text-gray-600 text-xs">Order: {photo.display_order}</p>
-              </div>
-              <button
-                onClick={() => handleDelete(photo)}
-                className={`text-xs px-3 py-1.5 rounded-lg border transition-colors whitespace-nowrap ${
-                  deleteConfirm === photo.id
-                    ? 'bg-red-900/50 border-red-700 text-red-300'
-                    : 'border-white/15 text-gray-400 hover:border-red-700 hover:text-red-400'
-                }`}
-              >
-                {deleteConfirm === photo.id ? 'Confirm delete?' : 'Delete'}
-              </button>
-              {deleteConfirm === photo.id && (
+          <p className="text-gray-500 text-xs">
+            Pin one photo as the hero background and one as the &quot;Who we are&quot; section
+            background — otherwise the hero rotates through the first few photos below and
+            &quot;Who we are&quot; just uses whichever photo sorts first.
+          </p>
+          {photos.map((photo) => {
+            const isHero = heroPhotoUrl === photo.image_url
+            const isAbout = aboutPhotoUrl === photo.image_url
+            return (
+              <div key={photo.id} className="flex items-center gap-4 border border-white/15 rounded-lg p-3">
+                <img
+                  src={photo.image_url}
+                  alt={photo.caption ?? 'Gallery'}
+                  className="w-16 h-16 object-cover rounded-lg flex-shrink-0 bg-white/10"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-gray-300 text-sm truncate">{photo.caption || '—'}</p>
+                  <p className="text-gray-600 text-xs">Order: {photo.display_order}</p>
+                  {(isHero || isAbout) && (
+                    <div className="flex gap-1.5 mt-1">
+                      {isHero && <span className="text-[10px] font-mono uppercase tracking-wide text-gold bg-gold/10 border border-gold/30 rounded-full px-2 py-0.5">Hero</span>}
+                      {isAbout && <span className="text-[10px] font-mono uppercase tracking-wide text-gold bg-gold/10 border border-gold/30 rounded-full px-2 py-0.5">Who we are</span>}
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1.5 flex-shrink-0">
+                  <button
+                    onClick={() => handlePin('hero_photo_url', photo)}
+                    disabled={pinning === `hero_photo_url-${photo.id}`}
+                    className={`text-xs px-3 py-1.5 rounded-lg border transition-colors whitespace-nowrap ${
+                      isHero ? 'bg-gold/15 border-gold/50 text-gold' : 'border-white/15 text-gray-400 hover:border-gold/40 hover:text-gold'
+                    }`}
+                  >
+                    {isHero ? 'Unpin Hero' : 'Use as Hero'}
+                  </button>
+                  <button
+                    onClick={() => handlePin('about_photo_url', photo)}
+                    disabled={pinning === `about_photo_url-${photo.id}`}
+                    className={`text-xs px-3 py-1.5 rounded-lg border transition-colors whitespace-nowrap ${
+                      isAbout ? 'bg-gold/15 border-gold/50 text-gold' : 'border-white/15 text-gray-400 hover:border-gold/40 hover:text-gold'
+                    }`}
+                  >
+                    {isAbout ? 'Unpin' : 'Use as "Who we are"'}
+                  </button>
+                </div>
                 <button
-                  onClick={() => setDeleteConfirm(null)}
-                  className="text-xs text-gray-500 hover:text-gray-300"
+                  onClick={() => handleDelete(photo)}
+                  className={`text-xs px-3 py-1.5 rounded-lg border transition-colors whitespace-nowrap ${
+                    deleteConfirm === photo.id
+                      ? 'bg-red-900/50 border-red-700 text-red-300'
+                      : 'border-white/15 text-gray-400 hover:border-red-700 hover:text-red-400'
+                  }`}
                 >
-                  Cancel
+                  {deleteConfirm === photo.id ? 'Confirm delete?' : 'Delete'}
                 </button>
-              )}
-            </div>
-          ))}
+                {deleteConfirm === photo.id && (
+                  <button
+                    onClick={() => setDeleteConfirm(null)}
+                    className="text-xs text-gray-500 hover:text-gray-300"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>

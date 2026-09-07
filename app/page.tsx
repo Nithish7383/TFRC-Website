@@ -99,7 +99,15 @@ export default async function LandingPage() {
   const showGallery = photos.length > 0
   const displayPhotos = photos.slice(0, 9)
   const hasMorePhotos = photos.length > 9
-  const heroPhotos = photos.slice(0, 6)
+
+  // Admin can pin one gallery photo each for the hero and "Who we are"
+  // backgrounds (see HomepageGalleryManager's "Use as Hero" / "Use as Who
+  // we are" buttons). Falls back to the previous behavior — a rotating set
+  // of the first few photos for the hero, the first photo for "Who we are"
+  // — if nothing's pinned, or the pinned photo was since deleted.
+  const pinnedHeroPhoto = photos.find((p) => p.image_url === s['hero_photo_url'])
+  const heroPhotos = pinnedHeroPhoto ? [pinnedHeroPhoto] : photos.slice(0, 6)
+  const aboutPhoto = photos.find((p) => p.image_url === s['about_photo_url']) || photos[0]
 
   return (
     <main className="min-h-screen bg-black">
@@ -185,12 +193,12 @@ export default async function LandingPage() {
       <HomepageEventsSection events={eventsWithSlotsLeft} whatsappLink={whatsappLink} />
 
       {/* WHO WE ARE */}
-      {photos[0] && (
+      {aboutPhoto && (
         <Reveal scale>
           <section className="relative border-t border-white/10 py-24 md:py-32 px-4 overflow-hidden">
             <div className="absolute inset-0">
               <img
-                src={photos[0].image_url}
+                src={aboutPhoto.image_url}
                 alt=""
                 className="w-full h-full object-cover object-center scale-105"
               />
