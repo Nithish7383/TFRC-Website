@@ -31,10 +31,12 @@ const HOVER: Record<keyof typeof ICONS, string> = {
   youtube: 'hover:text-[#FF0000] hover:border-[#FF0000]/50 hover:shadow-[0_8px_24px_-10px_rgba(255,0,0,0.5)]',
 }
 
-// WhatsApp is the actual join channel, not just another social link — it
-// stays green at rest instead of waiting for hover like Instagram/YouTube.
+// WhatsApp and Instagram are the two channels people actually convert
+// through — they stay in brand color at rest instead of waiting for hover
+// like YouTube.
 const BASE: Partial<Record<keyof typeof ICONS, string>> = {
   whatsapp: 'text-[#25D366] border-[#25D366]/30 bg-[#25D366]/[0.08]',
+  instagram: 'text-[#E1306C] border-[#E1306C]/30 bg-[#E1306C]/[0.08]',
 }
 
 export default function SocialLinks({ whatsappLink, instagramUrl, youtubeUrl, variant = 'pill' }: Props) {

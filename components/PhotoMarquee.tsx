@@ -8,8 +8,8 @@ interface Props {
 // with fewer photos doesn't linger just because the loop still has to
 // finish a full cycle; a row with more photos takes proportionally longer,
 // but each photo passes by at the same speed either way.
-const SECONDS_PER_PHOTO = 1.6
-const MIN_DURATION_S = 8
+const SECONDS_PER_PHOTO = 3.2
+const MIN_DURATION_S = 14
 
 function Row({ photos, direction }: { photos: GalleryPhoto[]; direction: 'left' | 'right' }) {
   // Duplicated so the strip can loop seamlessly at translateX(-50%).
