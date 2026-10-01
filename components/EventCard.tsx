@@ -72,11 +72,23 @@ export default function EventCard({ event, slotsLeft, onRegisterClick, disabled 
 
       {/* Top row — week label + scarcity */}
       <div className="relative z-[1] flex items-start justify-between p-5">
-        <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.2em]
-                         text-gold/90 bg-black/40 backdrop-blur-md border border-gold/20
-                         rounded-full px-3 py-1.5">
-          {weekLabel(event.date)}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.2em]
+                           text-gold/90 bg-black/40 backdrop-blur-md border border-gold/20
+                           rounded-full px-3 py-1.5">
+            {weekLabel(event.date)}
+          </span>
+          <span
+            className={`inline-flex items-center text-[10px] font-mono font-bold uppercase tracking-[0.15em]
+                        backdrop-blur-md border rounded-full px-3 py-1.5 ${
+              event.is_paid
+                ? 'text-black bg-gold border-gold'
+                : 'text-green-300 bg-green-950/50 border-green-500/30'
+            }`}
+          >
+            {event.is_paid ? (event.price_inr ? `₹${event.price_inr}` : 'Paid') : 'Free'}
+          </span>
+        </div>
 
         {showScarcity && (
           <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.15em]

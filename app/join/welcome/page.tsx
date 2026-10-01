@@ -8,7 +8,7 @@ export default async function JoinWelcomePage({
   searchParams: { member_id?: string; name?: string }
 }) {
   const member_id = searchParams.member_id || 'TFRC0001'
-  const name = searchParams.name || 'Runner'
+  const name = searchParams.name || 'friend'
 
   const supabase = createClient()
   const { data: settingsRows } = await supabase.from('site_settings').select('key, value')

@@ -84,3 +84,52 @@ export async function registerMember(input: NewMemberInput): Promise<RegisterRes
 
   return { ok: true, memberId: inserted.member_id }
 }
+
+export interface QuickJoinInput {
+  name: string
+  phone: string
+  age: number
+  gender: string
+}
+
+/**
+ * Short signup used straight from an event card: creates the same members
+ * row as /join, but only from the fields an event actually needs. The
+ * members table still requires place/occupation/running_experience, so
+ * those get neutral defaults ('' / 'First timer' — the schema's CHECK only
+ * allows the four listed values) that the member can fill in later.
+ */
+export async function registerMemberQuick(input: QuickJoinInput): Promise<RegisterResult> {
+  const name = input.name.trim()
+  const phone = normalizePhone(input.phone)
+
+  if (!name) return { ok: false, error: 'Please enter your name.' }
+  if (!/^\d{10}$/.test(phone)) return { ok: false, error: 'Please enter a valid 10-digit phone number.' }
+  if (input.gender !== 'Male' && input.gender !== 'Female') return { ok: false, error: 'Please select your gender.' }
+  if (!Number.isInteger(input.age) || input.age < 10 || input.age > 80) {
+    return { ok: false, error: 'Please enter a valid age.' }
+  }
+
+  return registerMember({
+    name,
+    phone,
+    age: input.age,
+    gender: input.gender,
+    place: '',
+    occupation: '',
+    running_experience: 'First timer',
+    goals: [],
+    emergency_contact_name: null,
+    emergency_contact_phone: null,
+    medical_conditions: null,
+    blood_group: null,
+    instagram_handle: null,
+    profile_photo_url: null,
+    birthday: null,
+    height: null,
+    weight: null,
+    running_pace: null,
+    weekly_training_days: null,
+    interests: [],
+  })
+}

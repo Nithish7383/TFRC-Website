@@ -29,7 +29,7 @@ export default function HeroContent() {
         variants={item}
         className="eyebrow mb-5 bg-black/40 backdrop-blur-md border border-gold/20 rounded-full px-4 py-1.5"
       >
-        Madurai&apos;s fitness movement
+        We Don&apos;t Talk About It. We Show Up.
       </motion.span>
 
       <motion.h1
@@ -41,9 +41,16 @@ export default function HeroContent() {
 
       <motion.p
         variants={item}
-        className="heading-display text-white text-lg md:text-xl mb-10 text-shadow-hero"
+        className="heading-display text-white text-lg md:text-xl mb-3 text-shadow-hero"
       >
-        Remember the first rule.
+        For people who want to live more.
+      </motion.p>
+
+      <motion.p
+        variants={item}
+        className="text-gray-200 text-sm md:text-base mb-10 max-w-md text-shadow-hero"
+      >
+        Runs, treks, sports, meetups and experiences in Madurai.
       </motion.p>
 
       <motion.div variants={item}>

@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
 import { Event, Gender, Question } from '@/lib/types'
-import { REASON_OPTIONS, normalizePhone } from '@/lib/constants'
+import { normalizePhone } from '@/lib/constants'
 import EventPreviewCard from '@/components/EventPreviewCard'
+import QuickJoinForm, { QuickJoinedMember } from '@/components/QuickJoinForm'
 import { createRegistrationResponses } from '@/app/register/actions'
 import { validatePhotoFile } from '@/lib/photo-upload'
 import { uploadPaymentScreenshot } from '@/lib/payment-upload'
@@ -55,7 +56,6 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
     phone: '',
     gender: '',
     occupation: '',
-    reasons: [] as string[],
     running_experience: '',
     emergency_contact_name: '',
     emergency_contact_phone: '',
@@ -72,7 +72,7 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
   const [showConfirm, setShowConfirm] = useState(false)
   const paymentFileInputRef = useRef<HTMLInputElement>(null)
 
-  // Reasons and emergency contact rarely change between events, but there's
+  // Emergency contact rarely changes between events, but there's
   // nowhere server-side we can safely pre-fill them from — the phone-lookup
   // RPC deliberately excludes emergency_contact fields since it's callable
   // by anyone with just a phone number (see supabase-v7-member-auth.sql).
@@ -82,12 +82,10 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
   useEffect(() => {
     if (!member) return
     try {
-      const savedReasons = localStorage.getItem('tfrc_last_reasons')
       const savedEmergencyName = localStorage.getItem('tfrc_last_emergency_name')
       const savedEmergencyPhone = localStorage.getItem('tfrc_last_emergency_phone')
       setForm((prev) => ({
         ...prev,
-        reasons: prev.reasons.length === 0 && savedReasons ? JSON.parse(savedReasons) : prev.reasons,
         emergency_contact_name: prev.emergency_contact_name || savedEmergencyName || '',
         emergency_contact_phone: prev.emergency_contact_phone || savedEmergencyPhone || '',
       }))
@@ -182,6 +180,30 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
     }))
   }
 
+  // A new visitor just joined from this page: continue straight into the
+  // event form as a member, no separate /join detour.
+  const handleQuickJoined = (joined: QuickJoinedMember) => {
+    const normalizedPhone = normalizePhone(phoneInput)
+    setMember({
+      member_id: joined.member_id,
+      name: joined.name,
+      age: joined.age,
+      gender: joined.gender,
+      place: '',
+      occupation: '',
+      running_experience: '',
+    })
+    setMemberNotFound(false)
+    setMemberChecked(true)
+    setForm((prev) => ({
+      ...prev,
+      phone: normalizedPhone,
+      name: joined.name,
+      age: String(joined.age),
+      gender: joined.gender,
+    }))
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
     if (e.target.name === 'event_id') setQuestionAnswers({})
@@ -215,16 +237,6 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
     setError('')
   }
 
-  const toggleReason = (reason: string) => {
-    setForm((prev) => ({
-      ...prev,
-      reasons: prev.reasons.includes(reason)
-        ? prev.reasons.filter((r) => r !== reason)
-        : [...prev.reasons, reason],
-    }))
-    setError('')
-  }
-
   // Validates the form and, if everything checks out, opens a review step
   // instead of registering immediately — a stray tap on "Submit
   // Registration" at the bottom of a long form now only opens a summary the
@@ -233,7 +245,6 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
     e.preventDefault()
     if (!form.event_id) { setError('Please select an event.'); return }
     if (!form.gender) { setError('Please select your gender.'); return }
-    if (form.reasons.length === 0) { setError('Please select at least one reason.'); return }
     if (isPastDeadline) { setError('Registration is closed. The deadline has passed.'); return }
     if (selectedEvent?.is_paid && !form.payment_screenshot_url) {
       setError('Please upload your payment screenshot to continue.')
@@ -313,7 +324,7 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
         phone: form.phone.trim(),
         gender: form.gender,
         occupation: form.occupation.trim(),
-        reason: form.reasons.join(', '),
+        reason: 'Registered via event page',
         running_experience: form.running_experience || null,
         emergency_contact_name: form.emergency_contact_name.trim() || null,
         emergency_contact_phone: form.emergency_contact_phone.trim() || null,
@@ -358,7 +369,6 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
     }
 
     try {
-      localStorage.setItem('tfrc_last_reasons', JSON.stringify(form.reasons))
       localStorage.setItem('tfrc_last_emergency_name', form.emergency_contact_name.trim())
       localStorage.setItem('tfrc_last_emergency_phone', form.emergency_contact_phone.trim())
     } catch {
@@ -369,6 +379,7 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
       name: form.name,
       event: selectedEvent?.title || '',
       date: selectedEvent?.date || '',
+      event_id: selectedEvent?.id || '',
     })
     router.push(`/confirmation?${params.toString()}`)
   }
@@ -379,7 +390,7 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
       <div className="card space-y-5">
         <div>
           <h2 className="text-white font-semibold text-lg mb-1">First, let&apos;s find your member profile</h2>
-          <p className="text-gray-400 text-sm">Enter the WhatsApp number you used to join TFRC.</p>
+          <p className="text-gray-400 text-sm">Enter your WhatsApp number. New here? You can join in a few seconds.</p>
         </div>
         <form onSubmit={handlePhoneLookup} className="flex flex-col sm:flex-row gap-3">
           <input
@@ -416,7 +427,7 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
         </form>
 
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/70 backdrop-blur-sm">
-          <div className="card max-w-sm w-full border-gold/30 space-y-4 relative">
+          <div className="card max-w-sm w-full max-h-[90vh] overflow-y-auto border-gold/30 space-y-4 relative">
             <button
               type="button"
               onClick={() => setMemberNotFound(false)}
@@ -425,27 +436,12 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
             >
               ×
             </button>
-            <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center">
-              <svg className="w-6 h-6 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-white font-semibold text-lg">You&apos;re not a member yet</p>
-              <p className="text-gray-400 text-sm mt-1">
-                This number isn&apos;t registered with TFRC. Create a free member profile first — it only takes a minute — then come back here to register for events.
-              </p>
-            </div>
-            <a href="/join" className="btn-primary w-full text-center block">
-              Join as Member →
-            </a>
-            <button
-              type="button"
-              onClick={() => setMemberNotFound(false)}
-              className="text-gray-500 hover:text-gray-300 text-sm w-full text-center"
-            >
-              Try a different number
-            </button>
+            <QuickJoinForm
+              phone={phoneInput}
+              onJoined={handleQuickJoined}
+              onCancel={() => { setMemberChecked(false); setMemberNotFound(false) }}
+              submitLabel="Join & Continue →"
+            />
           </div>
         </div>
       </div>
@@ -577,71 +573,6 @@ export default function RegisterForm({ events, preselectedEventId, paymentQrUrl 
               </div>
             </div>
           )}
-        </div>
-
-        {/* Place */}
-        <div>
-          <label className="block text-gray-300 text-sm font-medium mb-2">City / Area <span className="text-red-400">*</span></label>
-          <input type="text" name="place" value={form.place} onChange={handleChange} required placeholder="e.g. Anna Nagar, Chennai" className="input-field" />
-        </div>
-
-        {/* Occupation */}
-        <div>
-          <label className="block text-gray-300 text-sm font-medium mb-2">Occupation <span className="text-red-400">*</span></label>
-          <input type="text" name="occupation" value={form.occupation} onChange={handleChange} required placeholder="e.g. Software Engineer, Student" className="input-field" />
-        </div>
-
-        {/* Running Experience (pre-filled, editable) */}
-        <div>
-          <label className="block text-gray-300 text-sm font-medium mb-2">Running Experience <span className="text-red-400">*</span></label>
-          <div className="grid grid-cols-2 gap-3">
-            {([
-              { value: 'First timer', label: 'First timer' },
-              { value: 'Casual', label: 'Casual (1–2/month)' },
-              { value: 'Regular', label: 'Regular (weekly)' },
-              { value: 'Competitive', label: 'Competitive' },
-            ] as const).map(({ value, label }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => { setForm((p) => ({ ...p, running_experience: value })); setError('') }}
-                className={`py-3 px-4 rounded-xl border-2 text-sm font-medium transition-all text-left ${
-                  form.running_experience === value
-                    ? 'border-gold text-gold bg-gold/10'
-                    : 'border-white/15 text-gray-400 hover:border-white/30'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Reason — multi-select */}
-        <div>
-          <label className="block text-gray-300 text-sm font-medium mb-3">
-            Why do you want to join? <span className="text-red-400">*</span>
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            {REASON_OPTIONS.map((reason) => (
-              <label
-                key={reason}
-                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                  form.reasons.includes(reason)
-                    ? 'border-gold/60 bg-gold/10'
-                    : 'border-white/10 hover:border-white/25'
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  checked={form.reasons.includes(reason)}
-                  onChange={() => toggleReason(reason)}
-                  className="accent-gold"
-                />
-                <span className="text-sm text-gray-300">{reason}</span>
-              </label>
-            ))}
-          </div>
         </div>
 
         {/* Emergency Contact — accordion */}

@@ -21,6 +21,13 @@ export default function EventPreviewCard({ event }: Props) {
       <div>
         <h3 className="heading-display text-white text-xl">{event.title}</h3>
         <p className="text-gray-400 text-sm">{formatEventDate(event.date)}</p>
+        <p className="text-sm font-medium mt-1">
+          {event.is_paid ? (
+            <span className="text-gold">{event.price_inr ? `₹${event.price_inr}` : 'Paid event'}</span>
+          ) : (
+            <span className="text-green-400">Free</span>
+          )}
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-3 text-sm text-gray-300">

@@ -20,19 +20,28 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 const SITE_URL = 'https://thefirstruleclub.vercel.app'
-const SITE_TITLE = 'The First Rule Club — We Don\'t Talk About It.'
-const SITE_DESCRIPTION = 'The First Rule Club — Madurai\'s fitness community for runs, treks, and martial arts. Meet new people, build discipline, and grow — together. Join for free.'
+const SITE_TITLE = 'The First Rule Club | Madurai'
+const SITE_DESCRIPTION = 'The First Rule Club is a community in Madurai for people who want to live more. Runs, treks, sports, fitness, Fight Club, meetups and experiences that bring people together.'
+const INSTAGRAM_URL = 'https://www.instagram.com/thefirstruleclub'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
+  applicationName: 'The First Rule Club',
+  // './' resolves to each page's own URL, so subpages don't canonicalize to the homepage
+  alternates: { canonical: './' },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+  },
   openGraph: {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     siteName: 'The First Rule Club',
-    images: [{ url: '/firstruleclublogo.jpg', width: 800, height: 800 }],
+    images: [{ url: '/firstruleclublogo.jpg', width: 800, height: 800, alt: 'The First Rule Club logo' }],
     locale: 'en_IN',
     type: 'website',
   },
@@ -47,12 +56,33 @@ export const metadata: Metadata = {
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
+  '@id': `${SITE_URL}/#organization`,
   name: 'The First Rule Club',
+  alternateName: 'TFRC',
   url: SITE_URL,
   logo: `${SITE_URL}/firstruleclublogo.jpg`,
   description: SITE_DESCRIPTION,
-  areaServed: 'Madurai, India',
+  slogan: 'For people who want to live more.',
+  areaServed: {
+    '@type': 'City',
+    name: 'Madurai',
+    containedInPlace: { '@type': 'AdministrativeArea', name: 'Tamil Nadu, India' },
+  },
+  sameAs: [INSTAGRAM_URL],
 }
+
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${SITE_URL}/#website`,
+  name: 'The First Rule Club',
+  url: SITE_URL,
+  inLanguage: 'en-IN',
+  publisher: { '@id': `${SITE_URL}/#organization` },
+}
+
+// Escape "<" so content can never close the script tag early
+const toJsonLd = (data: object) => JSON.stringify(data).replace(/</g, '\\u003c')
 
 export default function RootLayout({
   children,
@@ -66,7 +96,11 @@ export default function RootLayout({
       >
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: toJsonLd(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: toJsonLd(websiteJsonLd) }}
         />
         {children}
       </body>

@@ -41,8 +41,8 @@ export default async function GalleryPage() {
       {/* Header */}
       <Reveal>
         <section className="max-w-5xl mx-auto px-4 pt-12 pb-4">
-          <h1 className="heading-display text-white text-4xl md:text-5xl mb-2">Run Gallery</h1>
-          <p className="text-gray-400 text-lg">Every run, remembered.</p>
+          <h1 className="heading-display text-white text-4xl md:text-5xl mb-2">Gallery</h1>
+          <p className="text-gray-400 text-lg">People. Places. Experiences.</p>
         </section>
       </Reveal>
 
@@ -52,7 +52,7 @@ export default async function GalleryPage() {
           <div className="max-w-5xl mx-auto px-4">
             <Reveal>
               <div className="card text-center py-20">
-                <p className="text-gray-400 text-xl">Photos from our runs coming soon.</p>
+                <p className="text-gray-400 text-xl">Photos from our events coming soon.</p>
                 <p className="text-gray-600 text-sm mt-2">Check back after our next event!</p>
               </div>
             </Reveal>

@@ -43,7 +43,7 @@ export default function MemberRegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.gender) { setError('Please select your gender.'); return }
-    if (!form.running_experience) { setError('Please select your running experience.'); return }
+    if (!form.running_experience) { setError('Please tell us how active you are.'); return }
 
     setLoading(true)
     setError('')
@@ -206,18 +206,18 @@ export default function MemberRegisterForm() {
             </div>
           </div>
 
-          {/* Section 2 — Running */}
+          {/* Section 2 — Activity level */}
           <div className="space-y-4">
-            <h2 className="heading-display text-white text-xl border-b border-white/10 pb-3">Running Profile</h2>
+            <h2 className="heading-display text-white text-xl border-b border-white/10 pb-3">About You</h2>
 
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-3">
-                Running Experience <span className="text-red-400">*</span>
+                How active are you? <span className="text-red-400">*</span>
               </label>
               <div className="grid grid-cols-2 gap-3">
                 {([
-                  { value: 'First timer', label: 'First timer' },
-                  { value: 'Casual', label: 'Casual (1–2/month)' },
+                  { value: 'First timer', label: 'Just starting out' },
+                  { value: 'Casual', label: 'Casual (once or twice a month)' },
                   { value: 'Regular', label: 'Regular (weekly)' },
                   { value: 'Competitive', label: 'Competitive' },
                 ] as const).map(({ value, label }) => (

@@ -5,7 +5,7 @@ interface Props {
   unlockHint?: string
 }
 
-export default function TierCard({ name, perks, unlocked, unlockHint = 'Attend a run to reveal this tier' }: Props) {
+export default function TierCard({ name, perks, unlocked, unlockHint = 'Attend an event to reveal this tier' }: Props) {
   return (
     <div className="relative card overflow-hidden">
       <div className={unlocked ? '' : 'blur-sm select-none pointer-events-none'} aria-hidden={!unlocked}>

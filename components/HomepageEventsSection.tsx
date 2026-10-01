@@ -8,6 +8,7 @@ import { normalizePhone } from '@/lib/constants'
 import { Event, Gender } from '@/lib/types'
 import EventsCarousel from '@/components/EventsCarousel'
 import Reveal from '@/components/ui/Reveal'
+import QuickJoinForm, { QuickJoinedMember } from '@/components/QuickJoinForm'
 
 interface EventWithSlots extends Event {
   slotsLeft: number
@@ -41,7 +42,6 @@ export default function HomepageEventsSection({ events }: Props) {
   const [member, setMember] = useState<MemberForRegistration | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
 
   const resetModal = () => {
     setRegisterOpenFor(null)
@@ -51,7 +51,6 @@ export default function HomepageEventsSection({ events }: Props) {
     setMember(null)
     setSubmitting(false)
     setError('')
-    setSuccess(false)
   }
 
   const handleRegisterClick = (event: EventWithSlots) => {
@@ -89,8 +88,9 @@ export default function HomepageEventsSection({ events }: Props) {
   // Only ever reached for free events — handleRegisterClick redirects paid
   // events straight to /register before this modal (and this function) can
   // be reached, so no payment handling is needed here.
-  const handleConfirm = async () => {
-    if (!registerOpenFor || !member) return
+  const handleConfirm = async (memberOverride?: MemberForRegistration) => {
+    const registrant = memberOverride ?? member
+    if (!registerOpenFor || !registrant) return
     setSubmitting(true)
     setError('')
 
@@ -111,14 +111,14 @@ export default function HomepageEventsSection({ events }: Props) {
 
     const { error: insertError } = await supabase.from('registrations').insert({
       event_id: registerOpenFor.id,
-      name: member.name,
-      age: member.age,
-      place: member.place,
+      name: registrant.name,
+      age: registrant.age,
+      place: registrant.place,
       phone: normalizedPhone,
-      gender: member.gender,
-      occupation: member.occupation,
+      gender: registrant.gender,
+      occupation: registrant.occupation,
       reason: 'Registered via homepage',
-      running_experience: member.running_experience || null,
+      running_experience: registrant.running_experience || null,
     })
 
     setSubmitting(false)
@@ -141,7 +141,31 @@ export default function HomepageEventsSection({ events }: Props) {
       return
     }
 
-    setSuccess(true)
+    // Show the event they registered for, not the generic homepage.
+    const params = new URLSearchParams({
+      name: registrant.name,
+      event: registerOpenFor.title,
+      date: registerOpenFor.date,
+      event_id: registerOpenFor.id,
+    })
+    router.push(`/confirmation?${params.toString()}`)
+  }
+
+  // A brand-new visitor just created their membership from the event card —
+  // register them for this event straight away instead of asking again.
+  const handleQuickJoined = async (joined: QuickJoinedMember) => {
+    const newMember: MemberForRegistration = {
+      member_id: joined.member_id,
+      name: joined.name,
+      age: joined.age,
+      gender: joined.gender,
+      place: '',
+      occupation: '',
+      running_experience: '',
+    }
+    setMember(newMember)
+    setNotFound(false)
+    await handleConfirm(newMember)
   }
 
   if (events.length === 0) return null
@@ -182,42 +206,7 @@ export default function HomepageEventsSection({ events }: Props) {
             className="card max-w-sm w-full space-y-5 border-gold/20 shadow-gold-glow-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            {success ? (
-              <div className="text-center space-y-4">
-                <motion.div
-                  initial={{ scale: 0, rotate: -30 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: 'spring', stiffness: 260, damping: 16, delay: 0.1 }}
-                  className="w-16 h-16 bg-green-900/40 border-2 border-green-600/50 rounded-full
-                             flex items-center justify-center mx-auto
-                             shadow-[0_0_30px_-6px_rgba(34,197,94,0.6)]"
-                >
-                  <motion.svg
-                    className="w-8 h-8 text-green-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <motion.path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2.5}
-                      d="M5 13l4 4L19 7"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ duration: 0.5, delay: 0.3, ease: 'easeOut' }}
-                    />
-                  </motion.svg>
-                </motion.div>
-                <h2 className="heading-display text-white text-xl">You&apos;re registered!</h2>
-                <p className="text-gray-400 text-sm">
-                  You&apos;ll be notified on WhatsApp if you&apos;re selected for {registerOpenFor.title}.
-                </p>
-                <button onClick={resetModal} className="btn-primary w-full text-center">
-                  Done
-                </button>
-              </div>
-            ) : member ? (
+            {member ? (
               <div className="text-center space-y-5">
                 <div>
                   <p className="eyebrow mb-2 justify-center w-full">Confirm</p>
@@ -236,7 +225,7 @@ export default function HomepageEventsSection({ events }: Props) {
                   </motion.div>
                 )}
                 <div className="flex flex-col gap-3">
-                  <button onClick={handleConfirm} disabled={submitting} className="btn-primary w-full text-center">
+                  <button onClick={() => handleConfirm()} disabled={submitting} className="btn-primary w-full text-center">
                     {submitting ? 'Registering...' : 'Confirm Registration →'}
                   </button>
                   <button onClick={resetModal} className="btn-secondary w-full text-center">
@@ -266,11 +255,18 @@ export default function HomepageEventsSection({ events }: Props) {
                 </form>
 
                 {notFound && (
-                  <div className="bg-red-900/20 border border-red-800/40 rounded-xl p-4 space-y-3">
-                    <p className="text-red-300 text-sm font-semibold">This number isn&apos;t registered as a TFRC member yet.</p>
-                    <a href="/join" className="btn-primary inline-block text-sm">
-                      Join as Member →
-                    </a>
+                  <div className="border-t border-white/10 pt-5">
+                    {submitting && <p className="text-gold text-sm mb-3">Registering you...</p>}
+                    {error && (
+                      <div className="bg-red-900/20 border border-red-800/50 rounded-lg px-4 py-3 text-red-400 text-sm mb-3">
+                        {error}
+                      </div>
+                    )}
+                    <QuickJoinForm
+                      phone={phoneInput}
+                      onJoined={handleQuickJoined}
+                      onCancel={() => { setNotFound(false); setError('') }}
+                    />
                   </div>
                 )}
 

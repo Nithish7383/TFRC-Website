@@ -17,28 +17,24 @@ import ScrollCue from '@/components/ScrollCue'
 
 const FAQ_ITEMS = [
   {
-    question: 'Do I need to pay anything to join?',
-    answer: 'No. TFRC has no entry fee and no membership cost — it always stays free to join and run with us.',
+    question: 'Is it free to join?',
+    answer: 'Joining the TFRC community is free. Most events are free too. Some special events may have a fee to cover real costs like refreshments or a venue — the price is always shown on the event.',
   },
   {
-    question: 'Do I need to be a fast runner to join?',
-    answer: 'Not at all. We welcome every pace, from first-timers to competitive runners. No ego, just show up.',
-  },
-  {
-    question: 'Do I need experience in martial arts or fitness to join?',
-    answer: 'No experience needed — just show up. Our sessions welcome complete beginners alongside seasoned practitioners.',
+    question: 'Do I need to be fit or experienced?',
+    answer: 'Not at all. Whether it’s your first time or you’ve been at it for years, everyone is welcome. No ego, just show up.',
   },
   {
     question: 'How do I register for an event?',
-    answer: 'Become a member first (it takes a minute), then pick any upcoming event and register with your member phone number.',
+    answer: 'Pick an upcoming event and tap Register Now. Enter your phone number — if you’re new, add your name and a couple of details and you’ll be a TFRC member and registered in one go.',
   },
   {
     question: 'How do I stay updated on events?',
     answer: 'Join our WhatsApp group after registering — that\'s where meeting points, timing changes, and new events get posted first.',
   },
   {
-    question: 'What kind of activities does TFRC run?',
-    answer: 'Group runs, treks, yoga/recovery sessions, turf sports, and community meetups — something for every kind of mover.',
+    question: 'What does TFRC do?',
+    answer: 'Runs, treks, sports, fitness and Fight Club sessions, networking and community meetups, Collide events, readers’ get-togethers and other experiences — there’s always something to show up for.',
   },
 ]
 
@@ -208,12 +204,13 @@ export default async function LandingPage() {
             <div className="relative z-[1] max-w-4xl mx-auto text-center">
               <p className="eyebrow mb-4 justify-center w-full">Who we are</p>
               <h2 className="heading-display text-white text-4xl md:text-6xl mb-6">
-                More than a <span className="text-gold-sheen">run club.</span>
+                There&apos;s always <span className="text-gold-sheen">something happening.</span>
               </h2>
               <p className="text-gray-200 leading-relaxed text-base md:text-lg max-w-2xl mx-auto">
-                We&apos;re building a culture where movement feels less like a workout and more like
-                something you can&apos;t wait to show up for — sunrise runs, weekend treks, martial arts
-                sessions, and a place to meet new people, network, and always find your community.
+                We&apos;re building a culture where showing up becomes the best part of your week —
+                sunrise runs, weekend treks, sports, Fight Club, meetups and experiences, and a place
+                to meet new people and always find your community.
+                Come for one thing, stay for the people.
               </p>
             </div>
           </section>
@@ -243,9 +240,9 @@ export default async function LandingPage() {
           ) : (
             <StaggerItem>
               <p className="text-gray-300 leading-relaxed text-base md:text-lg">
-                We believe fitness isn&apos;t just about lifting weights or running miles. It&apos;s about
-                building habits, creating memories, and surrounding yourself with people who inspire you
-                to keep showing up.
+                We believe life gets bigger when you show up — for yourself and for the people around
+                you. It&apos;s about building habits, creating memories, and surrounding yourself with
+                people who inspire you to keep showing up.
               </p>
             </StaggerItem>
           )}
@@ -258,12 +255,12 @@ export default async function LandingPage() {
           <section className="border-t border-white/10 py-20 md:py-28 px-4">
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-12">
-                <p className="eyebrow mb-3 justify-center w-full">Beyond the run</p>
+                <p className="eyebrow mb-3 justify-center w-full">Our groups</p>
                 <h2 className="heading-display text-white text-3xl md:text-4xl">
-                  Find your <span className="text-gold-sheen">circle</span>
+                  Find your <span className="text-gold-sheen">thing</span>
                 </h2>
                 <p className="text-gray-400 mt-3 max-w-lg mx-auto">
-                  TFRC is more than running — pick a group that matches what you&apos;re into.
+                  Pick a group that matches what you&apos;re into.
                 </p>
               </div>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -344,7 +341,7 @@ export default async function LandingPage() {
             <h2 className="heading-display text-white text-3xl md:text-5xl mb-4">
               Ready to <span className="text-gold-sheen">show up?</span>
             </h2>
-            <p className="text-gray-400 text-base md:text-lg mb-8">No entry fee, no ego — just show up.</p>
+            <p className="text-gray-400 text-base md:text-lg mb-8">Joining is free. Most events are too — any fee is shown on the event.</p>
             <Link href="/join" className="btn-primary inline-block text-base py-3.5 px-8">
               Join as Member →
             </Link>

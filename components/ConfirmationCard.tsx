@@ -8,12 +8,19 @@ interface Props {
   event: string
   date: string
   whatsappShareText: string
+  details?: {
+    isPaid: boolean
+    price: number | null
+    meetingPointUrl: string | null
+    distance: string | null
+    paceGroup: string | null
+  }
 }
 
 const TFRC_INSTAGRAM = 'https://www.instagram.com/thefirstruleclub'
 const EASE = [0.16, 1, 0.3, 1] as const
 
-export default function ConfirmationCard({ name, event, date, whatsappShareText }: Props) {
+export default function ConfirmationCard({ name, event, date, whatsappShareText, details }: Props) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 24, scale: 0.97 }}
@@ -53,6 +60,38 @@ export default function ConfirmationCard({ name, event, date, whatsappShareText 
           <span className="text-gold-sheen">We don&apos;t talk about it.</span>
         </p>
       </motion.div>
+
+      {details && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.35, ease: EASE }}
+          className="relative z-[1] bg-gold/5 rounded-lg p-4 text-left border border-gold/20 space-y-1.5 text-sm"
+        >
+          <p className="text-gray-300">
+            <span className="text-gold font-medium">{event}</span>
+            {date && <> · {date}</>}
+          </p>
+          <p className="text-gray-300">
+            {details.isPaid
+              ? <>Fee: <span className="text-gold font-medium">{details.price ? `₹${details.price}` : 'Paid event'}</span> — we&apos;ll verify your payment screenshot.</>
+              : <span className="text-green-400">Free event</span>}
+          </p>
+          {(details.distance || details.paceGroup) && (
+            <p className="text-gray-300">{[details.distance, details.paceGroup].filter(Boolean).join(' · ')}</p>
+          )}
+          {details.meetingPointUrl && (
+            <a
+              href={details.meetingPointUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block text-gold hover:underline"
+            >
+              📍 View meeting point
+            </a>
+          )}
+        </motion.div>
+      )}
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}

@@ -1,11 +1,11 @@
 export const TFRC_LOCATION = 'Madurai, Tamil Nadu'
 
 export const GOALS_OPTIONS = [
-  'Improve fitness',
-  'Lose weight',
   'Meet new people',
+  'Stay active',
+  'Try new things',
   'Build consistency',
-  'Prepare for races',
+  'Find my community',
   'Explore Madurai',
   'Stress relief',
   'Just curious',
@@ -24,12 +24,12 @@ export const INTERESTS_OPTIONS = [
 ]
 
 export const REASON_OPTIONS = [
-  'First running event',
-  'Fitness goal',
+  'First TFRC event',
+  'Stay active',
   'Meet community',
   'Challenge myself',
   'Friend invited me',
-  'Regular runner',
+  'Regular at TFRC',
   'Other',
 ]
 

@@ -56,7 +56,7 @@ export default function StatusPage() {
       <div className="max-w-xl mx-auto">
         <Reveal>
           <div className="text-center mb-10">
-            <p className="eyebrow mb-2 justify-center w-full">Track your run</p>
+            <p className="eyebrow mb-2 justify-center w-full">Track your registration</p>
             <h1 className="heading-display text-white text-4xl mb-2">Check Registration Status</h1>
             <p className="text-gray-400">Enter your WhatsApp number to see your registration status.</p>
           </div>
@@ -153,7 +153,7 @@ function StatusCard({ reg }: { reg: RegResult }) {
             <p className="text-white text-sm font-medium">Event: {formattedDate}</p>
           )}
           <p className="text-gray-400 text-sm">
-            Check back 48 hours before the event. Selected runners are notified via WhatsApp.
+            Check back 48 hours before the event. Selected participants are notified via WhatsApp.
           </p>
         </div>
       )}

@@ -14,7 +14,7 @@ function PhotoTile({ photo }: { photo: EventPhoto }) {
       >
         <img
           src={photo.image_url}
-          alt={photo.caption || 'Run photo'}
+          alt={photo.caption || 'TFRC community photo'}
           loading="lazy"
           className="w-full h-full object-cover transition-transform duration-[900ms] ease-out-expo group-hover:scale-[1.08]"
         />
