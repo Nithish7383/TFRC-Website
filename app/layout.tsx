@@ -44,6 +44,16 @@ export const metadata: Metadata = {
   },
 }
 
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'The First Rule Club',
+  url: SITE_URL,
+  logo: `${SITE_URL}/firstruleclublogo.jpg`,
+  description: SITE_DESCRIPTION,
+  areaServed: 'Madurai, India',
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -54,6 +64,10 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${oswald.variable} ${jetbrainsMono.variable} font-sans bg-black text-white min-h-screen`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         {children}
       </body>
     </html>
